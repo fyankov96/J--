@@ -114,17 +114,7 @@ class Scanner {
                 } else {
                     return new TokenInfo(DIV, line);
                 }
-            } 
-            if (ch == '%') {
-                nextCh();
-                if (ch == '%') {
-                    while (ch != '\n' && ch != EOFCH) {
-                        nextCh();
-                    }
-                } else {
-                    return new TokenInfo(REM, line);
-                }
-            } else {
+            }  else {
                 moreWhiteSpace = false;
             }
         }
@@ -196,6 +186,9 @@ class Scanner {
                 reportScannerError("Operator & is not supported in j--.");
                 return getNextToken();
             }
+        case '%':
+            nextCh();
+        return new TokenInfo(REM, line);
         case '>':
             nextCh();
             return new TokenInfo(GT, line);

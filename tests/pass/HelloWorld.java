@@ -7,6 +7,7 @@ import java.lang.System;
 public class HelloWorld {
 
     public static String message() {
+        int x = 33 / 3;
         return "Hello, World!";
     }
 

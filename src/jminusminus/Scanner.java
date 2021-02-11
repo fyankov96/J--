@@ -188,7 +188,7 @@ class Scanner {
             }
         case '%':
             nextCh();
-        return new TokenInfo(REM, line);
+            return new TokenInfo(REM, line);
         case '>':
             nextCh();
             return new TokenInfo(GT, line);

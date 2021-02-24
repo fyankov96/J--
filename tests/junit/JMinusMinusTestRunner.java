@@ -3,6 +3,8 @@
 package junit;
 
 import java.io.File;
+
+
 import junit.framework.TestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -23,7 +25,12 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(ClassesTest.class);
         suite.addTestSuite(DivisionTest.class);
         suite.addTestSuite(RemainderTest.class);
+        suite.addTestSuite(UnsignedRightShiftTest.class);
+        suite.addTestSuite(LeftShiftTest.class);
+        suite.addTestSuite(RightShiftTest.class);
+        suite.addTestSuite(UnaryPlusTest.class);
         suite.addTestSuite(MultiLineCommentTest.class);
+
         return suite;
     }
 

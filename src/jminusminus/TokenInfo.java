@@ -14,17 +14,24 @@ enum TokenKind {
     EOF("<EOF>"), 
 
     // Reserved words
-    ABSTRACT("abstract"), BOOLEAN("boolean"), CHAR("char"), CLASS("class"), 
-    ELSE("else"), EXTENDS("extends"), IF("if"), IMPORT("import"), 
-    INSTANCEOF("instanceof"), INT("int"), NEW("new"), PACKAGE("package"), 
-    PRIVATE("private"), PROTECTED("protected"), PUBLIC("public"), 
-    RETURN("return"), STATIC("static"), SUPER("super"), THIS("this"), 
-    VOID("void"), WHILE("while"), 
+
+    ABSTRACT("abstract"), BOOLEAN("boolean"), BREAK("break"), BYTE("byte"), 
+    CASE("case"), CATCH("catch"), CHAR("char"), CLASS("class"), 
+    CONST("const"), CONTINUE("continue"), DEFAULT("default"), DO("do"),
+    DOUBLE("double"), ELSE("else"), EXTENDS("extends"), FINAL("final"),
+    FINALLY("finally"), FLOAT("float"), FOR("for"), GOTO("goto"),
+    IF("if"), IMPLEMENTS("implements"), IMPORT("import"), INSTANCEOF("instanceof"),
+    INT("int"), INTERFACE("interface"), LONG("long"), NATIVE("native"),
+    NEW("new"), PACKAGE("package"), PRIVATE("private"), PROTECTED("protected"),
+    PUBLIC("public"), RETURN("return"), SHORT("short"), STATIC("static"),
+    STRICTFP("strictfp"), SUPER("super"), SWITCH("switch"), SYNCHRONIZED("synchronized"),
+    THIS("this"), THROW("throw"), THROWS("throws"), TRANSIENT("transient"),
+    TRY("try"), VOID("void"), VOLATILE("volatile"), WHILE("while"),
 
     // Operators
     ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND("&&"), 
     LE("<="), LNOT("!"), MINUS("-"), PLUS("+"), PLUS_ASSIGN("+="), STAR("*"),
-    DIV("/"), REM("%"),
+    DIV("/"), REM("%"), USHR(">>>"), SHR(">>"), SHL("<<"),
 
     // Separators
     LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), 

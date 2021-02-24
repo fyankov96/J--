@@ -1066,8 +1066,8 @@ public class Parser {
      * Parse a relational expression.
      * 
      * <pre>
-     *   relationalExpression ::= additiveExpression  // level 5
-     *                              [(GT | LE) additiveExpression 
+     *   relationalExpression ::= shiftExpression  // level 5
+     *                              [(GT | LE) shiftExpression 
      *                              | INSTANCEOF referenceType]
      * </pre>
      * 
@@ -1076,13 +1076,38 @@ public class Parser {
 
     private JExpression relationalExpression() {
         int line = scanner.token().line();
-        JExpression lhs = additiveExpression();
+        JExpression lhs = shiftExpression();
         if (have(GT)) {
-            return new JGreaterThanOp(line, lhs, additiveExpression());
+            return new JGreaterThanOp(line, lhs, shiftExpression());
         } else if (have(LE)) {
-            return new JLessEqualOp(line, lhs, additiveExpression());
+            return new JLessEqualOp(line, lhs, shiftExpression());
         } else if (have(INSTANCEOF)) {
             return new JInstanceOfOp(line, lhs, referenceType());
+        } else {
+            return lhs;
+        }
+    }
+    /**
+     * Parse a shift expression.
+     * 
+     * <pre>
+     *   relationalExpression ::= additiveExpression  // level 4
+     *                              [(GT | LE) additiveExpression 
+     *                              | INSTANCEOF referenceType]
+     * </pre>
+     * 
+     * @return an AST for a relationalExpression.
+     */
+
+    private JExpression shiftExpression() {
+        int line = scanner.token().line();
+        JExpression lhs = additiveExpression();
+        if (have(USHR)) {
+            return new JUnsignedShiftRight(line, lhs, additiveExpression());
+        } else if(have(SHR)) {
+            return new JShiftRight(line, lhs, additiveExpression());
+        } else if(have(SHL)) {
+            return new JShiftLeft(line, lhs, additiveExpression());
         } else {
             return lhs;
         }
@@ -1147,6 +1172,7 @@ public class Parser {
      * 
      * <pre>
      *   unaryExpression ::= INC unaryExpression // level 1
+     *                     | PLUS unaryExpression
      *                     | MINUS unaryExpression
      *                     | simpleUnaryExpression
      * </pre>
@@ -1160,6 +1186,8 @@ public class Parser {
             return new JPreIncrementOp(line, unaryExpression());
         } else if (have(MINUS)) {
             return new JNegateOp(line, unaryExpression());
+        } else if (have(PLUS)){
+            return new JUnaryPlusOp(line, unaryExpression());
         } else {
             return simpleUnaryExpression();
         }

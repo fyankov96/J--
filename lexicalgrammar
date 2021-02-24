@@ -75,6 +75,8 @@ STAR        ::= "*"
 DIV         ::= "/"
 REM         ::= "%"
 USHR        ::= ">>>"
+SHR         ::= ">>"
+SHL         ::= "<<"
 
 // Separators
 COMMA       ::= ","

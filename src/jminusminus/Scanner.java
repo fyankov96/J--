@@ -222,16 +222,18 @@ class Scanner {
                 if(ch == '>') {
                     nextCh();
                     return new TokenInfo(USHR, line);
-                } else {
-                    reportScannerError("Operator >> is not yet supported in j--");
                 }
+                return new TokenInfo(SHR, line);
             }
             return new TokenInfo(GT, line);
         case '<':
             nextCh();
-            if (ch == '=') {
+            if(ch == '='){
                 nextCh();
                 return new TokenInfo(LE, line);
+            } else if(ch == '<') {
+                nextCh();
+                return new TokenInfo(SHL, line);
             } else {
                 reportScannerError("Operator < is not supported in j--.");
                 return getNextToken();

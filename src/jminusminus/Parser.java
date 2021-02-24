@@ -1104,6 +1104,10 @@ public class Parser {
         JExpression lhs = additiveExpression();
         if (have(USHR)) {
             return new JUnsignedShiftRight(line, lhs, additiveExpression());
+        } else if(have(SHR)) {
+            return new JShiftRight(line, lhs, additiveExpression());
+        } else if(have(SHL)) {
+            return new JShiftLeft(line, lhs, additiveExpression());
         } else {
             return lhs;
         }

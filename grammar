@@ -84,7 +84,7 @@ relationalExpression ::= shiftExpression       // level 5
                            | INSTANCEOF referenceType]
 
 shiftExpression ::= additiveExpression             // level 4
-                           {USHR additiveExpression}
+                           {(USHR | SHR | SHL) additiveExpression}
 
 additiveExpression ::= multiplicativeExpression // level 3
                          {(PLUS | MINUS) multiplicativeExpression}

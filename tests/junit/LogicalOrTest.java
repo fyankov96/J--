@@ -1,14 +1,14 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.Division;
+import pass.LogicalOr;
 
 public class LogicalOrTest extends TestCase {
-    private Division division;
+    private LogicalOr logicalOr;
 
     protected void setUp() throws Exception {
         super.setUp();
-        division = new Division();
+        logicalOr = new LogicalOr();
     }
 
     protected void tearDown() throws Exception {
@@ -16,9 +16,9 @@ public class LogicalOrTest extends TestCase {
     }
 
     public void testDivide() {
-        this.assertEquals(division.divide(0, 42), 0);
-        this.assertEquals(division.divide(42, 1), 42);
-        this.assertEquals(division.divide(127, 3), 42);
+        this.assertEquals(logicalOr.logicalOr(true, true), true);
+        this.assertEquals(logicalOr.logicalOr(true, false), true);
+        this.assertEquals(logicalOr.logicalOr(false, false), false);
     }
     
 }

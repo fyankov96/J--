@@ -1009,8 +1009,13 @@ public class Parser {
             return new JPlusAssignOp(line, lhs, assignmentExpression());
         } else if (have(DIV_ASSIGN)) {
             return new JDivideAssignOp(line, lhs, assignmentExpression());
-        }
-        else {
+        } else if (have(STAR_ASSIGN)) {
+            return new JMultiplyAssignOp(line, lhs, assignmentExpression());
+        } else if (have(MINUS_ASSIGN)){
+            return new JSubtractAssignOp(line, lhs, assignmentExpression());
+        } else if (have (REM_ASSIGN)){
+            return new JRemainderAssignOp(line, lhs, assignmentExpression());
+        } else{
         return lhs;
         }
     }

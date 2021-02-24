@@ -15,7 +15,7 @@ public class DivisionAssignmentTest extends TestCase {
         super.tearDown();
     }
 
-    public void divisionAssignment() {
+    public void testdivisionAssignment() {
         this.assertEquals(divisionAssignment.divideAssign(0, 42), 0);
         this.assertEquals(divisionAssignment.divideAssign(42, 1), 42);
         this.assertEquals(divisionAssignment.divideAssign(127, 3), 42);

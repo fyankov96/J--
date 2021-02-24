@@ -25,6 +25,10 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(RemainderTest.class);
         suite.addTestSuite(NotEqualsTest.class);
         suite.addTestSuite(DivisionAssignmentTest.class);
+        suite.addTestSuite(MultiplicationAssignmentTest.class);
+        suite.addTestSuite(SubtractionAssignmentTest.class);
+        suite.addTestSuite(RemainderAssignmentTest.class);
+        suite.addTestSuite(LogicalOrTest.class);
         return suite;
     }
 

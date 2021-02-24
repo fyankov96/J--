@@ -2,8 +2,8 @@ package fail;
 
 import java.lang.System;
 
-public class DivisionAssignment {
+public class MultiplicationAssignment {
     public static void main(String[] args) {
-        System.out.println('a' /= 42);
+        System.out.println('a' *=    42);
     }
 }

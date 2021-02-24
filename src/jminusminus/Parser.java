@@ -1007,8 +1007,11 @@ public class Parser {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
             return new JPlusAssignOp(line, lhs, assignmentExpression());
-        } else {
-            return lhs;
+        } else if (have(DIV_ASSIGN)) {
+            return new JDivideAssignOp(line, lhs, assignmentExpression());
+        }
+        else {
+        return lhs;
         }
     }
 
@@ -1055,6 +1058,8 @@ public class Parser {
         while (more) {
             if (have(EQUAL)) {
                 lhs = new JEqualOp(line, lhs, relationalExpression());
+            } else if (have(NOT_EQUALS)){
+                lhs = new JNotEqualOp(line, lhs, relationalExpression());
             } else {
                 more = false;
             }

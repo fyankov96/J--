@@ -71,13 +71,13 @@ statementExpression ::= expression // but must have side-effect, eg i++
 expression ::= assignmentExpression
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
+                           [(ASSIGN | PLUS_ASSIGN | DIV_ASSIGN) assignmentExpression]
 
 conditionalAndExpression ::= equalityExpression // level 10
                                {LAND equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
-                         {EQUAL relationalExpression}
+                         {EQUAL | NOT_EQUALS relationalExpression}
 
 relationalExpression ::= additiveExpression       // level 5
                            [(GT | LE) additiveExpression

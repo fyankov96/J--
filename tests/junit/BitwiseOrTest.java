@@ -15,7 +15,7 @@ public class BitwiseOrTest extends TestCase {
         super.tearDown();
     }
 
-    public void testDivide() {
+    public void testBitwiseOr() {
         this.assertEquals(bitwiseOr.bitwiseOr(5, 7),7);
         this.assertEquals(bitwiseOr.bitwiseOr(60, 13),61);
         this.assertEquals(bitwiseOr.bitwiseOr(9, 8), 9);

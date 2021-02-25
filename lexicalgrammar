@@ -75,6 +75,11 @@ STAR        ::= "*"
 DIV         ::= "/"
 REM         ::= "%"
 USHR        ::= ">>>"
+BOR          ::= "|"
+BAND         ::= "&"
+BXOR         ::= "^"
+BNOT         ::= "~"
+
 
 // Separators
 COMMA       ::= ","

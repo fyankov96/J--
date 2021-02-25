@@ -209,9 +209,23 @@ class Scanner {
                 nextCh();
                 return new TokenInfo(LAND, line);
             } else {
-                reportScannerError("Operator & is not supported in j--.");
-                return getNextToken();
+                return new TokenInfo(BAND, line);
             }
+        case '|':
+            nextCh();
+            if (ch == '|') {
+                nextCh();
+                reportScannerError("Operator >> is not yet supported in j--");
+                return getNextToken();
+            } else {
+                return new TokenInfo(BOR, line);
+            }
+        case '^':
+            nextCh();
+            return new TokenInfo(BXOR, line);
+        case '~':
+            nextCh();
+            return new TokenInfo(BNOT, line);
         case '%':
             nextCh();
             return new TokenInfo(REM, line);

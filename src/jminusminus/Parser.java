@@ -1017,7 +1017,7 @@ public class Parser {
      * 
      * <pre>
      *   conditionalAndExpression ::= equalityExpression // level 10
-     *                                  {LAND equalityExpression}
+     *                                  {LAND bitwiseOrExpression}
      * </pre>
      * 
      * @return an AST for a conditionalExpression.
@@ -1026,16 +1026,81 @@ public class Parser {
     private JExpression conditionalAndExpression() {
         int line = scanner.token().line();
         boolean more = true;
-        JExpression lhs = equalityExpression();
+        JExpression lhs = bitwiseOrExpression();
         while (more) {
             if (have(LAND)) {
-                lhs = new JLogicalAndOp(line, lhs, equalityExpression());
+                lhs = new JLogicalAndOp(line, lhs, bitwiseOrExpression());
             } else {
                 more = false;
             }
         }
         return lhs;
     }
+
+       /**
+     * Parse a bitwise-or expression.
+     * 
+     * <pre>
+     *   bitwiseOrExpressions ::= bitwiseXorExpression // level 9
+     *                                  {BOR bitwiseXorExpression}
+     * </pre>
+     * 
+     * @return an AST for a bitwiseOrExpression.
+     */
+
+    private JExpression bitwiseOrExpression() {
+        int line = scanner.token().line();
+        JExpression lhs = bitwiseXorExpression();
+        if (have(BOR)) {
+            return new JBitwiseOrOp(line, lhs, bitwiseXorExpression());
+        } else {
+            return lhs;
+        }
+    }
+
+
+       /**
+     * Parse a bitwise-xor expression.
+     * 
+     * <pre>
+     *   bitwiseXorExpressions ::= bitwiseAndExpression // level 8
+     *                                  {BXOR bitwiseAndExpression}
+     * </pre>
+     * 
+     * @return an AST for a bitwiseXorExpression.
+     */
+
+    private JExpression bitwiseXorExpression() {
+        int line = scanner.token().line();
+        JExpression lhs = bitwiseAndExpression();
+        if (have(BXOR)) {
+            return new JBitwiseXorOp(line, lhs, bitwiseAndExpression());
+        } else {
+            return lhs;
+        }
+    }
+
+           /**
+     * Parse a bitwise-and expression.
+     * 
+     * <pre>
+     *   bitwiseAndExpressions ::= equalityExpression // level 7
+     *                                  {BAND equalityExpression}
+     * </pre>
+     * 
+     * @return an AST for a bitwiseAndExpression.
+     */
+
+    private JExpression bitwiseAndExpression() {
+        int line = scanner.token().line();
+        JExpression lhs = equalityExpression();
+        if (have(BAND)) {
+            return new JBitwiseAndOp(line, lhs, equalityExpression());
+        } else {
+            return lhs;
+        }
+    }
+
 
     /**
      * Parse an equality expression.

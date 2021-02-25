@@ -7,6 +7,9 @@
 // Single line comment -- ignored
 "//" {~("\n"|"\r")} ("\n"|"\r"["\n"])
 
+// Multi-line comment -- ignored
+"/*" {~("*/")} "*/"
+
 // Reserved words
 ABSTRACT	::= "abstract" 
 BOOLEAN	    ::= "boolean" 
@@ -67,6 +70,7 @@ GT          ::= ">"
 INC         ::= "++"
 LAND        ::= "&&"
 LE          ::= "<="
+SE          ::= ">="
 LNOT        ::= "!"
 MINUS       ::= "-"
 PLUS        ::= "+"
@@ -75,6 +79,18 @@ STAR        ::= "*"
 DIV         ::= "/"
 REM         ::= "%"
 USHR        ::= ">>>"
+SHR         ::= ">>"
+SHL         ::= "<<"
+DIV_ASSIGN  ::= "/="
+USHR_ASSIGN ::= ">>>="
+SHR_ASSIGN  ::= ">>="
+SHL_ASSIGN  ::= "<<="
+NOT_EQUALS  ::= "!="
+STAR_ASSIGN ::= "*="
+MINUS_ASSIGN ::= "-="
+REM_ASSIGN   ::= "%="
+DEC         ::= "--"
+
 
 // Separators
 COMMA       ::= ","
@@ -99,4 +115,4 @@ CHAR_LITERAL   ::= "'" (ESC | ~("'"|"\n"|"\r"|"\\")) "'"
 // End of file
 EOF            ::= "<end of file>"
 
-
+ 

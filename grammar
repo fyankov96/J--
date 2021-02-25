@@ -76,7 +76,16 @@ assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
                            | SHR_ASSIGN | SHL_ASSIGN) assignmentExpression]
 
 conditionalAndExpression ::= equalityExpression // level 10
-                               {LAND equalityExpression}
+                               {LAND bitWiseOrExpression}
+
+bitWiseOrExpression ::= bitWiseXOrExpression // level 9
+                          {BOR bitWiseXOrExpression}
+
+bitWiseXOrExpression ::= bitWiseAndExpression // level 8
+                          {BXOR bitWiseAndExpression}
+
+bitWiseAndExpression ::= equalityExpression // level 7
+                          {BAND equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
                          {EQUAL | NOT_EQUALS relationalExpression}
@@ -98,6 +107,7 @@ unaryExpression ::= INC unaryExpression  // level 1
                   | PLUS unaryExpression
                   | DEC unaryExpression
                   | MINUS unaryExpression
+                  | BNOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression

@@ -307,6 +307,11 @@ class JRemainderOp extends JBinaryExpression {
      }
 }
 
+
+/**
+ * The AST node for a Shift Right (>>>) expression.
+ */
+
 class JUnsignedShiftRight extends JBinaryExpression {
     public JUnsignedShiftRight(int line, JExpression lhs, JExpression rhs) {
         super(line, ">>>", lhs, rhs);
@@ -332,6 +337,30 @@ class JBitwiseAndOp extends JBinaryExpression {
     public JBitwiseAndOp(int line, JExpression lhs, JExpression rhs) {
         super(line, "&", lhs, rhs);
     }
+    
+    public JExpression analyze(Context context) {
+        lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+    
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IAND);
+    }
+}
+/**
+ * The AST node for a Shift Right (>>) expression.
+ */
+
+class JShiftRight extends JBinaryExpression {
+    public JShiftRight(int line, JExpression lhs, JExpression rhs) {
+        super(line, ">>", lhs, rhs);
+    }
 
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
@@ -345,7 +374,7 @@ class JBitwiseAndOp extends JBinaryExpression {
     public void codegen(CLEmitter output) {
         lhs.codegen(output);
         rhs.codegen(output);
-        output.addNoArgInstruction(IAND);
+        output.addNoArgInstruction(ISHR);
     }
 }
 
@@ -388,5 +417,31 @@ class JBitwiseXorOp extends JBinaryExpression {
         lhs.codegen(output);
         rhs.codegen(output);
         output.addNoArgInstruction(IXOR);
+    }
+}
+
+
+/**
+ * The AST node for a Shift Left (<<) expression.
+ */
+
+class JShiftLeft extends JBinaryExpression {
+    public JShiftLeft(int line, JExpression lhs, JExpression rhs) {
+        super(line, "<<", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+    }
+
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(ISHL);
     }
 }

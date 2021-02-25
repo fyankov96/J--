@@ -1007,8 +1007,22 @@ public class Parser {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
             return new JPlusAssignOp(line, lhs, assignmentExpression());
-        } else {
-            return lhs;
+        } else if (have(DIV_ASSIGN)) {
+            return new JDivideAssignOp(line, lhs, assignmentExpression());
+        } else if (have(STAR_ASSIGN)) {
+            return new JMultiplyAssignOp(line, lhs, assignmentExpression());
+        } else if (have(MINUS_ASSIGN)){
+            return new JSubtractAssignOp(line, lhs, assignmentExpression());
+        } else if (have (REM_ASSIGN)){
+            return new JRemainderAssignOp(line, lhs, assignmentExpression());
+        } else if (have (USHR_ASSIGN)){
+            return new JUnsignedShiftRightAssignOp(line,lhs,assignmentExpression());
+        } else if (have (SHR_ASSIGN)){
+            return new JShiftRightAssignOp(line,lhs,assignmentExpression());
+        } else if (have (SHL_ASSIGN)){
+            return new JShiftLeftAssignOp(line,lhs,assignmentExpression());
+        }else{
+        return lhs;
         }
     }
 
@@ -1120,6 +1134,8 @@ public class Parser {
         while (more) {
             if (have(EQUAL)) {
                 lhs = new JEqualOp(line, lhs, relationalExpression());
+            } else if (have(NOT_EQUALS)){
+                lhs = new JNotEqualOp(line, lhs, relationalExpression());
             } else {
                 more = false;
             }
@@ -1169,6 +1185,10 @@ public class Parser {
         JExpression lhs = additiveExpression();
         if (have(USHR)) {
             return new JUnsignedShiftRight(line, lhs, additiveExpression());
+        } else if(have(SHR)) {
+            return new JShiftRight(line, lhs, additiveExpression());
+        } else if(have(SHL)) {
+            return new JShiftLeft(line, lhs, additiveExpression());
         } else {
             return lhs;
         }
@@ -1233,6 +1253,7 @@ public class Parser {
      * 
      * <pre>
      *   unaryExpression ::= INC unaryExpression // level 1
+     *                     | PLUS unaryExpression
      *                     | MINUS unaryExpression
      *                     | simpleUnaryExpression
      * </pre>
@@ -1246,7 +1267,11 @@ public class Parser {
             return new JPreIncrementOp(line, unaryExpression());
         } else if (have(MINUS)) {
             return new JNegateOp(line, unaryExpression());
-        } else {
+        } else if (have(PLUS)){
+            return new JUnaryPlusOp(line, unaryExpression());
+        } /* else if (have(BNOT)) { 
+            return new JBitWiseNotOp(line, unaryExpression());
+        }*/ else {
             return simpleUnaryExpression();
         }
     }

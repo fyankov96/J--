@@ -71,7 +71,9 @@ statementExpression ::= expression // but must have side-effect, eg i++
 expression ::= assignmentExpression
 
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN) assignmentExpression]
+                           [(ASSIGN | PLUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN 
+                           | MINUS_ASSIGN | REM_ASSIGN | USHR_ASSIGN 
+                           | SHR_ASSIGN | SHL_ASSIGN) assignmentExpression]
 
 conditionalAndExpression ::= equalityExpression // level 10
                                {LAND equalityExpression}
@@ -79,9 +81,12 @@ conditionalAndExpression ::= equalityExpression // level 10
 equalityExpression ::= relationalExpression  // level 6
                          {EQUAL | NOT_EQUALS relationalExpression}
 
-relationalExpression ::= additiveExpression       // level 5
-                           [(GT | LE) additiveExpression
+relationalExpression ::= shiftExpression       // level 5
+                           [(GT | LE) shiftExpression
                            | INSTANCEOF referenceType]
+
+shiftExpression ::= additiveExpression             // level 4
+                           {(USHR | SHR | SHL) additiveExpression}
 
 additiveExpression ::= multiplicativeExpression // level 3
                          {(PLUS | MINUS) multiplicativeExpression}
@@ -90,6 +95,8 @@ multiplicativeExpression ::= unaryExpression       // level 2
                                {( STAR | DIV | REM) unaryExpression}
 
 unaryExpression ::= INC unaryExpression  // level 1
+                  | PLUS unaryExpression
+                  | DEC unaryExpression
                   | MINUS unaryExpression
                   | simpleUnaryExpression
 

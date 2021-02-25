@@ -194,37 +194,18 @@ class JLogicalAndOp extends JBooleanBinaryExpression {
 }
 
 
+
+
 /**
- * The AST node for an equality (==) expression. Implements short-circuiting
+ * The AST node for an equality (!=) expression. Implements short-circuiting
  * branching.
  */
 
 class JNotEqualOp extends JBooleanBinaryExpression {
 
-    /**
-     * Constructs an AST node for an equality expression.
-     * 
-     * @param line
-     *            line number in which the equality expression occurs in the
-     *            source file.
-     * @param lhs
-     *            lhs operand.
-     * @param rhs
-     *            rhs operand.
-     */
-
     public JNotEqualOp(int line, JExpression lhs, JExpression rhs) {
         super(line, "!=", lhs, rhs);
     }
-
-    /**
-     * Analyzing an equality expression means analyzing its operands and
-     * checking that the types match.
-     * 
-     * @param context
-     *            context in which names are resolved.
-     * @return the analyzed (and possibly rewritten) AST subtree.
-     */
 
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
@@ -233,18 +214,6 @@ class JNotEqualOp extends JBooleanBinaryExpression {
         type = Type.BOOLEAN;
         return this;
     }
-
-    /**
-     * Branching code generation for == operation.
-     * 
-     * @param output
-     *            the code emitter (basically an abstraction for producing the
-     *            .class file).
-     * @param targetLabel
-     *            target for generated branch instruction.
-     * @param onTrue
-     *            should we branch on true?
-     */
 
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
@@ -257,6 +226,5 @@ class JNotEqualOp extends JBooleanBinaryExpression {
                     targetLabel);
         }
     }
-
 }
 

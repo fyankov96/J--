@@ -73,7 +73,8 @@ class Scanner {
         reserved.put(CONST.image(), CONST);
         reserved.put(CONTINUE.image(), CONTINUE);
         reserved.put(DEFAULT.image(), DEFAULT);
-        reserved.put(DO.image(), DOUBLE);
+        reserved.put(DO.image(), DO);
+        reserved.put(DOUBLE.image(), DOUBLE);
         reserved.put(ELSE.image(), ELSE);
         reserved.put(EXTENDS.image(), EXTENDS);
         reserved.put(FALSE.image(), FALSE);
@@ -99,7 +100,7 @@ class Scanner {
         reserved.put(RETURN.image(), RETURN);
         reserved.put(SHORT.image(), SHORT);
         reserved.put(STATIC.image(), STATIC);
-        reserved.put(STICTFP.image(), STRICTFP);
+        reserved.put(STRICTFP.image(), STRICTFP);
         reserved.put(SUPER.image(), SUPER);
         reserved.put(SWITCH.image(), SWITCH);
         reserved.put(SYNCHRONIZED.image(), SYNCHRONIZED);

@@ -1269,9 +1269,9 @@ public class Parser {
             return new JNegateOp(line, unaryExpression());
         } else if (have(PLUS)){
             return new JUnaryPlusOp(line, unaryExpression());
-        } /* else if (have(BNOT)) { 
-            return new JBitWiseNotOp(line, unaryExpression());
-        }*/ else {
+        } else if (have(BNOT)) { 
+            return new JBitwiseNotOp(line, unaryExpression());
+        } else {
             return simpleUnaryExpression();
         }
     }

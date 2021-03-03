@@ -70,11 +70,17 @@ statementExpression ::= expression // but must have side-effect, eg i++
 
 expression ::= assignmentExpression
 
-assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
+assignmentExpression ::= ternaryExpression  // must be a valid lhs
+                           [(ASSIGN | PLUS_ASSIGN | OR_ASSIGN) assignmentExpression]
 
-conditionalAndExpression ::= equalityExpression // level 10
-                               {LAND equalityExpression}
+ternaryExpression ::= conditionalAndExpression
+                        [COND ternaryExpression]
+
+conditionalAndExpression ::= conditionalOrExpression // level 10
+                               {LAND conditionalOrExpression}
+
+conditionalOrExpression ::= equalityExpression // level 9
+                               {LOR equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
                          {EQUAL relationalExpression}

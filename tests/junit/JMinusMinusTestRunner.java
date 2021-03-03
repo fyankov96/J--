@@ -30,7 +30,8 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(RightShiftTest.class);
         suite.addTestSuite(UnaryPlusTest.class);
         suite.addTestSuite(MultiLineCommentTest.class);
-
+        suite.addTestSuite(LogicalOrTest.class);
+        suite.addTestSuite(Conditional.class);
         return suite;
     }
 

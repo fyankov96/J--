@@ -181,6 +181,9 @@ class Scanner {
         case ',':
             nextCh();
             return new TokenInfo(COMMA, line);
+        case '?':
+            nextCh();
+            return new TokenInfo(COND, line);            
         case '=':
             nextCh();
             if (ch == '=') {
@@ -220,7 +223,19 @@ class Scanner {
                 nextCh();
                 return new TokenInfo(LAND, line);
             } else {
-                reportScannerError("Operator & is not supported in j--.");
+                reportScannerError("Operator & is not supported by j--.");
+                return getNextToken();
+            }
+        case '|':
+            nextCh();
+            if (ch == '|') {
+                nextCh();
+                return new TokenInfo(LOR, line);
+            } else if (ch == '=') {
+                nextCh();
+                return new TokenInfo(OR_ASSIGN,line);
+            } else {
+                reportScannerError("Operator | is not supported by j--.");
                 return getNextToken();
             }
         case '%':

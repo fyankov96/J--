@@ -31,7 +31,7 @@ enum TokenKind {
     // Operators
     ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND("&&"), 
     LE("<="), LNOT("!"), MINUS("-"), PLUS("+"), PLUS_ASSIGN("+="), STAR("*"),
-    DIV("/"), REM("%"), USHR(">>>"), SHR(">>"), SHL("<<"),
+    DIV("/"), REM("%"), USHR(">>>"), SHR(">>"), SHL("<<"), LOR("||"), COND("?"), OR_ASSIGN("|="),
 
     // Separators
     LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), 

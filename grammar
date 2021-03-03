@@ -71,19 +71,30 @@ statementExpression ::= expression // but must have side-effect, eg i++
 expression ::= assignmentExpression
 
 assignmentExpression ::= ternaryExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN | OR_ASSIGN) assignmentExpression]
+                           [(ASSIGN | PLUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN 
+                           | MINUS_ASSIGN | REM_ASSIGN | USHR_ASSIGN 
+                           | SHR_ASSIGN | SHL_ASSIGN | OR_ASSIGN) assignmentExpression]
 
-ternaryExpression ::= conditionalAndExpression
+ternaryExpression ::= conditionalOrExpression
                         [COND ternaryExpression]
 
-conditionalAndExpression ::= conditionalOrExpression // level 10
-                               {LAND conditionalOrExpression}
+conditionalOrExpression ::= conditionalAndExpression
+                               {LOR conditionalAndExpression}
 
-conditionalOrExpression ::= equalityExpression // level 9
-                               {LOR equalityExpression}
+conditionalAndExpression ::= bitWiseOrExpression // level 10
+                               {LAND bitWiseOrExpression}
+
+bitWiseOrExpression ::= bitWiseXOrExpression // level 9
+                          {BOR bitWiseXOrExpression}
+
+bitWiseXOrExpression ::= bitWiseAndExpression // level 8
+                          {BXOR bitWiseAndExpression}
+
+bitWiseAndExpression ::= equalityExpression // level 7
+                          {BAND equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
-                         {EQUAL relationalExpression}
+                         {EQUAL | NOT_EQUALS relationalExpression}
 
 relationalExpression ::= shiftExpression       // level 5
                            [(GT | LE) shiftExpression
@@ -100,7 +111,9 @@ multiplicativeExpression ::= unaryExpression       // level 2
 
 unaryExpression ::= INC unaryExpression  // level 1
                   | PLUS unaryExpression
+                  | DEC unaryExpression
                   | MINUS unaryExpression
+                  | BNOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression

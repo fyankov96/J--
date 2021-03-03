@@ -148,6 +148,9 @@ class Scanner {
                             }
                         }
                     }
+                } else if (ch == '=') {
+                    nextCh();
+                    return new TokenInfo(DIV_ASSIGN, line);
                 } else {
                     return new TokenInfo(DIV, line);
                 }
@@ -194,10 +197,20 @@ class Scanner {
             }
         case '!':
             nextCh();
-            return new TokenInfo(LNOT, line);
+            if(ch == '=') {
+                nextCh();
+                return new TokenInfo(NOT_EQUALS,line);
+            }else {
+                return new TokenInfo(LNOT, line);
+            }
         case '*':
             nextCh();
-            return new TokenInfo(STAR, line);
+            if(ch == '=') {
+                nextCh();
+                return new TokenInfo(STAR_ASSIGN, line);
+            }else{
+                return new TokenInfo(STAR, line);
+            }
         case '+':
             nextCh();
             if (ch == '=') {
@@ -214,7 +227,10 @@ class Scanner {
             if (ch == '-') {
                 nextCh();
                 return new TokenInfo(DEC, line);
-            } else {
+            } else if (ch == '='){
+                nextCh();
+                return new TokenInfo(MINUS_ASSIGN, line);
+            }else{
                 return new TokenInfo(MINUS, line);
             }
         case '&':
@@ -223,31 +239,52 @@ class Scanner {
                 nextCh();
                 return new TokenInfo(LAND, line);
             } else {
-                reportScannerError("Operator & is not supported by j--.");
-                return getNextToken();
+
+
+                return new TokenInfo(BAND, line);
             }
+        case '^':
+            nextCh();
+            return new TokenInfo(BXOR, line);
+        case '~':
+            nextCh();
+            return new TokenInfo(BNOT, line);
         case '|':
             nextCh();
-            if (ch == '|') {
+            if(ch == '|') {
                 nextCh();
-                return new TokenInfo(LOR, line);
+                return new TokenInfo(LOR,line);
             } else if (ch == '=') {
                 nextCh();
                 return new TokenInfo(OR_ASSIGN,line);
             } else {
-                reportScannerError("Operator | is not supported by j--.");
-                return getNextToken();
+                return new TokenInfo(BOR, line);
             }
         case '%':
             nextCh();
-            return new TokenInfo(REM, line);
+            if(ch == '='){
+                nextCh();
+                return new TokenInfo(REM_ASSIGN, line);
+            }else{
+                return new TokenInfo(REM, line);
+            }
         case '>':
             nextCh();
             if(ch == '>') {
                 nextCh();
                 if(ch == '>') {
                     nextCh();
-                    return new TokenInfo(USHR, line);
+                    if(ch == '=') {
+                        nextCh();
+                        return new TokenInfo(USHR_ASSIGN, line);
+                    }else{
+                        nextCh();
+                        return new TokenInfo(USHR, line);
+                    }
+                }
+                if(ch == '='){
+                    nextCh();
+                    return new TokenInfo(SHR_ASSIGN, line);
                 }
                 return new TokenInfo(SHR, line);
             }
@@ -259,6 +296,10 @@ class Scanner {
                 return new TokenInfo(LE, line);
             } else if(ch == '<') {
                 nextCh();
+                if(ch == '='){
+                    nextCh();
+                    return new TokenInfo(SHL_ASSIGN, line);
+                }
                 return new TokenInfo(SHL, line);
             } else {
                 reportScannerError("Operator < is not supported in j--.");

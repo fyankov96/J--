@@ -73,7 +73,7 @@ expression ::= assignmentExpression
 assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
                            [(ASSIGN | PLUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN 
                            | MINUS_ASSIGN | REM_ASSIGN | USHR_ASSIGN 
-                           | SHR_ASSIGN | SHL_ASSIGN) assignmentExpression]
+                           | SHR_ASSIGN | SHL_ASSIGN | XOR_ASSIGN) assignmentExpression]
 
 conditionalAndExpression ::= equalityExpression // level 10
                                {LAND bitWiseOrExpression}

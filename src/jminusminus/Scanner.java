@@ -182,6 +182,9 @@ class Scanner {
         case ';':
             nextCh();
             return new TokenInfo(SEMI, line);
+        case ':':
+            nextCh();
+            return new TokenInfo(COL, line);
         case ',':
             nextCh();
             return new TokenInfo(COMMA, line);
@@ -241,7 +244,12 @@ class Scanner {
             }
         case '^':
             nextCh();
-            return new TokenInfo(BXOR, line);
+            if(ch == '=') {
+                nextCh();
+                return new TokenInfo(XOR_ASSIGN, line);
+            } else {
+                return new TokenInfo(BXOR, line);
+            }
         case '~':
             nextCh();
             return new TokenInfo(BNOT, line);

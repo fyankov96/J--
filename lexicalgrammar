@@ -94,6 +94,7 @@ STAR_ASSIGN ::= "*="
 MINUS_ASSIGN ::= "-="
 REM_ASSIGN   ::= "%="
 DEC         ::= "--"
+XOR_ASSIGN  ::= "^="
 
 
 // Separators

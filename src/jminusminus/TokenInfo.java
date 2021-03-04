@@ -32,11 +32,11 @@ enum TokenKind {
     ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND("&&"), 
     LE("<="), LNOT("!"), MINUS("-"), PLUS("+"), PLUS_ASSIGN("+="), STAR("*"),
     DIV("/"), REM("%"), USHR(">>>"), USHR_ASSIGN(">>>="), SHR(">>"), SHR_ASSIGN(">>="), SHL("<<"), SHL_ASSIGN("<<="), NOT_EQUALS("!="),DIV_ASSIGN("/="),STAR_ASSIGN("*="),
-    MINUS_ASSIGN("-="), REM_ASSIGN("%="), LOR("||"), BAND("&"), BOR("|"), BXOR("^"), BNOT("~"),
+    MINUS_ASSIGN("-="), REM_ASSIGN("%="), LOR("||"), BAND("&"), BOR("|"), BXOR("^"), BNOT("~"), XOR_ASSIGN("^="),
 
     // Separators
     LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), 
-    RBRACK("]"), SEMI(";"), COMMA(","), DOT("."), 
+    RBRACK("]"), SEMI(";"), COMMA(","), DOT("."), COL(":"),
 
     // Identifiers
     IDENTIFIER("<IDENTIFIER>"), 

@@ -32,11 +32,7 @@ enum TokenKind {
     ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND("&&"), 
     LE("<="), LNOT("!"), MINUS("-"), PLUS("+"), PLUS_ASSIGN("+="), STAR("*"),
     DIV("/"), REM("%"), USHR(">>>"), USHR_ASSIGN(">>>="), SHR(">>"), SHR_ASSIGN(">>="), SHL("<<"), SHL_ASSIGN("<<="), NOT_EQUALS("!="),DIV_ASSIGN("/="),STAR_ASSIGN("*="),
-<<<<<<< HEAD
-    MINUS_ASSIGN("-="), REM_ASSIGN("%="), LOR("||"), BAND("&"), BOR("|"), BXOR("^"), BNOT("~"), XOR_ASSIGN("^="),
-=======
-    MINUS_ASSIGN("-="), REM_ASSIGN("%="), LOR("||"), BAND("&"), BOR("|"), BXOR("^"), BNOT("~"), COND("?"), OR_ASSIGN("|="),
->>>>>>> a1d67978972c65d2583c5be24c75e87689e2067f
+    MINUS_ASSIGN("-="), REM_ASSIGN("%="), LOR("||"), BAND("&"), BOR("|"), BXOR("^"), BNOT("~"), COND("?"), OR_ASSIGN("|="), XOR_ASSIGN("^="),
 
     // Separators
     LPAREN("("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), 

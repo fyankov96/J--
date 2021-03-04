@@ -188,6 +188,9 @@ class Scanner {
         case ',':
             nextCh();
             return new TokenInfo(COMMA, line);
+        case '?':
+            nextCh();
+            return new TokenInfo(COND, line);            
         case '=':
             nextCh();
             if (ch == '=') {
@@ -240,6 +243,8 @@ class Scanner {
                 nextCh();
                 return new TokenInfo(LAND, line);
             } else {
+
+
                 return new TokenInfo(BAND, line);
             }
         case '^':
@@ -258,6 +263,9 @@ class Scanner {
             if(ch == '|') {
                 nextCh();
                 return new TokenInfo(LOR,line);
+            } else if (ch == '=') {
+                nextCh();
+                return new TokenInfo(OR_ASSIGN,line);
             } else {
                 return new TokenInfo(BOR, line);
             }

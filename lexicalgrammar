@@ -96,12 +96,8 @@ NOT_EQUALS   ::= "!="
 STAR_ASSIGN  ::= "*="
 MINUS_ASSIGN ::= "-="
 REM_ASSIGN   ::= "%="
-<<<<<<< HEAD
-DEC         ::= "--"
-XOR_ASSIGN  ::= "^="
-=======
 DEC          ::= "--"
->>>>>>> a1d67978972c65d2583c5be24c75e87689e2067f
+XOR_ASSIGN   ::= "^="
 
 
 // Separators

@@ -75,10 +75,10 @@ assignmentExpression ::= ternaryExpression  // must be a valid lhs
                            | MINUS_ASSIGN | REM_ASSIGN | USHR_ASSIGN 
                            | SHR_ASSIGN | SHL_ASSIGN | OR_ASSIGN | XOR_ASSIGN) assignmentExpression]
 
-ternaryExpression ::= conditionalOrExpression
-                        [COND ternaryExpression]
+ternaryExpression ::= conditionalOrExpression  //level 12
+                        [COND ternaryExpression COLON ternaryExpression] 
 
-conditionalOrExpression ::= conditionalAndExpression
+conditionalOrExpression ::= conditionalAndExpression //level 11
                                {LOR conditionalAndExpression}
 
 conditionalAndExpression ::= bitWiseOrExpression // level 10

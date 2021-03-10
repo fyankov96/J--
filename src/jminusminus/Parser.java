@@ -985,6 +985,7 @@ public class Parser {
         return assignmentExpression();
     }
 
+
     /**
      * Parse an assignment expression.
      * 
@@ -1002,7 +1003,7 @@ public class Parser {
 
     private JExpression assignmentExpression() {
         int line = scanner.token().line();
-        JExpression lhs = conditionalOrExpression();
+        JExpression lhs = ternaryExpression();
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
@@ -1026,7 +1027,27 @@ public class Parser {
         }
     }
 
-        /**
+    /** 
+    ternaryExpression ::= conditionalOrExpression  //level 12
+                        [COND ternaryExpression COLON ternaryExpression] 
+    */
+    private JExpression ternaryExpression() {
+        int line = scanner.token().line();
+        JExpression condition = conditionalOrExpression();
+        if(have(COND)) {
+            JExpression trueExpr = ternaryExpression();
+            if(have(COL)) {
+                JExpression falseExpr = ternaryExpression();
+                return new JTernaryExpression(line, condition, trueExpr, falseExpr);
+            } else {
+                reportParserError("COLON sought where %s found", scanner.token()
+                    .image());
+            }
+        }
+        return condition;
+    }
+
+    /**
      * Parse a conditional-or expression.
      * 
      * <pre>

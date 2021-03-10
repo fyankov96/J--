@@ -73,7 +73,7 @@ expression ::= assignmentExpression
 assignmentExpression ::= ternaryExpression  // must be a valid lhs
                            [(ASSIGN | PLUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN 
                            | MINUS_ASSIGN | REM_ASSIGN | USHR_ASSIGN 
-                           | SHR_ASSIGN | SHL_ASSIGN | OR_ASSIGN) assignmentExpression]
+                           | SHR_ASSIGN | SHL_ASSIGN | OR_ASSIGN | XOR_ASSIGN) assignmentExpression]
 
 ternaryExpression ::= conditionalOrExpression
                         [COND ternaryExpression]
@@ -123,7 +123,7 @@ simpleUnaryExpression ::= LNOT unaryExpression
                           RPAREN simpleUnaryExpression
                         | postfixExpression 
 
-postfixExpression ::= primary {selector} {DEC}
+postfixExpression ::= primary {selector} {(DEC | INCN)}
 
 selector ::= DOT qualifiedIdentifier [arguments]
            | LBRACK expression RBRACK

@@ -73,7 +73,8 @@ class Scanner {
         reserved.put(CONST.image(), CONST);
         reserved.put(CONTINUE.image(), CONTINUE);
         reserved.put(DEFAULT.image(), DEFAULT);
-        reserved.put(DO.image(), DOUBLE);
+        reserved.put(DO.image(), DO);
+        reserved.put(DOUBLE.image(), DOUBLE);
         reserved.put(ELSE.image(), ELSE);
         reserved.put(EXTENDS.image(), EXTENDS);
         reserved.put(FALSE.image(), FALSE);
@@ -181,6 +182,9 @@ class Scanner {
         case ';':
             nextCh();
             return new TokenInfo(SEMI, line);
+        case ':':
+            nextCh();
+            return new TokenInfo(COL, line);
         case ',':
             nextCh();
             return new TokenInfo(COMMA, line);
@@ -245,7 +249,12 @@ class Scanner {
             }
         case '^':
             nextCh();
-            return new TokenInfo(BXOR, line);
+            if(ch == '=') {
+                nextCh();
+                return new TokenInfo(XOR_ASSIGN, line);
+            } else {
+                return new TokenInfo(BXOR, line);
+            }
         case '~':
             nextCh();
             return new TokenInfo(BNOT, line);

@@ -117,11 +117,11 @@ class JBitwiseNotOp extends JUnaryExpression {
 class JUnaryPlusOp extends JUnaryExpression {
 
     /**
-     * Constructs an AST node for a negation expression given its line number,
+     * Constructs an AST node for a plus expression given its line number,
      * and the operand.
      * 
      * @param line
-     *            line in which the negation expression occurs in the source
+     *            line in which the plus expression occurs in the source
      *            file.
      * @param arg
      *            the operand.
@@ -132,7 +132,7 @@ class JUnaryPlusOp extends JUnaryExpression {
     }
 
     /**
-     * Analyzing the negation operation involves analyzing its operand, checking
+     * Analyzing the plus operation involves analyzing its operand, checking
      * its type and determining the result type.
      * 
      * @param context
@@ -142,9 +142,24 @@ class JUnaryPlusOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
+        
         arg.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
         return this;
+
+        /*
+        if (arg.type() == Type.INT) {
+            type = Type.INT;
+        } else if (arg.type() == Type.DOUBLE) {
+            type = Type.DOUBLE;   
+        }
+        else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for +");
+        }
+        return this;
+        */
     }
 
     /**
@@ -195,9 +210,24 @@ class JNegateOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
+
         arg.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
         return this;
+
+        /*
+        if (arg.type() == Type.INT) {
+            type = Type.INT;
+        } else if (arg.type()) == Type.DOUBLE {
+            type = Type.DOUBLE;   
+        }
+        else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for -");
+        }
+        return this;
+        */
     }
 
     /**

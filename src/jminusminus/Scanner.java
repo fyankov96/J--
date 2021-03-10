@@ -361,6 +361,15 @@ class Scanner {
         case '0':
             // Handle only simple decimal integers for now.
             nextCh();
+            if(ch == '.') {
+                buffer = new StringBuffer();
+                do {
+                    buffer.append(ch);
+                    nextCh();
+                }
+                while (isDigit(ch));
+                return new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line);
+            }
             return new TokenInfo(INT_LITERAL, "0", line);
         case '1':
         case '2':
@@ -375,6 +384,14 @@ class Scanner {
             while (isDigit(ch)) {
                 buffer.append(ch);
                 nextCh();
+            }
+            if(ch == '.') {
+                do {
+                    buffer.append(ch);
+                    nextCh();
+                }
+                while (isDigit(ch));
+                return new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line);
             }
             return new TokenInfo(INT_LITERAL, buffer.toString(), line);
         default:

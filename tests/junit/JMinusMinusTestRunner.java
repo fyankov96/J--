@@ -45,7 +45,8 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(RightShiftAssignmentTest.class);
         suite.addTestSuite(UnsignedRightShiftAssignmentTest.class);
         suite.addTestSuite(XORassignTest.class);
-        
+        suite.addTestSuite(PostIncrementTest.class);
+        suite.addTestSuite(PreDecrementTest.class);
         return suite;
     }
 

@@ -110,7 +110,12 @@ class JPlusOp extends JBinaryExpression {
                     .analyze(context);
         } else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
-        } else {
+        }/* else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        } else if (rhs.type() == Type.DOUBLE && (lhs.type() == Type.INT || lhs.type() == Type.CHAR || lhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        }*/
+        else {
             type = Type.ANY;
             JAST.compilationUnit.reportSemanticError(line(),
                     "Invalid operand types for +");
@@ -174,10 +179,27 @@ class JSubtractOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+        
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
         return this;
+
+        /*
+        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
+            type = Type.INT;
+        } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        } else if (rhs.type() == Type.DOUBLE && (lhs.type() == Type.INT || lhs.type() == Type.CHAR || lhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        }
+        else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for -");
+        }
+        return this;
+        */
     }
 
     /**
@@ -232,10 +254,28 @@ class JMultiplyOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+        
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
         return this;
+
+        /*
+        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
+            type = Type.INT;
+        } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        } else if (rhs.type() == Type.DOUBLE && (lhs.type() == Type.INT || lhs.type() == Type.CHAR || lhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        }
+        else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for *");
+        }
+        return this;
+        */
+
     }
 
     /**
@@ -261,23 +301,40 @@ class JMultiplyOp extends JBinaryExpression {
 
 class JDivideOp extends JBinaryExpression {
     
-    public JDivideOp ( int line , JExpression lhs , JExpression rhs) {
-        super (line , "/", lhs , rhs );
+    public JDivideOp (int line, JExpression lhs, JExpression rhs) {
+        super(line, "/", lhs, rhs);
 }
 
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
         return this;
+
+        /*
+        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
+            type = Type.INT;
+        } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        } else if (rhs.type() == Type.DOUBLE && (lhs.type() == Type.INT || lhs.type() == Type.CHAR || lhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        }
+        else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for /");
+        }
+        return this;
+        */
     }
 
-    public void codegen ( CLEmitter output ) {
-        lhs . codegen ( output );
-        rhs . codegen ( output );
-        output . addNoArgInstruction ( IDIV );
+    public void codegen(CLEmitter output)  {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IDIV);
     }
 }
 
@@ -287,23 +344,40 @@ class JDivideOp extends JBinaryExpression {
 
 class JRemainderOp extends JBinaryExpression {
     
-    public JRemainderOp ( int line , JExpression lhs , JExpression rhs) {
-        super (line , "%", lhs , rhs );
+    public JRemainderOp(int line, JExpression lhs, JExpression rhs) {
+        super (line, "%", lhs, rhs);
 }
 
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
+
         lhs.type().mustMatchExpected(line(), Type.INT);
         rhs.type().mustMatchExpected(line(), Type.INT);
         type = Type.INT;
         return this; 
+
+        /*
+        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
+            type = Type.INT;
+        } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        } else if (rhs.type() == Type.DOUBLE && (lhs.type() == Type.INT || lhs.type() == Type.CHAR || lhs.type() == Type.DOUBLE)) {
+            type = Type.DOUBLE;   
+        }
+        else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for %");
+        }
+        return this;
+        */
     }
 
-    public void codegen ( CLEmitter output ) {
-        lhs . codegen ( output );
-        rhs . codegen ( output );
-        output . addNoArgInstruction ( IREM );
+    public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IREM);
      }
 }
 

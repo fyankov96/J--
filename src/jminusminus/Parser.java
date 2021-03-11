@@ -656,6 +656,8 @@ public class Parser {
             JExpression test = parExpression();
             JStatement statement = statement();
             return new JWhileStatement(line, test, statement);
+        } else if(have(FOR)) {
+            return forStatement();
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -671,6 +673,23 @@ public class Parser {
             mustBe(SEMI);
             return statement;
         }
+    }
+
+    /**
+     * forExpression ::= LPAREN [type] variableDeclarator SEMI expression SEMI statementExpression RPAREN statement
+                | LPAREN [type] variableDeclarator COL expression RPAREN statement
+     * @return A JForStatement
+     */
+    private JForStatement forStatement() {
+        if(!have(LPAREN)) {
+            reportParserError("( sought where %s found", scanner.token()
+            .image());
+        }
+        
+        scanner.recordPosition();
+        while(true)
+        scanner.next();
+        
     }
 
     /**

@@ -32,9 +32,13 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
+            | FOR forExpression
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI
+
+forExpression ::= LPAREN [type] variableDeclarator SEMI expression SEMI statementExpression RPAREN statement
+                | LPAREN [type] variableDeclarator COL expression RPAREN statement
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]

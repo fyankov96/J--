@@ -15,6 +15,10 @@ classDeclaration ::= CLASS IDENTIFIER
                        [EXTENDS qualifiedIdentifier] 
                        classBody
 
+interfaceDeclaration ::= INTERFACE IDENTIFIER
+                        [EXTENDS qualifiedIdentifier]
+                        classBody
+
 classBody ::= LCURLY {modifiers memberDecl} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor

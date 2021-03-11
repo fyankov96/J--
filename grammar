@@ -117,10 +117,10 @@ unaryExpression ::= INC unaryExpression  // level 1
                   | PLUS unaryExpression
                   | DEC unaryExpression
                   | MINUS unaryExpression
-                  | BNOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression
+                        | BNOT unaryExpression
                         | LPAREN basicType RPAREN unaryExpression //casted
                         | LPAREN // casted               
                             referenceType

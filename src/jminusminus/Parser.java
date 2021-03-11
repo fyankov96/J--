@@ -1336,8 +1336,6 @@ public class Parser {
             return new JNegateOp(line, unaryExpression());
         } else if (have(PLUS)){
             return new JUnaryPlusOp(line, unaryExpression());
-        } else if (have(BNOT)) { 
-            return new JBitwiseNotOp(line, unaryExpression());
         } else {
             return simpleUnaryExpression();
         }
@@ -1363,6 +1361,8 @@ public class Parser {
         int line = scanner.token().line();
         if (have(LNOT)) {
             return new JLogicalNotOp(line, unaryExpression());
+        } else if (have(BNOT)) { 
+            return new JBitwiseNotOp(line, unaryExpression());
         } else if (seeCast()) {
             mustBe(LPAREN);
             boolean isBasicType = seeBasicType();

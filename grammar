@@ -19,8 +19,10 @@ classBody ::= LCURLY {modifiers memberDecl} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
+                 [throws qualifiedIdentifier {, qualifiedIdentifier}] block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
+                 [throws qualifiedIdentifier {, qualifiedIdentifier}] block
                  (block | SEMI)
              | type variableDeclarators SEMI // field
 
@@ -32,6 +34,10 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
+            | TRY block 
+              CATCH ( formalParameter ) block
+              [FINALLY block]
+            | THROW expression SEMI
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI

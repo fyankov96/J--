@@ -15,6 +15,10 @@ classDeclaration ::= CLASS IDENTIFIER
                        [EXTENDS qualifiedIdentifier] 
                        classBody
 
+interfaceDeclaration ::= INTERFACE IDENTIFIER
+                        [EXTENDS qualifiedIdentifier]
+                        classBody
+
 classBody ::= LCURLY {modifiers memberDecl} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
@@ -38,9 +42,13 @@ statement ::= block
               CATCH ( formalParameter ) block
               [FINALLY block]
             | THROW expression SEMI
+            | FOR forExpression
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI
+
+forExpression ::= LPAREN [type] variableDeclarator SEMI expression SEMI statementExpression RPAREN statement
+                | LPAREN [type] variableDeclarator COL expression RPAREN statement
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]
@@ -81,10 +89,10 @@ assignmentExpression ::= ternaryExpression  // must be a valid lhs
                            | MINUS_ASSIGN | REM_ASSIGN | USHR_ASSIGN 
                            | SHR_ASSIGN | SHL_ASSIGN | OR_ASSIGN | XOR_ASSIGN) assignmentExpression]
 
-ternaryExpression ::= conditionalOrExpression
-                        [COND ternaryExpression]
+ternaryExpression ::= conditionalOrExpression  //level 12
+                        [COND ternaryExpression COLON ternaryExpression] 
 
-conditionalOrExpression ::= conditionalAndExpression
+conditionalOrExpression ::= conditionalAndExpression //level 11
                                {LOR conditionalAndExpression}
 
 conditionalAndExpression ::= bitWiseOrExpression // level 10
@@ -119,10 +127,10 @@ unaryExpression ::= INC unaryExpression  // level 1
                   | PLUS unaryExpression
                   | DEC unaryExpression
                   | MINUS unaryExpression
-                  | BNOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression
+                        | BNOT unaryExpression
                         | LPAREN basicType RPAREN unaryExpression //casted
                         | LPAREN // casted               
                             referenceType

@@ -689,6 +689,8 @@ public class Parser {
             JExpression expression = expression();
             mustBe(SEMI);
             return new JThrowStatement(line, expression);
+        } else if(have(FOR)) {
+            return forStatement();
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -704,6 +706,23 @@ public class Parser {
             mustBe(SEMI);
             return statement;
         }
+    }
+
+    /**
+     * forExpression ::= LPAREN [type] variableDeclarator SEMI expression SEMI statementExpression RPAREN statement
+                | LPAREN [type] variableDeclarator COL expression RPAREN statement
+     * @return A JForStatement
+     */
+    private JForStatement forStatement() {
+        if(!have(LPAREN)) {
+            reportParserError("( sought where %s found", scanner.token()
+            .image());
+        }
+        
+        scanner.recordPosition();
+        while(true)
+        scanner.next();
+        
     }
 
     /**
@@ -1018,6 +1037,7 @@ public class Parser {
         return assignmentExpression();
     }
 
+
     /**
      * Parse an assignment expression.
      * 
@@ -1035,7 +1055,7 @@ public class Parser {
 
     private JExpression assignmentExpression() {
         int line = scanner.token().line();
-        JExpression lhs = conditionalOrExpression();
+        JExpression lhs = ternaryExpression();
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
@@ -1059,7 +1079,27 @@ public class Parser {
         }
     }
 
-        /**
+    /** 
+    ternaryExpression ::= conditionalOrExpression  //level 12
+                        [COND ternaryExpression COLON ternaryExpression] 
+    */
+    private JExpression ternaryExpression() {
+        int line = scanner.token().line();
+        JExpression condition = conditionalOrExpression();
+        if(have(COND)) {
+            JExpression trueExpr = ternaryExpression();
+            if(have(COL)) {
+                JExpression falseExpr = ternaryExpression();
+                return new JTernaryExpression(line, condition, trueExpr, falseExpr);
+            } else {
+                reportParserError("COLON sought where %s found", scanner.token()
+                    .image());
+            }
+        }
+        return condition;
+    }
+
+    /**
      * Parse a conditional-or expression.
      * 
      * <pre>
@@ -1329,8 +1369,6 @@ public class Parser {
             return new JNegateOp(line, unaryExpression());
         } else if (have(PLUS)){
             return new JUnaryPlusOp(line, unaryExpression());
-        } else if (have(BNOT)) { 
-            return new JBitwiseNotOp(line, unaryExpression());
         } else {
             return simpleUnaryExpression();
         }
@@ -1356,6 +1394,8 @@ public class Parser {
         int line = scanner.token().line();
         if (have(LNOT)) {
             return new JLogicalNotOp(line, unaryExpression());
+        } else if (have(BNOT)) { 
+            return new JBitwiseNotOp(line, unaryExpression());
         } else if (seeCast()) {
             mustBe(LPAREN);
             boolean isBasicType = seeBasicType();

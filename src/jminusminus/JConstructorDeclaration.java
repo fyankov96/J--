@@ -39,10 +39,10 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      */
 
     public JConstructorDeclaration(int line, ArrayList<String> mods,
-            String name, ArrayList<JFormalParameter> params, JBlock body)
+            String name, ArrayList<JFormalParameter> params, ArrayList<TypeName> exceptions, JBlock body)
 
     {
-        super(line, mods, name, Type.CONSTRUCTOR, params, body);
+        super(line, mods, name, Type.CONSTRUCTOR, params, exceptions, body);
     }
 
     /**
@@ -190,6 +190,15 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
                 p.indentLeft();
             }
             p.println("</FormalParameters>");
+        }
+        if (exceptions != null) {
+            p.println("<Exceptions>");
+            for (TypeName exception : exceptions) {
+                p.indentRight();
+                p.printf("<Exception type=%s\n", exception.toString());
+                p.indentLeft();
+            }
+            p.println("</Exceptions>");
         }
         if (body != null) {
             p.println("<Body>");

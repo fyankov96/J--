@@ -3,6 +3,7 @@
 package jminusminus;
 
 import static jminusminus.CLConstants.*;
+import java.util.ArrayList;
 
 /**
  * The AST node for a for-statement.
@@ -23,9 +24,9 @@ class JForStepStatement extends JForStatement {
 
 
     /** Test expression. */
-    private JStatement initialization;
+    private ArrayList<JStatement> initialization;
     private JExpression condition;
-    private JStatement step;
+    private ArrayList<JStatement> step;
 
     /**
      * Constructs an AST node for a while-statement given its line number, the
@@ -39,7 +40,7 @@ class JForStepStatement extends JForStatement {
      *            the body.
      */
 
-    public JForStepStatement(int line, JStatement initialization, JExpression condition, JStatement step, JStatement body) {
+    public JForStepStatement(int line, ArrayList<JStatement> initialization, JExpression condition, ArrayList<JStatement> step, JStatement body) {
         super(line, body);
         this.initialization = initialization;
         this.condition = condition;
@@ -56,10 +57,13 @@ class JForStepStatement extends JForStatement {
      */
 
     public JForStepStatement analyze(Context context) {
-        initialization = (JStatement) initialization.analyze(context);
+
+        // TODO: Analyze arrayList of JStatement
+         
+        // initialization = (ArrayList<JStatement>) initialization.analyze(context);
         condition = (JExpression) condition.analyze(context);
         condition.type().mustMatchExpected(line(), Type.BOOLEAN);
-        step = (JStatement) step.analyze(context);
+        // step = (ArrayList<JStatement>) step.analyze(context);
         body = (JStatement) body.analyze(context);
         return this;
     }
@@ -83,9 +87,13 @@ class JForStepStatement extends JForStatement {
         p.printf("<JForStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Initialization>\n");
-        p.indentRight();
-        initialization.writeToStdOut(p);
-        p.indentLeft();
+        if (initialization != null) {
+            for (JAST initial : initialization) {
+                p.indentRight();
+                initial.writeToStdOut(p);
+                p.indentLeft();
+            }
+        }
         p.printf("</Initialization>\n");
         p.printf("<Condition>\n");
         p.indentRight();
@@ -93,9 +101,13 @@ class JForStepStatement extends JForStatement {
         p.indentLeft();
         p.printf("</Condition>\n");
         p.printf("<Step>\n");
-        p.indentRight();
-        step.writeToStdOut(p);
-        p.indentLeft();
+        if (step != null) {
+            for (JAST s : step) {
+                p.indentRight();
+                s.writeToStdOut(p);
+                p.indentLeft();
+            }
+        }
         p.printf("</Step>\n");
         p.printf("<Body>\n");
         p.indentRight();

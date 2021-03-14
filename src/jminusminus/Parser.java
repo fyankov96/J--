@@ -657,7 +657,7 @@ public class Parser {
             JStatement statement = statement();
             return new JWhileStatement(line, test, statement);
         } else if(have(FOR)) {
-            return forStatement();
+            return forStatement(line);
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -680,17 +680,76 @@ public class Parser {
                 | LPAREN [type] variableDeclarator COL expression RPAREN statement
      * @return A JForStatement
      */
-    private JForStatement forStatement() {
-        if(!have(LPAREN)) {
+    private JForStatement forStatement(int line) {
+        /*if(!have(LPAREN)) {
             reportParserError("( sought where %s found", scanner.token()
             .image());
+        } */
+        mustBe(LPAREN);
+
+        // JForStepStatement
+        ArrayList<JStatement> init = new ArrayList<JStatement>();
+        JExpression expression = null;
+        ArrayList<JStatement> update = new ArrayList<JStatement>();
+        JStatement body = null;
+
+        // TODO: Figure out how to check for for-each statements
+        /*if () {
+            // Figure out what kind of stattement is needed
+            JStatement declaration = null;
+            mustbe(COLON);
+            expression = expression();
+            mustBe(RPAREN);
+            body = statement();
+            return new JForEachStatement(line, declaration, expression, body);
+        }*/
+
+        if (!have(SEMI)) {
+            init = forInit(line);
+            mustBe(SEMI);
         }
-        
-        scanner.recordPosition();
-        while(true)
-        scanner.next();
-        
+        if (!have(SEMI)) {
+            expression = expression();
+            mustBe(SEMI);
+        }
+        if (!see(RPAREN)) {
+            update = forUpdate();
+        }
+        mustBe(RPAREN);
+        body = statement();
+        return new JForStepStatement(line, init, expression, update, body);
     }
+
+    /**
+     * forUpdate ::= statementExpression {, statementExpressiong}
+     * @return A JForUpdateStatement
+     */
+    private ArrayList<JStatement> forUpdate() {
+        ArrayList<JStatement> update = new ArrayList<JStatement>();
+        do {
+            update.add(statementExpression());
+        } while (have(COMMA));
+        return update;
+    }
+
+     /**
+     * forInit ::= statementExpression {, statementExpressiong}
+     *             | [final] type variableDeclarators
+     * @return A JForInitStatement
+     */
+    private ArrayList<JStatement> forInit(int line) {
+        // Type variableDeclarators
+        ArrayList<JStatement> init = new ArrayList<JStatement>();
+        if (seeBasicType() || seeReferenceType()) {
+            ArrayList<String> mods = new ArrayList<String>();
+            ArrayList<JVariableDeclarator> vdecls = variableDeclarators(type());
+            init.add(new JVariableDeclaration(line, mods, vdecls));
+        } else {
+            init = forUpdate();
+        }
+        return init;
+    }
+
 
     /**
      * Parse formal parameters.

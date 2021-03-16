@@ -43,6 +43,14 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Static (class) fields of this class. */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
+    /** Static initialization block  */
+    private ArrayList<JBlock> staticInitializationBlocks;
+
+    /** Instance initialization block  */
+    private ArrayList<JBlock> instanceInitializationBlocks;
+
+
+
     /**
      * Constructs an AST node for a class declaration given the line number, list
      * of class modifiers, name of the class, its super class type, and the
@@ -70,6 +78,22 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        staticInitializationBlocks = new ArrayList<JBlock>();
+        instanceInitializationBlocks = new ArrayList<JBlock>();
+    }
+
+    public JClassDeclaration(int line, ArrayList<String> mods, String name,
+    Type superType, ArrayList<JMember> classBlock, ArrayList<JMember> SIB, ArrayList<JMember> IIB) {
+        super(line);
+        this.mods = mods;
+        this.name = name;
+        this.superType = superType;
+        this.classBlock = classBlock;
+        hasExplicitConstructor = false;
+        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
+        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        staticInitializationBlocks = SIB;
+        instanceInitializationBlocks = IIB;
     }
 
     /**

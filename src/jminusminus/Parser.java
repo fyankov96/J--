@@ -79,10 +79,24 @@ public class Parser {
      */
 
     private boolean have(TokenKind sought) {
-        if (see(sought)) {
-            scanner.next();
+        if (see(soprivate boolean seeModifier(){ 
+            if(see(PUBLIC)){
             return true;
-        } else {
+            }
+            if(see(PROTECTED)){
+            return true;
+            }
+            if(see(PRIVATE)){
+            return true;
+            }
+            if(see(STATIC)){
+            return true;
+            }
+            if(see(ABSTRACT)){
+            return true;
+            }
+            return false;
+            }
             return false;
         }
     }
@@ -158,8 +172,42 @@ public class Parser {
     }
 
     // ////////////////////////////////////////////////
-    // Lookahead /////////////////////////////////////
+    // Lookahead  /////////////////////////////////////
     // ////////////////////////////////////////////////
+
+    /**
+     * Are we looking at an BLOCK started by a LCURLY? Look ahead to find
+     * out.
+     * 
+     * @return true iff we're looking at BLOCK; false otherwise.
+     */
+    private boolean seeBlock() {
+        scanner.recordPosition();
+        if(!have(LCURLY)) {
+            return false;
+        }
+        scanner.returnToPosition();
+    }
+
+
+    private boolean seeModifier(){ 
+        if(see(PUBLIC)){
+            return true;
+        }
+        if(see(PROTECTED)){
+            return true;
+        }
+        if(see(PRIVATE)){
+            return true;
+        }
+        if(see(STATIC)){
+            return true;
+        }
+        if(see(ABSTRACT)){
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Are we looking at an IDENTIFIER followed by a LPAREN? Look ahead to find
@@ -480,7 +528,7 @@ public class Parser {
      * <pre>
      *   classDeclaration ::= CLASS IDENTIFIER 
      *                        [EXTENDS qualifiedIdentifier] 
-     *                        classBody
+     *                        LCURLY classBody RCURLY
      * </pre>
      * 
      * A class which doesn't explicitly extend another (super) class implicitly
@@ -502,28 +550,57 @@ public class Parser {
         } else {
             superClass = Type.OBJECT;
         }
+        mustBe(LCURLY);
+
+        mustBe(RCURLY);
         return new JClassDeclaration(line, mods, name, superClass, classBody());
     }
 
+
+    private ArrayList<JBlock> collectIIB() {
+        scanner.recordPosition();
+        while (!see(RCURLY) && !see(EOF))
+        scanner.returnToPosition();
+
+    }
     /**
      * Parse a class body.
      * 
      * <pre>
-     *   classBody ::= LCURLY
-     *                   {modifiers memberDecl}
-     *                 RCURLY
+
+classBody ::=  {
+            SEMI
+            | modifiers memberDecl
+            | STATIC block 
+            | block
+            } 
+            
      * </pre>
      * 
      * @return list of members in the class body.
      */
 
-    private ArrayList<JMember> classBody() {
+    private ArrayList<JMember> consumeClassBody() {
         ArrayList<JMember> members = new ArrayList<JMember>();
-        mustBe(LCURLY);
         while (!see(RCURLY) && !see(EOF)) {
-            members.add(memberDecl(modifiers()));
+            if(have(SEMI)) {
+                //DO nothing
+            }
+            else if(see(STATIC)) {
+                if(seeBlock()) {
+                    members.add(block(true));
+                } else {
+                    members.add(memberDecl(modifiers()));
+                }
+            } else if(seeBlock()) {
+                
+            } else if(seeModifier()){
+                members.add(memberDecl(modifiers()));
+            } else {
+                reportParserError("classBody sought where %s found", scanner.token()
+                .image());
+            }
         }
-        mustBe(RCURLY);
         return members;
     }
 
@@ -589,7 +666,7 @@ public class Parser {
     }
 
     /**
-     * Parse a block.
+     * Parse a non static block.
      * 
      * <pre>
      *   block ::= LCURLY {blockStatement} RCURLY
@@ -599,6 +676,20 @@ public class Parser {
      */
 
     private JBlock block() {
+        block(false);
+    }
+
+    /**
+     * Parse a block.
+     * 
+     * <pre>
+     *   block ::= LCURLY {blockStatement} RCURLY
+     * </pre>
+     * 
+     * @return an AST for a block.
+     */
+
+    private JBlock block(boolean isStatic) {
         int line = scanner.token().line();
         ArrayList<JStatement> statements = new ArrayList<JStatement>();
         mustBe(LCURLY);
@@ -606,7 +697,7 @@ public class Parser {
             statements.add(blockStatement());
         }
         mustBe(RCURLY);
-        return new JBlock(line, statements);
+        return new JBlock(line, statements, isStatic);
     }
 
     /**

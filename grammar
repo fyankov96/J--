@@ -9,13 +9,18 @@ qualifiedIdentifier ::= IDENTIFIER {DOT IDENTIFIER}
 
 typeDeclaration ::= modifiers classDeclaration
 
-modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
+modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT} 
 
 classDeclaration ::= CLASS IDENTIFIER 
                        [EXTENDS qualifiedIdentifier] 
                        classBody
 
-classBody ::= LCURLY {modifiers memberDecl} RCURLY
+classBody ::= LCURLY {
+            SEMI
+            | modifiers memberDecl
+            | STATIC block 
+            | block
+            } RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block

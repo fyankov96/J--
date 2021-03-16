@@ -21,11 +21,16 @@ classBody ::= LCURLY {
             | STATIC block 
             | block
             } RCURLY
+interfaceDeclaration ::= INTERFACE IDENTIFIER
+                        [EXTENDS qualifiedIdentifier]
+                        classBody
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
+                 [throws qualifiedIdentifier {, qualifiedIdentifier}] block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
+                 [throws qualifiedIdentifier {, qualifiedIdentifier}] block
                  (block | SEMI)
              | type variableDeclarators SEMI // field
 
@@ -37,6 +42,10 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
+            | TRY block 
+              CATCH ( formalParameter ) block
+              [FINALLY block]
+            | THROW expression SEMI
             | FOR forExpression
             | RETURN [expression] SEMI
             | SEMI 
@@ -122,10 +131,10 @@ unaryExpression ::= INC unaryExpression  // level 1
                   | PLUS unaryExpression
                   | DEC unaryExpression
                   | MINUS unaryExpression
-                  | BNOT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression
+                        | BNOT unaryExpression
                         | LPAREN basicType RPAREN unaryExpression //casted
                         | LPAREN // casted               
                             referenceType

@@ -47,6 +47,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(XORassignTest.class);
         suite.addTestSuite(PostIncrementTest.class);
         suite.addTestSuite(PreDecrementTest.class);
+        suite.addTestSuite(ExceptionHandlingTest.class);
         return suite;
     }
 

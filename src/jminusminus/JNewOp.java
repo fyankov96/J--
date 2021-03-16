@@ -113,7 +113,7 @@ class JNewOp extends JExpression {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JNewOp line=\"%d\" type=\"%s\"/>\n", line(),
+        p.printf("<JNewOp line=\"%d\" type=\"%s\">\n", line(),
                 ((type == null) ? "" : type.toString()));
         p.indentRight();
         if (arguments != null) {

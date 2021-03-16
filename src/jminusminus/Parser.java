@@ -551,18 +551,14 @@ public class Parser {
             superClass = Type.OBJECT;
         }
         mustBe(LCURLY);
-
+        ArrayList<JMember> members = new ArrayList<>();
+        ArrayList<JBlock> IIB = new ArrayList<>();
+        ArrayList<JBlock> SIB = new ArrayList<>();
+        consumeClassBody(members, IIB, SIB);
         mustBe(RCURLY);
-        return new JClassDeclaration(line, mods, name, superClass, classBody());
+        return new JClassDeclaration(line, mods, name, superClass, members, SIB, IIB);
     }
 
-
-    private ArrayList<JBlock> collectIIB() {
-        scanner.recordPosition();
-        while (!see(RCURLY) && !see(EOF))
-        scanner.returnToPosition();
-
-    }
     /**
      * Parse a class body.
      * 
@@ -580,6 +576,34 @@ classBody ::=  {
      * @return list of members in the class body.
      */
 
+
+    private void consumeClassBody(ArrayList<JMember> members, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+        while (!see(RCURLY) && !see(EOF)) {
+            if(have(SEMI)) {
+                //DO nothing
+            }
+            else if(see(STATIC)) {
+                scanner.recordPosition();
+                boolean hasStatic = have(STATIC);
+                scanner.returnToPosition();
+                if(hasStatic) {
+                    have(STATIC);
+                    SIB.add(block(true));
+                } else {
+                    members.add(memberDecl(modifiers()));
+                }
+            } else if(seeModifier()){
+                members.add(memberDecl(modifiers()));
+            } else if(seeBlock()) {
+                IIB.add(block());
+            }
+            else {
+                reportParserError("classBody sought where %s found", scanner.token()
+                .image());
+            }
+        }
+    }
+
     private ArrayList<JMember> consumeClassBody() {
         ArrayList<JMember> members = new ArrayList<JMember>();
         while (!see(RCURLY) && !see(EOF)) {
@@ -587,13 +611,17 @@ classBody ::=  {
                 //DO nothing
             }
             else if(see(STATIC)) {
-                if(seeBlock()) {
+                scanner.recordPosition();
+                boolean hasStatic = have(STATIC);
+                scanner.returnToPosition();
+                if(hasStatic) {
+                    have(STATIC);
                     members.add(block(true));
                 } else {
                     members.add(memberDecl(modifiers()));
                 }
             } else if(seeBlock()) {
-                
+                p
             } else if(seeModifier()){
                 members.add(memberDecl(modifiers()));
             } else {
@@ -630,9 +658,14 @@ classBody ::=  {
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
             ArrayList<JFormalParameter> params = formalParameters();
+            ArrayList<TypeName> exceptions = new ArrayList<TypeName>();
+            if(have(THROWS)) {
+                while(!see(LCURLY)) {
+                    exceptions.add(qualifiedIdentifier());
+                } 
+            }           
             JBlock body = block();
-            memberDecl = new JConstructorDeclaration(line, mods, name, params,
-                    body);
+            memberDecl = new JConstructorDeclaration(line, mods, name, params, exceptions, body);
         } else {
             Type type = null;
             if (have(VOID)) {
@@ -641,9 +674,15 @@ classBody ::=  {
                 mustBe(IDENTIFIER);
                 String name = scanner.previousToken().image();
                 ArrayList<JFormalParameter> params = formalParameters();
+                ArrayList<TypeName> exceptions = new ArrayList<TypeName>();
+                if(have(THROWS)) {
+                    while(!see(LCURLY)) {
+                        exceptions.add(qualifiedIdentifier());
+                    } 
+                }
                 JBlock body = have(SEMI) ? null : block();
                 memberDecl = new JMethodDeclaration(line, mods, name, type,
-                        params, body);
+                        params, exceptions, body);
             } else {
                 type = type();
                 if (seeIdentLParen()) {
@@ -651,9 +690,15 @@ classBody ::=  {
                     mustBe(IDENTIFIER);
                     String name = scanner.previousToken().image();
                     ArrayList<JFormalParameter> params = formalParameters();
+                    ArrayList<TypeName> exceptions = new ArrayList<TypeName>();
+                    if(have(THROWS)) {
+                        while(!see(LCURLY)) {
+                            exceptions.add(qualifiedIdentifier());
+                        } 
+                    }
                     JBlock body = have(SEMI) ? null : block();
                     memberDecl = new JMethodDeclaration(line, mods, name, type,
-                            params, body);
+                            params, exceptions, body);
                 } else {
                     // Field
                     memberDecl = new JFieldDeclaration(line, mods,
@@ -726,6 +771,9 @@ classBody ::=  {
      *   statement ::= block
      *               | IF parExpression statement [ELSE statement]
      *               | WHILE parExpression statement 
+     *               | TRY block 
+                       CATCH ( formalParameter ) block
+                       [FINALLY block]
      *               | RETURN [expression] SEMI
      *               | SEMI 
      *               | statementExpression SEMI
@@ -747,8 +795,21 @@ classBody ::=  {
             JExpression test = parExpression();
             JStatement statement = statement();
             return new JWhileStatement(line, test, statement);
+        } else if(have(TRY)) {
+            JBlock tryBlock = block();
+            mustBe(CATCH);
+            mustBe(LPAREN);
+            JFormalParameter catchParam = formalParameter();
+            mustBe(RPAREN);
+            JBlock catchBlock = block();
+            JBlock finallyBlock = have(FINALLY) ? block() : null;
+            return new JTryCatchStatement(line, tryBlock, catchParam, catchBlock, finallyBlock);
+        } else if (have(THROW)) {
+            JExpression expression = expression();
+            mustBe(SEMI);
+            return new JThrowStatement(line, expression);
         } else if(have(FOR)) {
-            return forStatement();
+            return forStatement(line);
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -771,17 +832,76 @@ classBody ::=  {
                 | LPAREN [type] variableDeclarator COL expression RPAREN statement
      * @return A JForStatement
      */
-    private JForStatement forStatement() {
-        if(!have(LPAREN)) {
+    private JForStatement forStatement(int line) {
+        /*if(!have(LPAREN)) {
             reportParserError("( sought where %s found", scanner.token()
             .image());
+        } */
+        mustBe(LPAREN);
+
+        // JForStepStatement
+        ArrayList<JStatement> init = new ArrayList<JStatement>();
+        JExpression expression = null;
+        ArrayList<JStatement> update = new ArrayList<JStatement>();
+        JStatement body = null;
+
+        // TODO: Figure out how to check for for-each statements
+        /*if () {
+            // Figure out what kind of stattement is needed
+            JStatement declaration = null;
+            mustbe(COLON);
+            expression = expression();
+            mustBe(RPAREN);
+            body = statement();
+            return new JForEachStatement(line, declaration, expression, body);
+        }*/
+
+        if (!have(SEMI)) {
+            init = forInit(line);
+            mustBe(SEMI);
         }
-        
-        scanner.recordPosition();
-        while(true)
-        scanner.next();
-        
+        if (!have(SEMI)) {
+            expression = expression();
+            mustBe(SEMI);
+        }
+        if (!see(RPAREN)) {
+            update = forUpdate();
+        }
+        mustBe(RPAREN);
+        body = statement();
+        return new JForStepStatement(line, init, expression, update, body);
     }
+
+    /**
+     * forUpdate ::= statementExpression {, statementExpressiong}
+     * @return A JForUpdateStatement
+     */
+    private ArrayList<JStatement> forUpdate() {
+        ArrayList<JStatement> update = new ArrayList<JStatement>();
+        do {
+            update.add(statementExpression());
+        } while (have(COMMA));
+        return update;
+    }
+
+     /**
+     * forInit ::= statementExpression {, statementExpressiong}
+     *             | [final] type variableDeclarators
+     * @return A JForInitStatement
+     */
+    private ArrayList<JStatement> forInit(int line) {
+        // Type variableDeclarators
+        ArrayList<JStatement> init = new ArrayList<JStatement>();
+        if (seeBasicType() || seeReferenceType()) {
+            ArrayList<String> mods = new ArrayList<String>();
+            ArrayList<JVariableDeclarator> vdecls = variableDeclarators(type());
+            init.add(new JVariableDeclaration(line, mods, vdecls));
+        } else {
+            init = forUpdate();
+        }
+        return init;
+    }
+
 
     /**
      * Parse formal parameters.
@@ -890,9 +1010,7 @@ classBody ::=  {
      * 
      * <pre>
      *   variableDeclarator ::= IDENTIFIER
-     *                          [ASSIGN variableInitializer]
-     * </pre>
-     * 
+     *                          [ASSIGN variableInitializer]type() {
      * @param type
      *            type of the variable.
      * @return an AST for a variableDeclarator.
@@ -942,10 +1060,7 @@ classBody ::=  {
      */
 
     private JArrayInitializer arrayInitializer(Type type) {
-        int line = scanner.token().line();
-        ArrayList<JExpression> initials = new ArrayList<JExpression>();
-        mustBe(LCURLY);
-        if (have(RCURLY)) {
+        int line = scanner.token().line();type() {
             return new JArrayInitializer(line, type, initials);
         }
         initials.add(variableInitializer(type.componentType()));
@@ -971,7 +1086,7 @@ classBody ::=  {
         ArrayList<JExpression> args = new ArrayList<JExpression>();
         mustBe(LPAREN);
         if (have(RPAREN)) {
-            return args;
+            return args;type() {
         }
         do {
             args.add(expression());
@@ -1427,8 +1542,6 @@ classBody ::=  {
             return new JNegateOp(line, unaryExpression());
         } else if (have(PLUS)){
             return new JUnaryPlusOp(line, unaryExpression());
-        } else if (have(BNOT)) { 
-            return new JBitwiseNotOp(line, unaryExpression());
         } else {
             return simpleUnaryExpression();
         }
@@ -1454,6 +1567,8 @@ classBody ::=  {
         int line = scanner.token().line();
         if (have(LNOT)) {
             return new JLogicalNotOp(line, unaryExpression());
+        } else if (have(BNOT)) { 
+            return new JBitwiseNotOp(line, unaryExpression());
         } else if (seeCast()) {
             mustBe(LPAREN);
             boolean isBasicType = seeBasicType();

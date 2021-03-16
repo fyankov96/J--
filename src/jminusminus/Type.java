@@ -741,7 +741,6 @@ class Type {
         signature += ")";
         return signature;
     }
-
 }
 
 /**

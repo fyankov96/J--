@@ -515,6 +515,160 @@ private ArrayList<JMember> classBody(): {
 }
 
 /**
+ * Parse an interface declaration. A class which doesn't explicitly extend another
+ * (super) class implicitly extends the superclass java.lang.Object.
+ * 
+ * <pre>
+ *   classDeclaration ::= INTERFACE IDENTIFIER
+ *                        [EXTENDS qualifiedIdentifier]
+ *                        interfaceBody
+ * </pre>
+ * 
+ * 
+ * @param mods the class modifiers.
+ *
+ * @return an AST for a classDeclaration.
+ */
+
+private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods): {
+    int line = 0;
+    String name = "";
+    Type superClass = Type.OBJECT;
+    ArrayList<JMember> classBody = null;
+}
+{
+    try {
+        <CLASS> { line = token.beginLine; }
+        <IDENTIFIER> { name = token.image; }
+        [
+            <EXTENDS> superClass = qualifiedIdentifier()
+        ]
+        classBody = classBody()
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    {
+        return new JClassDeclaration(line, mods, name, superClass, classBody);
+    }
+}
+
+/**
+ * Parse a interface body.
+ * 
+ * <pre>
+ *   interfaceBody ::= LCURLY
+ *                   {modifiers memberDecl}
+ *                 RCURLY
+ * </pre>
+ * 
+ * @return list of members in the interface body.
+ */
+
+private ArrayList<JMember> interfaceBody(): {
+    ArrayList<String> mods = null;
+    JMember aMember        = null;
+    ArrayList<JMember> members = new ArrayList<JMember>();
+}
+{
+    try {
+        <LCURLY>
+        (
+            mods = modifiers()
+            aMember = memberDecl(mods) { members.add(aMember); }
+        )*
+        <RCURLY>
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return members; }
+}
+
+/**
+ * Parse an interface member declaration.
+ * 
+ * <pre>
+ *   interfaceMemberDecl ::= IDENTIFIER            // constructor
+ *                    formalParameters
+ *                    [THROWS qualifiedIdentifier {, qualifiedIdentifier}]
+ *                    block
+ *                | (VOID | type) IDENTIFIER  // method
+ *                    formalParameters
+ *                    [THROWS qualifiedIdentifier {, qualifiedIdentifier}]
+ *                    (block | SEMI)
+ *                | type variableDeclarators SEMI 
+ * </pre>
+ * 
+ * @param mods the class member modifiers.
+ *
+ * @return an AST for a memberDecl.
+ */
+    
+private JMember interfaceMemberDecl(ArrayList<String> mods): {
+    int line = 0;
+    Type type = null;
+    String name = "";
+    ArrayList<JFormalParameter> params = null;
+
+    TypeName exception = null;
+    ArrayList<TypeName> exceptions = new ArrayList<TypeName>();
+
+    JBlock body = null;
+    ArrayList<JVariableDeclarator> variableDeclarators = null;
+    JMember interfaceMemberDecl = null;
+}
+{
+    try {
+        LOOKAHEAD((<VOID> | type()) <IDENTIFIER> <LPAREN>)
+        (
+            (
+                <VOID> { type = Type.VOID; } |
+                type = type()
+            )
+            { line = token.beginLine; }
+            <IDENTIFIER> { name = token.image; }
+            params = formalParameters() 
+
+            [
+                LOOKAHEAD(<THROWS>)
+                <THROWS>
+                exception = qualifiedIdentifier()
+                exceptions.add(exception)
+                (
+                    <COMMA>
+                    exception = qualifiedIdentifier()
+                    exceptions.add(exception)
+                )*
+            ]
+
+            (
+                body = block() |
+                <SEMI>
+            )
+            {
+                memberDecl = new JMethodDeclaration(line, mods, name,
+                                                    type, params, exceptions, body);
+            }
+        ) |
+        (
+            type = type() { line = token.beginLine; }
+            variableDeclarators = variableDeclarators(type)
+            <SEMI>
+            {
+                memberDecl = new JFieldDeclaration(line, mods,
+                                                   variableDeclarators);
+            }
+        )
+    }
+    catch (ParseException e) { 
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return memberDecl; }
+}
+
+
+/**
  * Parse a member declaration.
  * 
  * <pre>

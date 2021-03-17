@@ -20,6 +20,9 @@ class JBlock extends JStatement {
      */
     private LocalContext context;
 
+
+    private static boolean isStatic;
+
     /**
      * Constructs an AST node for a block given its line number, and the list of
      * statements forming the block body.
@@ -33,6 +36,13 @@ class JBlock extends JStatement {
     public JBlock(int line, ArrayList<JStatement> statements) {
         super(line);
         this.statements = statements;
+        this.isStatic = false;
+    }
+
+    public JBlock(int line, ArrayList<JStatement> statements, boolean isStatic) {
+        super(line);
+        this.statements = statements;
+        this.isStatic = isStatic;
     }
 
     /**
@@ -85,7 +95,7 @@ class JBlock extends JStatement {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JBlock line=\"%d\">\n", line());
+        p.printf("<JBlock line=\"%d\" static=\"%s\">\n", line(), isStatic ? "true" : "false");
         if (context != null) {
             p.indentRight();
             context.writeToStdOut(p);

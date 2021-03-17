@@ -113,7 +113,7 @@ class JAssignOp extends JAssignment {
  */
 
 class JPlusAssignOp extends JAssignment {
-
+    
     /**
      * Constructs the AST node for a += expression given its lhs and rhs
      * operands.
@@ -159,6 +159,7 @@ class JPlusAssignOp extends JAssignment {
             JAST.compilationUnit.reportSemanticError(line(),
                     "Invalid lhs type for +=: " + lhs.type());
         }
+        
         return this;
     }
 

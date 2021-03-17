@@ -43,6 +43,13 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Static (class) fields of this class. */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
+    /** Static initialization block  */
+    private ArrayList<JBlock> staticInitializationBlocks;
+
+    /** Instance initialization block  */
+    private ArrayList<JBlock> instanceInitializationBlocks;
+
+
     /** Class for implements */
     private ArrayList<TypeName> implement;
 
@@ -73,6 +80,22 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        staticInitializationBlocks = new ArrayList<JBlock>();
+        instanceInitializationBlocks = new ArrayList<JBlock>();
+    }
+
+    public JClassDeclaration(int line, ArrayList<String> mods, String name,
+    Type superType, ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+        super(line);
+        this.mods = mods;
+        this.name = name;
+        this.superType = superType;
+        this.classBlock = classBlock;
+        hasExplicitConstructor = false;
+        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
+        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        staticInitializationBlocks = SIB;
+        instanceInitializationBlocks = IIB;
     }
 
     /**
@@ -293,6 +316,24 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             }
             p.indentLeft();
             p.println("</ClassBlock>");
+        }
+        if (staticFieldInitializations != null) {
+            p.println("<StaticInitializationBlocks>");
+            p.indentRight();
+            for (JBlock block : staticInitializationBlocks) {
+                ((JAST) block).writeToStdOut(p);
+            }
+            p.indentLeft();
+            p.println("</StaticInitializationBlocks>");
+        }
+        if (instanceFieldInitializations != null) {
+            p.println("<InstanceInitializationBlocks>");
+            p.indentRight();
+            for (JBlock block : instanceInitializationBlocks) {
+                ((JAST) block).writeToStdOut(p);
+            }
+            p.indentLeft();
+            p.println("</InstanceInitializationBlocks>");
         }
         p.indentLeft();
         p.println("</JClassDeclaration>");

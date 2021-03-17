@@ -158,8 +158,43 @@ public class Parser {
     }
 
     // ////////////////////////////////////////////////
-    // Lookahead /////////////////////////////////////
+    // Lookahead  /////////////////////////////////////
     // ////////////////////////////////////////////////
+
+    /**
+     * Are we looking at an BLOCK started by a LCURLY? Look ahead to find
+     * out.
+     * 
+     * @return true iff we're looking at BLOCK; false otherwise.
+     */
+    private boolean seeBlock() {
+        scanner.recordPosition();
+        if(!have(LCURLY)) {
+            return false;
+        }
+        scanner.returnToPosition();
+        return true;
+    }
+
+
+    private boolean seeModifier(){ 
+        if(see(PUBLIC)){
+            return true;
+        }
+        if(see(PROTECTED)){
+            return true;
+        }
+        if(see(PRIVATE)){
+            return true;
+        }
+        if(see(STATIC)){
+            return true;
+        }
+        if(see(ABSTRACT)){
+            return true;
+        }
+        return false;
+    }
 
     /**
      * Are we looking at an IDENTIFIER followed by a LPAREN? Look ahead to find
@@ -284,7 +319,7 @@ public class Parser {
      */
 
     private boolean seeBasicType() {
-        return (see(BOOLEAN) || see(CHAR) || see(INT));
+        return (see(BOOLEAN) || see(CHAR) || see(INT) || see(DOUBLE));
     }
 
     /**
@@ -480,7 +515,7 @@ public class Parser {
      * <pre>
      *   classDeclaration ::= CLASS IDENTIFIER 
      *                        [EXTENDS qualifiedIdentifier] 
-     *                        classBody
+     *                        LCURLY classBody RCURLY
      * </pre>
      * 
      * A class which doesn't explicitly extend another (super) class implicitly
@@ -502,30 +537,68 @@ public class Parser {
         } else {
             superClass = Type.OBJECT;
         }
-        return new JClassDeclaration(line, mods, name, superClass, classBody());
+        mustBe(LCURLY);
+        ArrayList<JMember> members = new ArrayList<>();
+        ArrayList<JBlock> IIB = new ArrayList<>();
+        ArrayList<JBlock> SIB = new ArrayList<>();
+        consumeClassBody(members, SIB, IIB);
+        mustBe(RCURLY);
+        return new JClassDeclaration(line, mods, name, superClass, members, SIB, IIB);
     }
 
     /**
      * Parse a class body.
      * 
      * <pre>
-     *   classBody ::= LCURLY
-     *                   {modifiers memberDecl}
-     *                 RCURLY
+
+classBody ::=  [SEMI] | {
+            SEMI
+            | modifiers memberDecl
+            | STATIC block 
+            | block
+            } 
+            
      * </pre>
      * 
      * @return list of members in the class body.
      */
 
-    private ArrayList<JMember> classBody() {
-        ArrayList<JMember> members = new ArrayList<JMember>();
-        mustBe(LCURLY);
+
+    private void consumeClassBody(ArrayList<JMember> members, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+        boolean error = false;
         while (!see(RCURLY) && !see(EOF)) {
-            members.add(memberDecl(modifiers()));
+            scanner.errorHasOccured();
+
+            if(have(SEMI)) {
+                //DO nothing
+            }
+            else if(see(STATIC)) {
+                scanner.recordPosition();
+                boolean hasStatic = have(STATIC);
+                scanner.returnToPosition();
+                if(hasStatic) {
+                    have(STATIC);
+                    SIB.add(block(true));
+                } else {
+                    members.add(memberDecl(modifiers()));
+                }
+            } else if(seeModifier() || seeBasicType() || seeReferenceType() || see(VOID)){
+                members.add(memberDecl(modifiers()));
+            } else if(seeBlock()) {
+                IIB.add(block());
+            }
+            else {
+                error = true;
+                break;
+            }
         }
-        mustBe(RCURLY);
-        return members;
+        if(error) {
+            reportParserError("classBody sought where %s found", scanner.token()
+            .image());
+        }
+
     }
+
 
     /**
      * Parse a member declaration.
@@ -606,7 +679,7 @@ public class Parser {
     }
 
     /**
-     * Parse a block.
+     * Parse a non static block.
      * 
      * <pre>
      *   block ::= LCURLY {blockStatement} RCURLY
@@ -616,6 +689,20 @@ public class Parser {
      */
 
     private JBlock block() {
+        return block(false);
+    }
+
+    /**
+     * Parse a block.
+     * 
+     * <pre>
+     *   block ::= LCURLY {blockStatement} RCURLY
+     * </pre>
+     * 
+     * @return an AST for a block.
+     */
+
+    private JBlock block(boolean isStatic) {
         int line = scanner.token().line();
         ArrayList<JStatement> statements = new ArrayList<JStatement>();
         mustBe(LCURLY);
@@ -623,7 +710,7 @@ public class Parser {
             statements.add(blockStatement());
         }
         mustBe(RCURLY);
-        return new JBlock(line, statements);
+        return new JBlock(line, statements, isStatic);
     }
 
     /**
@@ -690,7 +777,7 @@ public class Parser {
             mustBe(SEMI);
             return new JThrowStatement(line, expression);
         } else if(have(FOR)) {
-            return forStatement();
+            return forStatement(line);
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -713,17 +800,76 @@ public class Parser {
                 | LPAREN [type] variableDeclarator COL expression RPAREN statement
      * @return A JForStatement
      */
-    private JForStatement forStatement() {
-        if(!have(LPAREN)) {
+    private JForStatement forStatement(int line) {
+        /*if(!have(LPAREN)) {
             reportParserError("( sought where %s found", scanner.token()
             .image());
+        } */
+        mustBe(LPAREN);
+
+        // JForStepStatement
+        ArrayList<JStatement> init = new ArrayList<JStatement>();
+        JExpression expression = null;
+        ArrayList<JStatement> update = new ArrayList<JStatement>();
+        JStatement body = null;
+
+        // TODO: Figure out how to check for for-each statements
+        /*if () {
+            // Figure out what kind of stattement is needed
+            JStatement declaration = null;
+            mustbe(COLON);
+            expression = expression();
+            mustBe(RPAREN);
+            body = statement();
+            return new JForEachStatement(line, declaration, expression, body);
+        }*/
+
+        if (!have(SEMI)) {
+            init = forInit(line);
+            mustBe(SEMI);
         }
-        
-        scanner.recordPosition();
-        while(true)
-        scanner.next();
-        
+        if (!have(SEMI)) {
+            expression = expression();
+            mustBe(SEMI);
+        }
+        if (!see(RPAREN)) {
+            update = forUpdate();
+        }
+        mustBe(RPAREN);
+        body = statement();
+        return new JForStepStatement(line, init, expression, update, body);
     }
+
+    /**
+     * forUpdate ::= statementExpression {, statementExpressiong}
+     * @return A JForUpdateStatement
+     */
+    private ArrayList<JStatement> forUpdate() {
+        ArrayList<JStatement> update = new ArrayList<JStatement>();
+        do {
+            update.add(statementExpression());
+        } while (have(COMMA));
+        return update;
+    }
+
+     /**
+     * forInit ::= statementExpression {, statementExpressiong}
+     *             | [final] type variableDeclarators
+     * @return A JForInitStatement
+     */
+    private ArrayList<JStatement> forInit(int line) {
+        // Type variableDeclarators
+        ArrayList<JStatement> init = new ArrayList<JStatement>();
+        if (seeBasicType() || seeReferenceType()) {
+            ArrayList<String> mods = new ArrayList<String>();
+            ArrayList<JVariableDeclarator> vdecls = variableDeclarators(type());
+            init.add(new JVariableDeclaration(line, mods, vdecls));
+        } else {
+            init = forUpdate();
+        }
+        return init;
+    }
+
 
     /**
      * Parse formal parameters.
@@ -832,9 +978,7 @@ public class Parser {
      * 
      * <pre>
      *   variableDeclarator ::= IDENTIFIER
-     *                          [ASSIGN variableInitializer]
-     * </pre>
-     * 
+     *                          [ASSIGN variableInitializer]type() {
      * @param type
      *            type of the variable.
      * @return an AST for a variableDeclarator.
@@ -882,7 +1026,6 @@ public class Parser {
      *            type of the array.
      * @return an AST for an arrayInitializer.
      */
-
     private JArrayInitializer arrayInitializer(Type type) {
         int line = scanner.token().line();
         ArrayList<JExpression> initials = new ArrayList<JExpression>();
@@ -957,7 +1100,10 @@ public class Parser {
             return Type.CHAR;
         } else if (have(INT)) {
             return Type.INT;
-        } else {
+        } else if (have(DOUBLE)) {
+            return Type.DOUBLE;
+        }
+        else{
             reportParserError("Type sought where %s found", scanner.token()
                     .image());
             return Type.ANY;

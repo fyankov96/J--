@@ -21,7 +21,7 @@ class JBlock extends JStatement {
     private LocalContext context;
 
 
-    private static isStatic;
+    private static boolean isStatic;
 
     /**
      * Constructs an AST node for a block given its line number, and the list of

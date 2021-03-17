@@ -79,24 +79,10 @@ public class Parser {
      */
 
     private boolean have(TokenKind sought) {
-        if (see(soprivate boolean seeModifier(){ 
-            if(see(PUBLIC)){
+        if (see(sought)) {
+            scanner.next();
             return true;
-            }
-            if(see(PROTECTED)){
-            return true;
-            }
-            if(see(PRIVATE)){
-            return true;
-            }
-            if(see(STATIC)){
-            return true;
-            }
-            if(see(ABSTRACT)){
-            return true;
-            }
-            return false;
-            }
+        } else {
             return false;
         }
     }
@@ -187,6 +173,7 @@ public class Parser {
             return false;
         }
         scanner.returnToPosition();
+        return true;
     }
 
 
@@ -332,7 +319,7 @@ public class Parser {
      */
 
     private boolean seeBasicType() {
-        return (see(BOOLEAN) || see(CHAR) || see(INT));
+        return (see(BOOLEAN) || see(CHAR) || see(INT) || see(DOUBLE));
     }
 
     /**
@@ -554,7 +541,7 @@ public class Parser {
         ArrayList<JMember> members = new ArrayList<>();
         ArrayList<JBlock> IIB = new ArrayList<>();
         ArrayList<JBlock> SIB = new ArrayList<>();
-        consumeClassBody(members, IIB, SIB);
+        consumeClassBody(members, SIB, IIB);
         mustBe(RCURLY);
         return new JClassDeclaration(line, mods, name, superClass, members, SIB, IIB);
     }
@@ -564,7 +551,7 @@ public class Parser {
      * 
      * <pre>
 
-classBody ::=  {
+classBody ::=  [SEMI] | {
             SEMI
             | modifiers memberDecl
             | STATIC block 
@@ -578,7 +565,10 @@ classBody ::=  {
 
 
     private void consumeClassBody(ArrayList<JMember> members, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+        boolean error = false;
         while (!see(RCURLY) && !see(EOF)) {
+            scanner.errorHasOccured();
+
             if(have(SEMI)) {
                 //DO nothing
             }
@@ -592,45 +582,23 @@ classBody ::=  {
                 } else {
                     members.add(memberDecl(modifiers()));
                 }
-            } else if(seeModifier()){
+            } else if(seeModifier() || seeBasicType() || seeReferenceType() || see(VOID)){
                 members.add(memberDecl(modifiers()));
             } else if(seeBlock()) {
                 IIB.add(block());
             }
             else {
-                reportParserError("classBody sought where %s found", scanner.token()
-                .image());
+                error = true;
+                break;
             }
         }
+        if(error) {
+            reportParserError("classBody sought where %s found", scanner.token()
+            .image());
+        }
+
     }
 
-    private ArrayList<JMember> consumeClassBody() {
-        ArrayList<JMember> members = new ArrayList<JMember>();
-        while (!see(RCURLY) && !see(EOF)) {
-            if(have(SEMI)) {
-                //DO nothing
-            }
-            else if(see(STATIC)) {
-                scanner.recordPosition();
-                boolean hasStatic = have(STATIC);
-                scanner.returnToPosition();
-                if(hasStatic) {
-                    have(STATIC);
-                    members.add(block(true));
-                } else {
-                    members.add(memberDecl(modifiers()));
-                }
-            } else if(seeBlock()) {
-                p
-            } else if(seeModifier()){
-                members.add(memberDecl(modifiers()));
-            } else {
-                reportParserError("classBody sought where %s found", scanner.token()
-                .image());
-            }
-        }
-        return members;
-    }
 
     /**
      * Parse a member declaration.
@@ -721,7 +689,7 @@ classBody ::=  {
      */
 
     private JBlock block() {
-        block(false);
+        return block(false);
     }
 
     /**
@@ -1058,9 +1026,11 @@ classBody ::=  {
      *            type of the array.
      * @return an AST for an arrayInitializer.
      */
-
     private JArrayInitializer arrayInitializer(Type type) {
-        int line = scanner.token().line();type() {
+        int line = scanner.token().line();
+        ArrayList<JExpression> initials = new ArrayList<JExpression>();
+        mustBe(LCURLY);
+        if (have(RCURLY)) {
             return new JArrayInitializer(line, type, initials);
         }
         initials.add(variableInitializer(type.componentType()));
@@ -1086,7 +1056,7 @@ classBody ::=  {
         ArrayList<JExpression> args = new ArrayList<JExpression>();
         mustBe(LPAREN);
         if (have(RPAREN)) {
-            return args;type() {
+            return args;
         }
         do {
             args.add(expression());
@@ -1130,7 +1100,10 @@ classBody ::=  {
             return Type.CHAR;
         } else if (have(INT)) {
             return Type.INT;
-        } else {
+        } else if (have(DOUBLE)) {
+            return Type.DOUBLE;
+        }
+        else{
             reportParserError("Type sought where %s found", scanner.token()
                     .image());
             return Type.ANY;

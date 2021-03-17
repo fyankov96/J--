@@ -85,7 +85,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     }
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
-    Type superType, ArrayList<JMember> classBlock, ArrayList<JMember> SIB, ArrayList<JMember> IIB) {
+    Type superType, ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
         super(line);
         this.mods = mods;
         this.name = name;
@@ -316,6 +316,24 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             }
             p.indentLeft();
             p.println("</ClassBlock>");
+        }
+        if (staticFieldInitializations != null) {
+            p.println("<StaticInitializationBlocks>");
+            p.indentRight();
+            for (JBlock block : staticInitializationBlocks) {
+                ((JAST) block).writeToStdOut(p);
+            }
+            p.indentLeft();
+            p.println("</StaticInitializationBlocks>");
+        }
+        if (instanceFieldInitializations != null) {
+            p.println("<InstanceInitializationBlocks>");
+            p.indentRight();
+            for (JBlock block : instanceInitializationBlocks) {
+                ((JAST) block).writeToStdOut(p);
+            }
+            p.indentLeft();
+            p.println("</InstanceInitializationBlocks>");
         }
         p.indentLeft();
         p.println("</JClassDeclaration>");

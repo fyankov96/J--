@@ -27,10 +27,10 @@ interfaceDeclaration ::= INTERFACE IDENTIFIER
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
-                 [throws qualifiedIdentifier {, qualifiedIdentifier}] block
+                 [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
-                 [throws qualifiedIdentifier {, qualifiedIdentifier}] block
+                 [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
                  (block | SEMI)
              | type variableDeclarators SEMI // field
 

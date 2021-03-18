@@ -368,10 +368,10 @@ class Scanner {
         case EOFCH:
             return new TokenInfo(EOF, line);
         case '0':
-            // Handle only simple decimal integers for now.
             nextCh();
             if(ch == '.') {
                 buffer = new StringBuffer();
+                buffer.append('0');
                 do {
                     buffer.append(ch);
                     nextCh();

@@ -777,7 +777,7 @@ classBody ::=  [SEMI] | {
             mustBe(SEMI);
             return new JThrowStatement(line, expression);
         } else if(have(FOR)) {
-            return forStatement(line);
+            return forStatement();
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -796,52 +796,68 @@ classBody ::=  [SEMI] | {
     }
 
     /**
-     * forExpression ::= LPAREN [type] variableDeclarator SEMI expression SEMI statementExpression RPAREN statement
-                | LPAREN [type] variableDeclarator COL expression RPAREN statement
+     *  forExpression ::= LPAREN [forInit] SEMI [expression] SEMI [forUpdate] RPAREN statement
+                | LPAREN type variableDeclarator COL expression RPAREN statement
      * @return A JForStatement
      */
-    private JForStatement forStatement(int line) {
-        /*if(!have(LPAREN)) {
-            reportParserError("( sought where %s found", scanner.token()
-            .image());
-        } */
+    private JForStatement forStatement() {
+        int line = scanner.token().line();
         mustBe(LPAREN);
 
-        // JForStepStatement
-        ArrayList<JStatement> init = new ArrayList<JStatement>();
-        JExpression expression = null;
-        ArrayList<JStatement> update = new ArrayList<JStatement>();
+        //For Step
+        ArrayList<JStatement> initExpr = new ArrayList<>();
+        ArrayList<JVariableDeclarator> initDecl  = new ArrayList<>();
+        ArrayList<JStatement> update  = new ArrayList<>();
+        //For Each
+        Type typeFound;
+        JVariableDeclarator decl = null;
+        //Common
+        JExpression cond = null;
         JStatement body = null;
 
-        // TODO: Figure out how to check for for-each statements
-        /*if () {
-            // Figure out what kind of stattement is needed
-            JStatement declaration = null;
-            mustbe(COLON);
-            expression = expression();
-            mustBe(RPAREN);
-            body = statement();
-            return new JForEachStatement(line, declaration, expression, body);
-        }*/
 
-        if (!have(SEMI)) {
-            init = forInit(line);
-            mustBe(SEMI);
+
+        boolean isForEach = false;
+        if(seeBasicType() || seeReferenceType()) {
+            scanner.recordPosition();
+            typeFound = type();
+            variableDeclarator(typeFound);
+            if(have(COL)) {
+                isForEach = true;
+            }
+            scanner.returnToPosition();
         }
-        if (!have(SEMI)) {
-            expression = expression();
+        if(isForEach) {
+            typeFound = type();
+            decl = variableDeclarator(typeFound);
+            mustBe(COL);
+            cond = expression();
+        } else {
+            if(!see(SEMI)) {
+                forInit(initExpr, initDecl);
+            }
             mustBe(SEMI);
-        }
-        if (!see(RPAREN)) {
-            update = forUpdate();
+            if(!see(SEMI)) {
+                cond = expression();
+            }
+            mustBe(SEMI);
+            if(!see(RPAREN)) {
+                update = forUpdate();
+            }
         }
         mustBe(RPAREN);
         body = statement();
-        return new JForStepStatement(line, init, expression, update, body);
+
+        if(isForEach) {
+            return new JForEachStatement(line, decl, cond, body);
+        } else {
+            return new JForStepStatement(line, initExpr, initDecl, cond, update, body);
+
+        }
     }
 
     /**
-     * forUpdate ::= statementExpression {, statementExpressiong}
+     * forUpdate ::= statementExpression {, statementExpression}
      * @return A JForUpdateStatement
      */
     private ArrayList<JStatement> forUpdate() {
@@ -853,21 +869,19 @@ classBody ::=  [SEMI] | {
     }
 
      /**
-     * forInit ::= statementExpression {, statementExpressiong}
-     *             | [final] type variableDeclarators
+     * forInit ::= forUpdate
+     *             | type variableDeclarators
      * @return A JForInitStatement
      */
-    private ArrayList<JStatement> forInit(int line) {
+    private void forInit(ArrayList<JStatement> initExpr, ArrayList<JVariableDeclarator> initDecl) {
         // Type variableDeclarators
-        ArrayList<JStatement> init = new ArrayList<JStatement>();
         if (seeBasicType() || seeReferenceType()) {
-            ArrayList<String> mods = new ArrayList<String>();
-            ArrayList<JVariableDeclarator> vdecls = variableDeclarators(type());
-            init.add(new JVariableDeclaration(line, mods, vdecls));
+           initDecl = variableDeclarators(type());
+           initExpr = new ArrayList<JStatement>();
         } else {
-            init = forUpdate();
+            initDecl = new ArrayList<JVariableDeclarator>();
+            initExpr = forUpdate();
         }
-        return init;
     }
 
 
@@ -1154,6 +1168,8 @@ classBody ::=  [SEMI] | {
         int line = scanner.token().line();
         JExpression expr = expression();
         if (expr instanceof JAssignment || expr instanceof JPreIncrementOp
+                                        || expr instanceof JPostIncrementOp
+                                        || expr instanceof JPreDecrementOp
                                         || expr instanceof JPostDecrementOp
                                         || expr instanceof JMessageExpression
                                         || expr instanceof JSuperConstruction
@@ -1220,8 +1236,10 @@ classBody ::=  [SEMI] | {
             return new JShiftRightAssignOp(line,lhs,assignmentExpression());
         } else if (have (SHL_ASSIGN)){
             return new JShiftLeftAssignOp(line,lhs,assignmentExpression());
+        } else if (have (XOR_ASSIGN)){
+            return new JXORAssignOp(line,lhs,assignmentExpression());
         }else{
-        return lhs;
+            return lhs;
         }
     }
 

@@ -51,11 +51,11 @@ statement ::= block
             | SEMI 
             | statementExpression SEMI
 
-forExpression ::= LPAREN forInit SEMI expression SEMI forUpdate RPAREN statement
-                | LPAREN [type] variableDeclarator COL expression RPAREN statement
+forExpression ::= LPAREN [forInit] SEMI [expression] SEMI [forUpdate] RPAREN statement
+                | LPAREN type variableDeclarator COL expression RPAREN statement
 
-forInit ::= statementExpression {, statementExpression}
-| [final] type variableDeclarators
+forInit ::= forUpdate
+| type variableDeclarators
 
 forUpdate ::= statementExpression {, statementExpression}
 

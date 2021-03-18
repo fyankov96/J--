@@ -153,7 +153,7 @@ TOKEN: {
 | <CLASS: "class"> 
 | <CONST: "const"> 
 | <CONTINUE: "continue"> 
-| <DEFAULT: "default">
+| <DEFAULT_: "default">
 | <DO: "do">
 | <DOUBLE: "double">
 | <ELSE: "else">
@@ -533,8 +533,9 @@ private ArrayList<JMember> classBody(): {
 private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods): {
     int line = 0;
     String name = "";
-    Type superClass = Type.OBJECT;
-    ArrayList<JMember> classBody = null;
+    ArrayList<TypeName> superClasses = new ArrayList<TypeName>();
+    TypeName superClass = null;
+    ArrayList<JMember> interfaceBody = null;
 }
 {
     try {
@@ -542,14 +543,14 @@ private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods): {
         <IDENTIFIER> { name = token.image; }
         [
             <EXTENDS> superClass = qualifiedIdentifier()
-        ]
-        classBody = classBody()
+        ] {superClasses.add(superClass);}
+        interfaceBody = interfaceBody()
     }
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
     {
-        return new JClassDeclaration(line, mods, name, superClass, classBody);
+        return new JInterfaceDeclaration(line, mods, name, superClasses, interfaceBody);
     }
 }
 
@@ -632,13 +633,13 @@ private JMember interfaceMemberDecl(ArrayList<String> mods): {
 
             [
                 LOOKAHEAD(<THROWS>)
-                <THROWS>
+                <THROWS> 
                 exception = qualifiedIdentifier()
-                exceptions.add(exception)
+                { exceptions.add(exception); }
                 (
                     <COMMA>
                     exception = qualifiedIdentifier()
-                    exceptions.add(exception)
+                    { exceptions.add(exception); }
                 )*
             ]
 
@@ -647,7 +648,7 @@ private JMember interfaceMemberDecl(ArrayList<String> mods): {
                 <SEMI>
             )
             {
-                memberDecl = new JMethodDeclaration(line, mods, name,
+                interfaceMemberDecl = new JMethodDeclaration(line, mods, name,
                                                     type, params, exceptions, body);
             }
         ) |
@@ -656,7 +657,7 @@ private JMember interfaceMemberDecl(ArrayList<String> mods): {
             variableDeclarators = variableDeclarators(type)
             <SEMI>
             {
-                memberDecl = new JFieldDeclaration(line, mods,
+                interfaceMemberDecl = new JFieldDeclaration(line, mods,
                                                    variableDeclarators);
             }
         )
@@ -664,7 +665,7 @@ private JMember interfaceMemberDecl(ArrayList<String> mods): {
     catch (ParseException e) { 
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
-    { return memberDecl; }
+    { return interfaceMemberDecl; }
 }
 
 
@@ -716,11 +717,11 @@ private JMember memberDecl(ArrayList<String> mods): {
                 LOOKAHEAD(<THROWS>)
                 <THROWS>
                 exception = qualifiedIdentifier()
-                exceptions.add(exception)
+                { exceptions.add(exception); }
                 (
                     <COMMA>
                     exception = qualifiedIdentifier()
-                    exceptions.add(exception)
+                    { exceptions.add(exception); }
                 )*
             ]
 
@@ -744,11 +745,11 @@ private JMember memberDecl(ArrayList<String> mods): {
                 LOOKAHEAD(<THROWS>)
                 <THROWS>
                 exception = qualifiedIdentifier()
-                exceptions.add(exception)
+                { exceptions.add(exception); }
                 (
                     <COMMA>
                     exception = qualifiedIdentifier()
-                    exceptions.add(exception)
+                    { exceptions.add(exception); }
                 )*
             ]
 
@@ -888,7 +889,7 @@ private JStatement statement(): {
         tryBlock = block()
         <CATCH>
         <LPAREN>
-        catchParam = JFormalParameter()
+        catchParam = formalParameter()
         <RPAREN>
         catchBlock = block()
         [

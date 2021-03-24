@@ -503,6 +503,10 @@ private ArrayList<JMember> classBody(): {
     try {
         <LCURLY>
         (
+            <STATIC>
+            aMember = block();
+            members.add(block);
+            |
             mods = modifiers()
             aMember = memberDecl(mods) { members.add(aMember); }
         )*

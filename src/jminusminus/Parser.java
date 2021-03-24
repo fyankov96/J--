@@ -742,6 +742,7 @@ classBody ::=  [SEMI] | {
      *               | TRY block 
                        CATCH ( formalParameter ) block
                        [FINALLY block]
+                     | THROW [expression] SEMI
      *               | RETURN [expression] SEMI
      *               | SEMI 
      *               | statementExpression SEMI

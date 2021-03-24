@@ -24,7 +24,8 @@ class JForStepStatement extends JForStatement {
 
 
     /** Test expression. */
-    private ArrayList<JStatement> initialization;
+    private ArrayList<JStatement> initStatements;
+    private ArrayList<JVariableDeclarator> initDeclarations;
     private JExpression condition;
     private ArrayList<JStatement> step;
 
@@ -40,9 +41,11 @@ class JForStepStatement extends JForStatement {
      *            the body.
      */
 
-    public JForStepStatement(int line, ArrayList<JStatement> initialization, JExpression condition, ArrayList<JStatement> step, JStatement body) {
+    public JForStepStatement(int line, ArrayList<JStatement> initStatements, ArrayList<JVariableDeclarator> initDeclarations,  
+                             JExpression condition, ArrayList<JStatement> step, JStatement body) {
         super(line, body);
-        this.initialization = initialization;
+        this.initStatements = initStatements;
+        this.initDeclarations = initDeclarations;
         this.condition = condition;
         this.step = step;
     }
@@ -87,24 +90,33 @@ class JForStepStatement extends JForStatement {
         p.printf("<JForStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Initialization>\n");
-        if (initialization != null) {
-            for (JAST initial : initialization) {
+        if(this.initStatements != null) {
+            for(JStatement j : this.initStatements) {
                 p.indentRight();
-                initial.writeToStdOut(p);
+                j.writeToStdOut(p);
                 p.indentLeft();
             }
         }
+        if(this.initDeclarations != null) {
+            for(JVariableDeclarator j : this.initDeclarations) {
+                p.indentRight();
+                j.writeToStdOut(p);
+                p.indentLeft();
+            }
+        } 
         p.printf("</Initialization>\n");
         p.printf("<Condition>\n");
         p.indentRight();
-        condition.writeToStdOut(p);
+        if(this.condition != null) {
+            condition.writeToStdOut(p);
+        }
         p.indentLeft();
         p.printf("</Condition>\n");
         p.printf("<Step>\n");
-        if (step != null) {
-            for (JAST s : step) {
+        if(this.step != null) {
+            for(JStatement j : this.step) {
                 p.indentRight();
-                s.writeToStdOut(p);
+                j.writeToStdOut(p);
                 p.indentLeft();
             }
         }
@@ -124,9 +136,8 @@ class JForEachStatement extends JForStatement {
 
 
     /** Test expression. */
-    private JStatement declaration;
+    private JVariableDeclarator declaration;
     private JExpression iterable;
-    private JStatement body;
 
     /**
      * Constructs an AST node for a while-statement given its line number, the
@@ -140,7 +151,7 @@ class JForEachStatement extends JForStatement {
      *            the body.
      */
 
-    public JForEachStatement(int line, JStatement declaration, JExpression iterable, JStatement body) {
+    public JForEachStatement(int line, JVariableDeclarator declaration, JExpression iterable, JStatement body) {
         super(line, body);
         this.declaration = declaration;
         this.iterable = iterable;
@@ -156,7 +167,7 @@ class JForEachStatement extends JForStatement {
      */
 
     public JForEachStatement analyze(Context context) {
-        declaration = (JStatement) declaration.analyze(context);
+        declaration = (JVariableDeclarator) declaration.analyze(context);
         iterable = (JExpression) iterable.analyze(context);
         //TODO (how to check that it is an iterable?) iterable.type().mustMatchExpected(line(), );
         body = (JStatement) body.analyze(context);

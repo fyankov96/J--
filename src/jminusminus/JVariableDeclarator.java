@@ -40,6 +40,8 @@ class JVariableDeclarator extends JAST {
         this.name = name;
         this.type = type;
         this.initializer = initializer;
+
+        
     }
 
     /**

@@ -51,8 +51,13 @@ statement ::= block
             | SEMI 
             | statementExpression SEMI
 
-forExpression ::= LPAREN [type] variableDeclarator SEMI expression SEMI statementExpression RPAREN statement
-                | LPAREN [type] variableDeclarator COL expression RPAREN statement
+forExpression ::= LPAREN [forInit] SEMI [expression] SEMI [forUpdate] RPAREN statement
+                | LPAREN type variableDeclarator COL expression RPAREN statement
+
+forInit ::= forUpdate
+| type variableDeclarators
+
+forUpdate ::= statementExpression {, statementExpression}
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]

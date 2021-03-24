@@ -19,7 +19,6 @@ public class ExceptionHandling {
             int x = 42;
             throw new NullPointerException();
         } catch (NullPointerException e) {
-            System.out.println("Caught an error");
             return 0;
         }
         finally {return 1;}  

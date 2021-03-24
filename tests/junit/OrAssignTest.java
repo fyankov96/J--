@@ -15,7 +15,7 @@ public class OrAssignTest extends TestCase {
         super.tearDown();
     }
 
-    public void testDivide() {
+    public void testOrAssign() {
         this.assertEquals(orass.OrAssign(true), true);
         this.assertEquals(orass.OrAssign(false), false);
     }    

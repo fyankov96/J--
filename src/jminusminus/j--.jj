@@ -1480,7 +1480,7 @@ private JExpression assignmentExpression(): {
  * Parse a conditional-or expression.
  * 
  * <pre>
- *   conditionalAndExpression ::= conditionalAndExpression        // level 11
+ *   conditionalOrExpression ::= conditionalAndExpression        // level 11
  *                                  {LOR conditionalAndExpression}
  * </pre>
  * 
@@ -1495,7 +1495,7 @@ private JExpression assignmentExpression(): {
     try {
         lhs = conditionalAndExpression() { line = lhs.line(); }
         (
-            <LAND>
+            <LOR>
             rhs = conditionalAndExpression()
             { lhs = new JLogicalOrOp(line, lhs, rhs); }
         )*

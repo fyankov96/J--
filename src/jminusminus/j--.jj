@@ -464,6 +464,8 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
+    ArrayList<JBlock> SIB = null;
+    ArrayList<JBlock> IIB = null;
 }
 {
     try {
@@ -472,13 +474,13 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
         [
             <EXTENDS> superClass = qualifiedIdentifier()
         ]
-        classBody = classBody()
+        classBody = classBody(SIB,IIB)
     }
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
     {
-        return new JClassDeclaration(line, mods, name, superClass, classBody);
+        return new JClassDeclaration(line, mods, name, superClass, classBody, SIB, IIB);
     }
 }
 

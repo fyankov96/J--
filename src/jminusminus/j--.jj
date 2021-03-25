@@ -141,6 +141,9 @@ SKIP: {" "|"\t"|"\n"|"\r"|"\f"}
 // Single line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
 
+// Multi line comment -- ignored
+SKIP: {<MULTI_LINE_COMMENT: "/*" (".*?") "*/">}
+
 // Reserved words
 TOKEN: {
   <ABSTRACT: "abstract"> 
@@ -198,17 +201,29 @@ TOKEN: {
 
 // Operators (these could be combined with the reserved words)
 TOKEN: {
+  <COND: "?">
   <PLUS: "+">
 | <ASSIGN: "=">
 | <DEC: "--">
 | <EQUAL: "==">
 | <GT: ">">
+  <LT: "<">
 | <INC: "++">
 | <LAND: "&&">
+  <BAND: "&">
 | <LE: "<=">
+  <SE: ">=">
 | <LNOT: "!">
 | <MINUS: "-">
 | <STAR: "*">
+  <BNOT: "~">
+  <DIV: "/">
+  <REM:"%">
+  <SHR: ">>">
+  <SHL: "<<">
+  <USHR: ">>>">
+  <BOR: "|">
+  <LOR: "||">
 | <PLUS_ASSIGN: "+=">
 | <MINUS_ASSIGN: "-=">
 | <MULT_ASSIGN: "*=">
@@ -220,6 +235,7 @@ TOKEN: {
 | <USHR_ASSIGN: ">>>=">
 | <SHR_ASSIGN: ">>=">
 | <SHL_ASSIGN: "<<=">
+  <NOT_EQUALS "!=">
 }
 
 // Separators (these could be combined with the reserved words)

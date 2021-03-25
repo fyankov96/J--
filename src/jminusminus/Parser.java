@@ -742,6 +742,7 @@ classBody ::=  [SEMI] | {
      *               | TRY block 
                        CATCH ( formalParameter ) block
                        [FINALLY block]
+                     | THROW [expression] SEMI
      *               | RETURN [expression] SEMI
      *               | SEMI 
      *               | statementExpression SEMI
@@ -1237,7 +1238,7 @@ classBody ::=  [SEMI] | {
         } else if (have (SHL_ASSIGN)){
             return new JShiftLeftAssignOp(line,lhs,assignmentExpression());
         } else if (have (XOR_ASSIGN)){
-            return new JXORAssignOp(line,lhs,assignmentExpression());
+            return new JXOrAssignOp(line,lhs,assignmentExpression());
         }else{
             return lhs;
         }

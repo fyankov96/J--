@@ -16,11 +16,11 @@ public class XORassignTest extends TestCase {
     }
 
     public void testxORassign() {
-        this.assertEquals(xORassign.XORassign(1, 3), 2);
-        this.assertEquals(xORassign.XORassign(2, 2), 0);
-        this.assertEquals(xORassign.XORassign(-5, 5), -2);
-        this.assertEquals(xORassign.XORassign(4, -7), -3);
-        this.assertEquals(xORassign.XORassign(-2, -4), 2);
-        this.assertEquals(xORassign.XORassign(-2, -2), 0);
+        this.assertEquals(xORassign.assign(1, 3), 2);
+        this.assertEquals(xORassign.assign(2, 2), 0);
+        this.assertEquals(xORassign.assign(-5, 5), -2);
+        this.assertEquals(xORassign.assign(4, -7), -3);
+        this.assertEquals(xORassign.assign(-2, -4), 2);
+        this.assertEquals(xORassign.assign(-2, -2), 0);
     }
 }

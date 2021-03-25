@@ -218,8 +218,8 @@ TOKEN: {
 | <OR_ASSIGN: "|=">
 | <XOR_ASSIGN: "^=">
 | <USHR_ASSIGN: ">>>=">
-| <SSHR_ASSIGN: ">>=">
-| <SSHL_ASSIGN: "<<=">
+| <SHR_ASSIGN: ">>=">
+| <SHL_ASSIGN: "<<=">
 }
 
 // Separators (these could be combined with the reserved words)
@@ -1407,7 +1407,7 @@ private JExpression assignmentExpression(): {
             rhs = assignmentExpression()
             { lhs = new JSubtractAssignOp(line, lhs, rhs); } |
 
-            <STAR_ASSIGN>
+            <MULT_ASSIGN>
             rhs = assignmentExpression()
             { lhs = new JMultiplyAssignOp(line, lhs, rhs); } |
 
@@ -1441,7 +1441,7 @@ private JExpression assignmentExpression(): {
             
             <USHR_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JUnsignedShiftRightAssignOp(line, lhs, rhs); } |
+            { lhs = new JUnsignedShiftRightAssignOp(line, lhs, rhs); }
         ]
     }
     catch (ParseException e) {

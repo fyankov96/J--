@@ -475,21 +475,26 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
+    ArrayList<JBlock> SIB = new ArrayList<JBlock>();
+    ArrayList<JBlock> IIB = new ArrayList<JBlock>();
 }
 {
     try {
         <CLASS> { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         [
+            <IMPLEMENTS> superClass = qualifiedIdentifier() 
+        ]
+        [
             <EXTENDS> superClass = qualifiedIdentifier()
         ]
-        classBody = classBody()
+        classBody = classBody(SIB,IIB)
     }
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
     {
-        return new JClassDeclaration(line, mods, name, superClass, classBody);
+        return new JClassDeclaration(line, mods, name, superClass, classBody, SIB, IIB);
     }
 }
 
@@ -505,17 +510,22 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
  * @return list of members in the class body.
  */
 
-private ArrayList<JMember> classBody(): {
+private ArrayList<JMember> classBody(ArrayList<JBlock> SIB, ArrayList<JBlock> IIB): {
     ArrayList<String> mods = null;
     JMember aMember        = null;
+    JBlock aBlock          = null;
     ArrayList<JMember> members = new ArrayList<JMember>();
 }
 {
     try {
         <LCURLY>
         (
+            LOOKAHEAD(<STATIC> block()) 
+            <STATIC>
+            aBlock = block() {SIB.add(aBlock);} | 
+            aBlock = block() {IIB.add(aBlock);} |
             mods = modifiers()
-            aMember = memberDecl(mods) { members.add(aMember); }
+            aMember = memberDecl(mods) { members.add(aMember);}
         )*
         <RCURLY>
     }
@@ -1393,7 +1403,7 @@ private JExpression assignmentExpression(): {
 }
 {
     try {
-        lhs = conditionalAndExpression() { line = lhs.line(); }
+        lhs = conditionalOrExpression() { line = lhs.line(); }
         [
             <ASSIGN>
             rhs = assignmentExpression()
@@ -1449,6 +1459,37 @@ private JExpression assignmentExpression(): {
     }
     { return lhs; }
 }
+
+/**
+ * Parse a conditional-or expression.
+ * 
+ * <pre>
+ *   conditionalAndExpression ::= conditionalAndExpression        // level 11
+ *                                  {LOR conditionalAndExpression}
+ * </pre>
+ * 
+ * @return an AST for a conditionalExpression.
+ */
+
+ private JExpression conditionalOrExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = conditionalAndExpression() { line = lhs.line(); }
+        (
+            <LAND>
+            rhs = conditionalAndExpression()
+            { lhs = new JLogicalOrOp(line, lhs, rhs); }
+        )*
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return lhs; }
+}
+
 
 /**
  * Parse a conditional-and expression.
@@ -1636,6 +1677,10 @@ private JExpression unaryExpression(): {
         unaryExpr = unaryExpression()
         { expr = new JPreIncrementOp(line, unaryExpr); } |
 
+        <DEC> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JPreDecrementOp(line, unaryExpr); } |
+
         <MINUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JNegateOp(line, unaryExpr); } |
@@ -1719,7 +1764,11 @@ private JExpression postfixExpression(): {
         )*
         (
             <DEC>
+            { primaryExpr = new JPostDecrementOp(line, primaryExpr); } |
+
+            <INC>
             { primaryExpr = new JPostDecrementOp(line, primaryExpr); }
+
         )*
     }
     catch (ParseException e) {

@@ -1374,7 +1374,7 @@ private JExpression assignmentExpression(): {
 }
 {
     try {
-        lhs = conditionalAndExpression() { line = lhs.line(); }
+        lhs = conditionalOrExpression() { line = lhs.line(); }
         [
             <ASSIGN>
             rhs = assignmentExpression()
@@ -1390,6 +1390,37 @@ private JExpression assignmentExpression(): {
     }
     { return lhs; }
 }
+
+/**
+ * Parse a conditional-or expression.
+ * 
+ * <pre>
+ *   conditionalAndExpression ::= conditionalAndExpression        // level 11
+ *                                  {LOR conditionalAndExpression}
+ * </pre>
+ * 
+ * @return an AST for a conditionalExpression.
+ */
+
+ private JExpression conditionalOrExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = conditionalAndExpression() { line = lhs.line(); }
+        (
+            <LAND>
+            rhs = conditionalAndExpression()
+            { lhs = new JLogicalOrOp(line, lhs, rhs); }
+        )*
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return lhs; }
+}
+
 
 /**
  * Parse a conditional-and expression.
@@ -1577,6 +1608,10 @@ private JExpression unaryExpression(): {
         unaryExpr = unaryExpression()
         { expr = new JPreIncrementOp(line, unaryExpr); } |
 
+        <DEC> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JPreDecrementOp(line, unaryExpr); } |
+
         <MINUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JNegateOp(line, unaryExpr); } |
@@ -1660,7 +1695,11 @@ private JExpression postfixExpression(): {
         )*
         (
             <DEC>
+            { primaryExpr = new JPostDecrementOp(line, primaryExpr); } |
+
+            <INC>
             { primaryExpr = new JPostDecrementOp(line, primaryExpr); }
+
         )*
     }
     catch (ParseException e) {

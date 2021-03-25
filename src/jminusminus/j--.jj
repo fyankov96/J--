@@ -464,8 +464,8 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
-    ArrayList<JBlock> SIB = null;
-    ArrayList<JBlock> IIB = null;
+    ArrayList<JBlock> SIB = new ArrayList<JBlock>();
+    ArrayList<JBlock> IIB = new ArrayList<JBlock>();
 }
 {
     try {
@@ -506,11 +506,12 @@ private ArrayList<JMember> classBody(ArrayList<JBlock> SIB, ArrayList<JBlock> II
     try {
         <LCURLY>
         (
+            LOOKAHEAD(<STATIC> block()) 
             <STATIC>
-            aBlock = block() {SIB.add(aBlock); }
-            | aBlock = block() {IIB.add(aBlock); }
-            | mods = modifiers();
-            | aMember = memberDecl(mods) { members.add(aMember); }
+            aBlock = block() {SIB.add(aBlock);} | 
+            aBlock = block() {IIB.add(aBlock);} |
+            mods = modifiers()
+            aMember = memberDecl(mods) { members.add(aMember);}
         )*
         <RCURLY>
     }

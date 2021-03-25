@@ -472,6 +472,9 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
         <CLASS> { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         [
+            <IMPLEMENTS> superClass = qualifiedIdentifier() 
+        ]
+        [
             <EXTENDS> superClass = qualifiedIdentifier()
         ]
         classBody = classBody(SIB,IIB)

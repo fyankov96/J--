@@ -1,0 +1,332 @@
+[33mcommit e5cd29ba22c6dd681475306321561d2de5eceb43[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Thu Mar 25 07:00:36 2021 +0100
+
+    "LOR, post++ and pre-- should be done"
+
+[33mcommit 903f765acf267d0bee8c2c4f797c080149ac1c66[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Thu Mar 18 11:37:06 2021 +0100
+
+    feat: j--, testing
+
+[33mcommit 72dc69fddb2c3070e6161c9e53696e7b19ac9aa0[m
+Merge: 6ce041e 8d1cbf2
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Thu Mar 18 01:48:34 2021 +0100
+
+    Merge branch 'master' of https://github.com/fyankov96/J--
+
+[33mcommit 6ce041ece7f26c9bbb4de4b28168e1c52e87265c[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Thu Mar 18 01:48:02 2021 +0100
+
+    feat: for statement
+
+[33mcommit bf4e5cdad771f8075fb445b090d8182c8b7e2ee2[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Thu Mar 18 01:46:39 2021 +0100
+
+    feat: for statement
+
+[33mcommit 8d1cbf2b462ced7f7df50c7d2b7475857ee6c341[m
+Author: Tobias Thomsen <tobias@debian.tobias_debian>
+Date:   Wed Mar 17 21:32:24 2021 +0100
+
+    Adding support for interface in j--
+
+[33mcommit c6e377760a930f35b32cc7ba809dc9875ab97741[m
+Merge: 6303325 744215a
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Mar 17 14:09:08 2021 +0100
+
+    Merge branch 'master' of https://github.com/fyankov96/J-- into master
+
+[33mcommit 6303325dcb4ecc082d49aa7e0e18a24bb20f38f7[m
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Mar 17 14:09:04 2021 +0100
+
+    Added JavaCC doubles & exceptions
+
+[33mcommit 744215a075f393eaa2b3f53f909a5861b230f04d[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Wed Mar 17 02:06:33 2021 +0100
+
+    feat: static phase 2 implementation
+
+[33mcommit 16e8613da17deb634330e4f7fd158b33db526a2b[m
+Merge: 089e310 8109504
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Wed Mar 17 00:44:19 2021 +0100
+
+    feat: solve merge conflict
+
+[33mcommit 089e310ab6873ac375c8361b5fef6ae01bc492f9[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Tue Mar 16 23:13:32 2021 +0100
+
+    feat: static
+
+[33mcommit 81095041a70272be450362df96cef02f6bdc3dca[m
+Merge: 6b66098 44c722f
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Sun Mar 14 16:06:36 2021 +0100
+
+    Merge branch 'master' of https://github.com/fyankov96/J--
+
+[33mcommit 6b66098c7a898558cd77a05f866d43b9ca317ed2[m
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Sun Mar 14 16:06:29 2021 +0100
+
+    JForStepStatement (Parsing) should be done.
+
+[33mcommit 44c722ffe6f8925e63b9aeacebbd04be804e82e6[m
+Merge: a26afc3 320077f
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Sat Mar 13 15:03:55 2021 +0100
+
+    Added ExceptionHandling functionality
+
+[33mcommit a26afc344d7a78a65620f29a8a6506d054060b2f[m
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Sat Mar 13 15:01:58 2021 +0100
+
+    Added exceptionhandling functionality
+
+[33mcommit 320077ff5c885759555cbd8d55e80fd31f865a20[m
+Merge: 904e0db 86f9576
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Mar 11 13:00:52 2021 +0200
+
+    Merge branch 'master' of https://github.com/fyankov96/J--
+
+[33mcommit 904e0db0294097690eb2061dfc1f384e76f1b6be[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Mar 11 13:00:16 2021 +0200
+
+    Interface declaration and implementation
+
+[33mcommit 86f95765559daf00f210535e5ae27e2cb754bd2c[m
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Thu Mar 11 09:20:02 2021 +0100
+
+    Fixed the bitwise negation to match the grammar
+
+[33mcommit e48e15fa1b2315c43b098602a5c177be8e733f51[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Thu Mar 11 01:20:33 2021 +0100
+
+    feat: draft for, foreach
+
+[33mcommit ef5d12b6c765ee69f1b7b46f0993d64b90093a11[m
+Merge: f689565 afd514e
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Wed Mar 10 19:04:11 2021 +0100
+
+    Merge branch 'master' of https://github.com/fyankov96/J--
+
+[33mcommit f689565acc78eea97369936a2464b3211aef82ed[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Wed Mar 10 19:04:07 2021 +0100
+
+    feat: TernaryExpression
+
+[33mcommit afd514e9495d5800ca65ab3a8593bb1424c803cc[m
+Merge: 2fab519 d41b741
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Mar 10 14:49:44 2021 +0100
+
+    Merge branch 'master' of https://github.com/fyankov96/J-- into master
+
+[33mcommit 2fab51975bdec5c0686696480961657936e8531d[m
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Mar 10 14:49:33 2021 +0100
+
+    Added functionality for parsing doubles
+
+[33mcommit d41b741e1b4dae4696c109a71de4508273a31a6a[m
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Sun Mar 7 15:20:42 2021 +0100
+
+    Finished post++ & --pre. Uncertain on logical ||
+
+[33mcommit 7715584d0f55383893c65503d5dbb8f5aadb6976[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Mar 4 11:06:27 2021 +0200
+
+    Merging
+
+[33mcommit 3336f9dd0e40e0fac0158f00b9d05fe0bdb6e88b[m
+Merge: ae5b5f3 a1d6797
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Mar 4 11:01:36 2021 +0200
+
+    XORAssign operator & ':' separator
+
+[33mcommit ae5b5f34ecbf9ef2307e56f11f54799481f4eaaf[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Mar 4 10:59:23 2021 +0200
+
+    XORAssign operator & ':' separator
+
+[33mcommit a1d67978972c65d2583c5be24c75e87689e2067f[m
+Merge: aee1108 2c9266c
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Mar 3 16:03:10 2021 +0100
+
+    Adding operators ? || |=
+
+[33mcommit aee110884a33e9ee3118e28199cd2df3ae3a83eb[m
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Mar 3 15:51:53 2021 +0100
+
+    Added operators ? || |=
+
+[33mcommit 2c9266c3351024d3c5449b5af6e22114067fedb0[m
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Tue Mar 2 16:57:40 2021 +0100
+
+    BitwiseNot test is now working! Step 0 is done!
+
+[33mcommit b24d13bc64f1c1416731c1fecbd382f643bccea5[m
+Merge: 2d259b8 5865b4f
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Feb 25 15:27:38 2021 +0200
+
+    Merge branch 'master' of https://github.com/fyankov96/J--
+
+[33mcommit 5865b4fb64ec3f2fb5740009a7d34999400c3521[m
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Thu Feb 25 14:21:33 2021 +0100
+
+    Removed unary complement tests
+
+[33mcommit 87e4f3b11a450a78531b75ac706f184239d296d2[m
+Merge: 390c228 d586722
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Thu Feb 25 14:21:04 2021 +0100
+
+    Merge branch 'master' of https://github.com/fyankov96/J--
+
+[33mcommit 2d259b85994bf66cfad41689d5c26c86a6ecb8b0[m
+Merge: 6f621d0 d586722
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Feb 25 11:49:55 2021 +0200
+
+    Merge branch 'master' of https://github.com/fyankov96/J--
+
+[33mcommit 6f621d05079cd03f41103d1e4afec6a1e8dee443[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Feb 25 11:49:50 2021 +0200
+
+    Filip update
+
+[33mcommit 390c22842470c94db79920f6d78a4cb93e3b133e[m
+Author: s184213 <s184213@student.dtu.dk>
+Date:   Thu Feb 25 10:41:02 2021 +0100
+
+    Only the unary complement is not implemented
+
+[33mcommit d586722ed291c4d3c531c5badb7f9f3c05e310af[m
+Merge: 4223f87 e4c85a1
+Author: Tobias Thomsen <tobias@debian.tobias_debian>
+Date:   Thu Feb 25 01:37:00 2021 +0100
+
+    operators done missing 5
+
+[33mcommit 4223f878996991634c6f6f799c1a1ad4249ff596[m
+Author: Tobias Thomsen <tobias@debian.tobias_debian>
+Date:   Thu Feb 25 00:04:34 2021 +0100
+
+    implementing the last operations
+
+[33mcommit 8b10565afc122b9dd52738911ec1de80ef7a4d5b[m
+Author: Tobias Thomsen <tobias@debian.tobias_debian>
+Date:   Wed Feb 24 22:35:07 2021 +0100
+
+    != and /= implemented
+
+[33mcommit e4c85a17a6e9222996813f65a35ae96e850393f4[m
+Merge: a5d2bd5 6c682f0
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Feb 24 18:55:29 2021 +0100
+
+    MultiLine Comment Scanning
+
+[33mcommit a5d2bd52fa1f89115409c2b4215b787dad04e5f6[m
+Author: Thomas Tønder <thomas@byskov.name>
+Date:   Wed Feb 24 18:48:31 2021 +0100
+
+    Added MultiLine Comment Scanning
+
+[33mcommit 6c682f0abfcb77624d43433fe1d4ea8b0e46659e[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Wed Feb 24 18:44:33 2021 +0100
+
+    feat: Implement unary plus
+
+[33mcommit 3f596b6c44242f861e98bbcc0df77bdbefb2dc06[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Wed Feb 24 13:05:29 2021 +0100
+
+    feat: shift operators
+
+[33mcommit 12d256146b6ffbe84212db5fb3c3536fb31ffee0[m
+Author: Filip Yankov <47544404+fyankov96@users.noreply.github.com>
+Date:   Thu Feb 18 16:20:23 2021 +0200
+
+    Update Scanner.java
+
+[33mcommit ae8515b754b8e78117600763bb49998db460b24a[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Feb 18 16:18:13 2021 +0200
+
+    Reserved words v2
+
+[33mcommit b9b1e99182522ce78cb525e755ea0ec6a4ac7d6e[m
+Author: Filip Yankov <47544404+fyankov96@users.noreply.github.com>
+Date:   Thu Feb 18 16:14:29 2021 +0200
+
+    Update lexicalgrammar
+
+[33mcommit cc4265793cd8f4440dc92fee51a3ca1ae4a547d8[m
+Author: Filip Yankov <47544404+fyankov96@users.noreply.github.com>
+Date:   Thu Feb 18 16:11:55 2021 +0200
+
+    Update lexicalgrammar
+
+[33mcommit 591647aace2f1e37c50e068c4bafd669c1760e2a[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Feb 18 16:05:36 2021 +0200
+
+    Reserved Words
+
+[33mcommit e3153ed851a1786f1d688abf53aa6d3557a36675[m
+Author: Dario Passarello <dario.passarello@gmail.com>
+Date:   Thu Feb 18 11:52:07 2021 +0100
+
+    feat: add Unsigned right shift
+
+[33mcommit e69388ffbda2e431e0fcf63e492ec6a418adf771[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Feb 11 12:15:42 2021 +0200
+
+    Update 1.0
+
+[33mcommit ed52b3ce4e87c353fb9d787e615a017cd8e8a681[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Thu Feb 11 12:10:51 2021 +0200
+
+    Update
+
+[33mcommit cddf08a88b0a6557d64d5ae0cc4261219cb9a74b[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Fri Feb 5 12:48:26 2021 +0200
+
+    Second
+
+[33mcommit 7aee947b998416018796a4d9907a8f8bfdde8899[m
+Author: fyankov96 <f.yankov96@abv.bg>
+Date:   Fri Feb 5 12:45:18 2021 +0200
+
+    First

@@ -5,16 +5,13 @@ package pass;
 import java.lang.System;
 
 public class ExceptionHandling {
-
+    /*
     public ExceptionHandling() throws NullPointerException {
         throw new NullPointerException();
     }
+    */
 
-    public void Throwing() throws NullPointerException {
-        throw new NullPointerException();
-    }
-
-    public int TryCatch() {
+    public int TryCatch() throws NullPointerException {
         try {
             int x = 42;
             throw new NullPointerException();

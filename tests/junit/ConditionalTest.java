@@ -16,7 +16,7 @@ public class ConditionalTest extends TestCase {
     }
 
     public void testDivide() {
-        this.assertEquals(cond.Conditional(true), 1);
-        this.assertEquals(cond.Conditional(false), 2);
+        this.assertEquals(cond.cond(true), 1);
+        this.assertEquals(cond.cond(false), 2);
     }    
 }

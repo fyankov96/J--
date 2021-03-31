@@ -349,6 +349,96 @@ class JRemainderAssignOp extends JAssignment {
 }
 
 
+class JAndAssignOp extends JAssignment {
+
+    public JAndAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "&=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.BOOLEAN)) {
+            rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+            type = Type.BOOLEAN;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for %=: " + lhs.type());
+        }
+        return this;
+    }
+
+    public void codegen(CLEmitter output) {
+        return;
+    }
+}
+
+class JOrAssignOp extends JAssignment {
+
+    public JOrAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "|=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.BOOLEAN)) {
+            rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+            type = Type.BOOLEAN;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for %=: " + lhs.type());
+        }
+        return this;
+    }
+
+    public void codegen(CLEmitter output) {
+        return;
+    }
+}
+
+class JXOrAssignOp extends JAssignment {
+
+    public JXOrAssignOp(int line, JExpression lhs, JExpression rhs) {
+        super(line, "^=", lhs, rhs);
+    }
+
+    public JExpression analyze(Context context) {
+        if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+        rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.BOOLEAN)) {
+            rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+            type = Type.BOOLEAN;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for %=: " + lhs.type());
+        }
+        return this;
+    }
+
+    public void codegen(CLEmitter output) {
+        return;
+    }
+}
+
 class JShiftLeftAssignOp extends JAssignment {
 
     public JShiftLeftAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -379,45 +469,6 @@ class JShiftLeftAssignOp extends JAssignment {
         ((JLhs) lhs).codegenLoadLhsRvalue(output);
         rhs.codegen(output);
         output.addNoArgInstruction(ISHL);
-        if (!isStatementExpression) {
-            // Generate code to leave the r-value atop stack
-            ((JLhs) lhs).codegenDuplicateRvalue(output);
-        }
-        ((JLhs) lhs).codegenStore(output);
-    }
-
-}
-
-class JXORAssignOp extends JAssignment {
-
-    public JXORAssignOp(int line, JExpression lhs, JExpression rhs) {
-        super(line, "^=", lhs, rhs);
-    }
-
-    public JExpression analyze(Context context) {
-        if (!(lhs instanceof JLhs)) {
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Illegal lhs for assignment");
-            return this;
-        } else {
-            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
-        }
-        rhs = (JExpression) rhs.analyze(context);
-        if (lhs.type().equals(Type.INT)) {
-            rhs.type().mustMatchExpected(line(), Type.INT);
-            type = Type.INT;
-        } else {
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid lhs type for ^=: " + lhs.type());
-        }
-        return this;
-    }
-
-    public void codegen(CLEmitter output) {
-        ((JLhs) lhs).codegenLoadLhsLvalue(output);
-        ((JLhs) lhs).codegenLoadLhsRvalue(output);
-        rhs.codegen(output);
-        output.addNoArgInstruction(IXOR);
         if (!isStatementExpression) {
             // Generate code to leave the r-value atop stack
             ((JLhs) lhs).codegenDuplicateRvalue(output);

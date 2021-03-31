@@ -210,6 +210,7 @@ TOKEN: {
 | <MINUS: "-">
 | <PLUS_ASSIGN: "+=">
 | <STAR: "*">
+| <COND: "?">
 }
 
 // Separators (these could be combined with the reserved words)
@@ -223,6 +224,7 @@ TOKEN: {
 | <SEMI: ";">
 | <COMMA: ",">
 | <DOT: ".">
+| <COLON: ":">
 }
 
 // Identifiers
@@ -1389,6 +1391,37 @@ private JExpression assignmentExpression(): {
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
     { return lhs; }
+}
+
+/**
+ * Parse a ternary expression.
+ * 
+ * <pre>
+ *   ternaryExpression ::= conditionalOrExpression  //level 12
+                        [COND ternaryExpression COLON ternaryExpression]
+ * </pre>
+ * 
+ * @return an AST for a ternary expression.
+ */
+
+private JExpression ternaryExpression(): {
+    int line = 0;
+    JExpression cond = null, trueExp = null, falseExp = null;
+}
+{
+    try {
+        cond = conditionalAndExpression() { line = cond.line(); }
+        [
+        <COND>
+        trueExp = ternaryExpression()
+        <COLON>
+        falseExp = ternaryExpression()
+        ] {return new JTernaryExpression(line, cond, trueExp, falseExp);}
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return cond; }
 }
 
 /**

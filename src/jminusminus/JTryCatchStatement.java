@@ -63,13 +63,15 @@ class JTryCatchStatement extends JStatement {
      */
 
     public JStatement analyze(Context context) {
+        this.context = new LocalContext(context);
         tryBlock.analyze(context);
 
         // For iteration through both the catchblock and parameters
         int listSize = catchParams.size();
-        this.context = new LocalContext(context);
+
 
         for(int i = 0; i < listSize; i++) {
+            
             // Check for different catchparameters like NullPointerException
 
             LocalVariableDefn defn = new LocalVariableDefn(catchParams.get(i).type(), 

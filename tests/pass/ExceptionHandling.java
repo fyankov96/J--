@@ -4,13 +4,13 @@ package pass;
 
 public class ExceptionHandling {
     public ExceptionHandling() throws NullPointerException {
-        throw new NullPointerException();
+        // throw new NullPointerException();
     }
 
     public int tryCatch() throws NullPointerException {
         try {
             int x = 42;
-            throw new NullPointerException();
+            // throw new NullPointerException();
         } catch (NullPointerException e) {
             return 0;
         }

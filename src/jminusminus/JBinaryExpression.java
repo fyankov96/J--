@@ -48,7 +48,7 @@ abstract class JBinaryExpression extends JExpression {
 
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JBinaryExpression line=\"%d\" type=\"%s\" "
-                + "operator=\"%s\"> %s\n", line(), ((type == null) ? "" : type
+                + "operator=\"%s\"> \n", line(), ((type == null) ? "" : type
                 .toString()), Util.escapeSpecialXMLChars(operator));
         p.indentRight();
         p.printf("<Lhs>\n");

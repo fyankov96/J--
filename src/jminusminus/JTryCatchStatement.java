@@ -3,6 +3,8 @@
 package jminusminus;
 
 import static jminusminus.CLConstants.*;
+import java.util.ArrayList;
+
 
 /**
  * The AST node for a try-catch-statement.
@@ -10,14 +12,19 @@ import static jminusminus.CLConstants.*;
 
 class JTryCatchStatement extends JStatement {
 
+    /**
+     * The new context (built in analyze()) represented by this block.
+     */
+    private LocalContext context;
+
     /** The Try-Block */
     private JBlock tryBlock;
 
     /** The Catch expression */
-    private JFormalParameter catchParam;
+    private ArrayList<JFormalParameter> catchParams;
 
     /** The Catch-Block */
-    private JBlock catchBlock;
+    private ArrayList<JBlock> catchBlocks;
 
     /** The Finally-Block */
     private JBlock finallyBlock;
@@ -38,11 +45,11 @@ class JTryCatchStatement extends JStatement {
      *            
      */
 
-    public JTryCatchStatement(int line, JBlock tryBlock, JFormalParameter catchParam, JBlock catchBlock, JBlock finallyBlock) {
+    public JTryCatchStatement(int line, JBlock tryBlock, ArrayList<JFormalParameter> catchParams, ArrayList<JBlock> catchBlocks, JBlock finallyBlock) {
         super(line);
         this.tryBlock = tryBlock;
-        this.catchParam = catchParam;
-        this.catchBlock = catchBlock;
+        this.catchParams = catchParams;
+        this.catchBlocks = catchBlocks;
         this.finallyBlock = finallyBlock;
     }
 
@@ -56,6 +63,27 @@ class JTryCatchStatement extends JStatement {
      */
 
     public JStatement analyze(Context context) {
+        tryBlock.analyze(context);
+
+        // For iteration through both the catchblock and parameters
+        int listSize = catchParams.size();
+        this.context = new LocalContext(context);
+
+        for(int i = 0; i < listSize; i++) {
+            // Check for different catchparameters like NullPointerException
+
+            LocalVariableDefn defn = new LocalVariableDefn(catchParams.get(i).type(), 
+                this.context.nextOffset());
+            defn.initialize();
+            this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), defn);
+            
+            catchBlocks.get(i).analyze(this.context);
+        }
+    
+        if (finallyBlock != null) {
+            this.context = new LocalContext(context);
+            finallyBlock.analyze(context);
+        }
         return null;
     }
 
@@ -86,15 +114,28 @@ class JTryCatchStatement extends JStatement {
         p.indentLeft();
         p.printf("</TryBlock>\n");
         p.printf("<CatchParameter>\n");
-        p.indentRight();
-        catchParam.writeToStdOut(p);
-        p.indentLeft();
+
+        if(this.catchParams != null) {
+            for(JFormalParameter param : this.catchParams) {
+                p.indentRight();
+                param.writeToStdOut(p);
+                p.indentLeft();
+            }
+        }
+
         p.printf("</CatchParameter>\n");
         p.indentRight();
         p.printf("<CatchBlock>\n");
-        p.indentRight();
-        catchBlock.writeToStdOut(p);
-        p.indentLeft();
+
+
+        if(this.catchBlocks != null) {
+            for(JBlock block : this.catchBlocks) {
+                p.indentRight();
+                block.writeToStdOut(p);
+                p.indentLeft();
+            }
+        }
+
         p.printf("</CatchBlock>\n");
         if (finallyBlock != null) {
             p.printf("<FinallyBlock>\n");

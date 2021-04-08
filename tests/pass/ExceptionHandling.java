@@ -11,7 +11,7 @@ public class ExceptionHandling {
     }
     */
 
-    public int TryCatch() throws NullPointerException {
+    public int tryCatch() throws NullPointerException {
         try {
             int x = 42;
             throw new NullPointerException();

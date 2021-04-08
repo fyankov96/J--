@@ -766,13 +766,26 @@ classBody ::=  [SEMI] | {
             return new JWhileStatement(line, test, statement);
         } else if(have(TRY)) {
             JBlock tryBlock = block();
+            
+            ArrayList<JFormalParameter> catchParams = new ArrayList<>();
+            ArrayList<JBlock> catchBlocks = new ArrayList<>();
+
+            while(have(CATCH)) {
+                mustBe(LPAREN);
+                catchParams.add(formalParameter());
+                mustBe(RPAREN);
+                catchBlocks.add(block());
+            }
+            /*
             mustBe(CATCH);
             mustBe(LPAREN);
             JFormalParameter catchParam = formalParameter();
             mustBe(RPAREN);
+           
             JBlock catchBlock = block();
+             */
             JBlock finallyBlock = have(FINALLY) ? block() : null;
-            return new JTryCatchStatement(line, tryBlock, catchParam, catchBlock, finallyBlock);
+            return new JTryCatchStatement(line, tryBlock, catchParams, catchBlocks, finallyBlock);
         } else if (have(THROW)) {
             JExpression expression = expression();
             mustBe(SEMI);

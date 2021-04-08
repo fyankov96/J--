@@ -86,7 +86,7 @@ class JTryCatchStatement extends JStatement {
             this.context = new LocalContext(context);
             finallyBlock.analyze(context);
         }
-        return null;
+        return this;
     }
 
     /**
@@ -126,10 +126,11 @@ class JTryCatchStatement extends JStatement {
         }
 
         p.printf("</CatchParameter>\n");
-        p.printf("<CatchBlock>\n");
 
+        p.printf("<CatchBlocks>\n");
 
         if(this.catchBlocks != null) {
+
             for(JBlock block : this.catchBlocks) {
                 p.indentRight();
                 block.writeToStdOut(p);
@@ -137,7 +138,7 @@ class JTryCatchStatement extends JStatement {
             }
         }
 
-        p.printf("</CatchBlock>\n");
+        p.printf("</CatchBlocks>\n");
         if (finallyBlock != null) {
             p.printf("<FinallyBlock>\n");
             p.indentRight();

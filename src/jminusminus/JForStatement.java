@@ -4,6 +4,7 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The AST node for a for-statement.
@@ -24,10 +25,10 @@ class JForStepStatement extends JForStatement {
 
 
     /** Test expression. */
-    private ArrayList<JStatement> initStatements;
-    private ArrayList<JVariableDeclarator> initDeclarations;
+    private List<JStatement> initStatements;
+    private List<JVariableDeclarator> initDeclarations;
     private JExpression condition;
-    private ArrayList<JStatement> step;
+    private List<JStatement> step;
 
     /**
      * Constructs an AST node for a while-statement given its line number, the
@@ -41,8 +42,8 @@ class JForStepStatement extends JForStatement {
      *            the body.
      */
 
-    public JForStepStatement(int line, ArrayList<JStatement> initStatements, ArrayList<JVariableDeclarator> initDeclarations,  
-                             JExpression condition, ArrayList<JStatement> step, JStatement body) {
+    public JForStepStatement(int line, List<JStatement> initStatements, List<JVariableDeclarator> initDeclarations,  
+                             JExpression condition, List<JStatement> step, JStatement body) {
         super(line, body);
         this.initStatements = initStatements;
         this.initDeclarations = initDeclarations;
@@ -87,7 +88,7 @@ class JForStepStatement extends JForStatement {
      * {@inheritDoc}
      */
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JForStatement line=\"%d\">\n", line());
+        p.printf("<JForStepStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Initialization>\n");
         if(this.initStatements != null) {

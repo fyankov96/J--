@@ -64,7 +64,7 @@ class JTryCatchStatement extends JStatement {
 
     public JStatement analyze(Context context) {
         this.context = new LocalContext(context);
-        tryBlock.analyze(context);
+        tryBlock.analyze(this.context);
 
         // For iteration through both the catchblock and parameters
         int listSize = catchParams.size();

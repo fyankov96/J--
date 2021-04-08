@@ -24,11 +24,20 @@ abstract class JForStatement extends JStatement {
 class JForStepStatement extends JForStatement {
 
 
-    /** Test expression. */
-    private List<JStatement> initStatements;
-    private List<JVariableDeclarator> initDeclarations;
+    /* Variable update statements */
+    private ArrayList<JStatement> initStatements;
+
+    /* Variable declarations */
+    private JVariableDeclaration initDeclarations;
+
+    /* Termination expression */
     private JExpression condition;
-    private List<JStatement> step;
+
+    /* Step updates */
+    private ArrayList<JStatement> stepStmts;
+
+    /* The new context (built in analyze()) for defining variables used in the loop. */
+    private LocalContext context;
 
     /**
      * Constructs an AST node for a while-statement given its line number, the
@@ -36,24 +45,32 @@ class JForStepStatement extends JForStatement {
      * 
      * @param line
      *            line in which the while-statement occurs in the source file.
+     * @param initStatements
+     *            the variable initialization statements
+     * @param initDeclarations
+     *            the variable declarations
      * @param condition
-     *            test expression.
+     *            the termination condition
+     * @param stepStmts
+     *            the step updates
      * @param body
      *            the body.
      */
 
-    public JForStepStatement(int line, List<JStatement> initStatements, List<JVariableDeclarator> initDeclarations,  
-                             JExpression condition, List<JStatement> step, JStatement body) {
+    public JForStepStatement(int line, ArrayList<JStatement> initStatements, JVariableDeclaration initDeclarations,  
+                             JExpression condition, ArrayList<JStatement> stepStmts, JStatement body) {
         super(line, body);
         this.initStatements = initStatements;
         this.initDeclarations = initDeclarations;
         this.condition = condition;
-        this.step = step;
+        this.stepStmts = stepStmts;
     }
 
     /**
-     * Analysis involves analyzing the test, checking its type and analyzing the
-     * body statement.
+     * Analysis involves analyzing the variable assignments or declarations, 
+     * analyzing the termination condition and checking its type,
+     * analyzing each update statement
+     * and finally analyzing the body statement.
      * 
      * @param context
      *            context in which names are resolved.
@@ -61,14 +78,30 @@ class JForStepStatement extends JForStatement {
      */
 
     public JForStepStatement analyze(Context context) {
+        this.context = new LocalContext(context);
 
-        // TODO: Analyze arrayList of JStatement
-         
-        // initialization = (ArrayList<JStatement>) initialization.analyze(context);
-        condition = (JExpression) condition.analyze(context);
-        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
-        // step = (ArrayList<JStatement>) step.analyze(context);
-        body = (JStatement) body.analyze(context);
+        if (initStatements != null){
+            for (JStatement init : initStatements){
+                init.analyze(this.context);
+            }
+        }
+    
+        if(initDeclarations != null) {
+            initDeclarations.analyze(this.context);
+        }
+
+        if(condition != null) {
+            condition = (JExpression) condition.analyze(this.context);
+            condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        }
+
+        if(stepStmts != null) {
+            for (JStatement stmt : stepStmts){
+                stmt.analyze(this.context);
+            }
+        }
+
+        body = (JStatement) body.analyze(this.context);
         return this;
     }
 
@@ -99,11 +132,9 @@ class JForStepStatement extends JForStatement {
             }
         }
         if(this.initDeclarations != null) {
-            for(JVariableDeclarator j : this.initDeclarations) {
-                p.indentRight();
-                j.writeToStdOut(p);
-                p.indentLeft();
-            }
+            p.indentRight();
+            this.initDeclarations.writeToStdOut(p);
+            p.indentLeft();
         } 
         p.printf("</Initialization>\n");
         p.printf("<Condition>\n");
@@ -114,8 +145,8 @@ class JForStepStatement extends JForStatement {
         p.indentLeft();
         p.printf("</Condition>\n");
         p.printf("<Step>\n");
-        if(this.step != null) {
-            for(JStatement j : this.step) {
+        if(this.stepStmts != null) {
+            for(JStatement j : this.stepStmts) {
                 p.indentRight();
                 j.writeToStdOut(p);
                 p.indentLeft();
@@ -136,31 +167,39 @@ class JForStepStatement extends JForStatement {
 class JForEachStatement extends JForStatement {
 
 
-    /** Test expression. */
-    private JVariableDeclarator declaration;
+    /* Element declaration */
+    private JVariableDeclaration declaration;
+
+    /* Element Iterable */
     private JExpression iterable;
 
+    /* The new context (built in analyze()) for defining variables used in the loop. */
+    private LocalContext context;
+
     /**
-     * Constructs an AST node for a while-statement given its line number, the
-     * test expression, and the body.
+     * Constructs an AST node for a for-each-statement given its line number, the
+     * element declaration and iterable.
      * 
      * @param line
      *            line in which the while-statement occurs in the source file.
-     * @param condition
-     *            test expression.
+     * @param declaration
+     *            the element declaration
+     * @param iterable
+     *            the iterable
      * @param body
      *            the body.
      */
 
-    public JForEachStatement(int line, JVariableDeclarator declaration, JExpression iterable, JStatement body) {
+    public JForEachStatement(int line, JVariableDeclaration declaration, JExpression iterable, JStatement body) {
         super(line, body);
         this.declaration = declaration;
         this.iterable = iterable;
     }
 
     /**
-     * Analysis involves analyzing the test, checking its type and analyzing the
-     * body statement.
+     * Analysis involves analyzing the declaration and the iterable.
+     * Checking that the iterable is an array of the same components as the declaration
+     * and analyzing the body statement.
      * 
      * @param context
      *            context in which names are resolved.
@@ -168,10 +207,22 @@ class JForEachStatement extends JForStatement {
      */
 
     public JForEachStatement analyze(Context context) {
-        declaration = (JVariableDeclarator) declaration.analyze(context);
-        iterable = (JExpression) iterable.analyze(context);
-        //TODO (how to check that it is an iterable?) iterable.type().mustMatchExpected(line(), );
-        body = (JStatement) body.analyze(context);
+        this.context = new LocalContext(context);
+
+        declaration = (JVariableDeclaration) declaration.analyze(this.context);
+        iterable = (JExpression) iterable.analyze(this.context);
+
+        if (!(iterable.type().isArray())) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                "Attempting to iterate over a non-array type");
+        }
+
+        if(declaration.decls().get(0).type() != iterable.type().componentType()){
+            JAST.compilationUnit.reportSemanticError(line(),
+                "Using " + declaration.decls().get(0).type() + " type to iterate over " + iterable.type().componentType() + " array");
+        }
+
+        body = (JStatement) body.analyze(this.context);
         return this;
     }
 
@@ -194,16 +245,15 @@ class JForEachStatement extends JForStatement {
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JForEachStatement line=\"%d\">\n", line());
         p.indentRight();
-        p.printf("<Declaration>\n");
-        p.indentRight();
         declaration.writeToStdOut(p);
         p.indentLeft();
-        p.printf("</Declaration>\n");
+        p.indentRight();
         p.printf("<Iterable>\n");
         p.indentRight();
         iterable.writeToStdOut(p);
         p.indentLeft();
         p.printf("</Iterable>\n");
+    
         p.printf("<Body>\n");
         p.indentRight();
         body.writeToStdOut(p);

@@ -19,5 +19,4 @@ abstract class JStatement extends JAST {
     protected JStatement(int line) {
         super(line);
     }
-
 }

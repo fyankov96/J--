@@ -551,12 +551,13 @@ public class Parser {
      * 
      * <pre>
 
-classBody ::=  [SEMI] | {
-            SEMI
-            | modifiers memberDecl
-            | STATIC block 
-            | block
-            } 
+        classBody ::=  [SEMI] |
+                        {
+                        SEMI
+                        | modifiers memberDecl
+                        | STATIC block 
+                        | block
+                        } 
             
      * </pre>
      * 
@@ -570,22 +571,23 @@ classBody ::=  [SEMI] | {
             scanner.errorHasOccured();
 
             if(have(SEMI)) {
-                //DO nothing
+                //Do nothing
             }
             else if(see(STATIC)) {
                 scanner.recordPosition();
-                boolean hasStatic = have(STATIC);
+                boolean staticInitBlock = have(STATIC);
+                staticInitBlock &= see(LCURLY);
                 scanner.returnToPosition();
-                if(hasStatic) {
+                if(staticInitBlock) {
                     have(STATIC);
-                    SIB.add(block(true));
+                    SIB.add(block(true, true));
                 } else {
                     members.add(memberDecl(modifiers()));
                 }
             } else if(seeModifier() || seeBasicType() || seeReferenceType() || see(VOID)){
                 members.add(memberDecl(modifiers()));
             } else if(seeBlock()) {
-                IIB.add(block());
+                IIB.add(block(false, true));
             }
             else {
                 error = true;
@@ -596,7 +598,6 @@ classBody ::=  [SEMI] | {
             reportParserError("classBody sought where %s found", scanner.token()
             .image());
         }
-
     }
 
 
@@ -689,7 +690,7 @@ classBody ::=  [SEMI] | {
      */
 
     private JBlock block() {
-        return block(false);
+        return block(false, false);
     }
 
     /**
@@ -702,7 +703,7 @@ classBody ::=  [SEMI] | {
      * @return an AST for a block.
      */
 
-    private JBlock block(boolean isStatic) {
+    private JBlock block(boolean isStatic, boolean isInitBlock) {
         int line = scanner.token().line();
         ArrayList<JStatement> statements = new ArrayList<JStatement>();
         mustBe(LCURLY);
@@ -710,7 +711,7 @@ classBody ::=  [SEMI] | {
             statements.add(blockStatement());
         }
         mustBe(RCURLY);
-        return new JBlock(line, statements, isStatic);
+        return new JBlock(line, statements, isStatic, isInitBlock);
     }
 
     /**
@@ -810,8 +811,8 @@ classBody ::=  [SEMI] | {
     }
 
     /**
-     *  forExpression ::= LPAREN [forInit] SEMI [expression] SEMI [forUpdate] RPAREN statement
-                | LPAREN type variableDeclarator COL expression RPAREN statement
+     *  forExpression ::= LPAREN [JStatement {COMMA JStatement} | JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}] RPAREN statement
+                | LPAREN type JVariableDeclaration COL expression RPAREN statement
      * @return A JForStatement
      */
     private JForStatement forStatement() {
@@ -819,36 +820,51 @@ classBody ::=  [SEMI] | {
         mustBe(LPAREN);
 
         //For Step
-        ArrayList<JStatement> initExpr = new ArrayList<>();
-        ArrayList<JVariableDeclarator> initDecl  = new ArrayList<>();
-        ArrayList<JStatement> update  = new ArrayList<>();
+        ArrayList<JStatement> initStmts = null;
+
+        ArrayList<JVariableDeclarator> varDeclarators = new ArrayList<JVariableDeclarator>();
+        JVariableDeclaration varDecl = null;
+
+        ArrayList<JStatement> updateStmts = null;
+
         //For Each
         Type typeFound;
         JVariableDeclarator decl = null;
+
         //Common
         JExpression cond = null;
         JStatement body = null;
-
-
-
+        
         boolean isForEach = false;
         if(seeBasicType() || seeReferenceType()) {
             scanner.recordPosition();
             typeFound = type();
-            variableDeclarator(typeFound);
-            if(have(COL)) {
-                isForEach = true;
+            if(see(IDENTIFIER)) {
+                variableDeclarator(typeFound);
+                if(have(COL)) {
+                    isForEach = true;
+                }
             }
             scanner.returnToPosition();
         }
+             
         if(isForEach) {
             typeFound = type();
-            decl = variableDeclarator(typeFound);
+            varDeclarators = variableDeclarators(typeFound);
+            varDecl = new JVariableDeclaration(line, null, varDeclarators);
             mustBe(COL);
             cond = expression();
         } else {
             if(!see(SEMI)) {
-                forInit(initExpr, initDecl);
+                if (seeReferenceType()) {
+                    initStmts = new ArrayList<JStatement>();
+                    do {
+                        initStmts.add(statementExpression());
+                    } while (have(COMMA));
+                } else if(seeBasicType()){
+                    varDeclarators = variableDeclarators(type());
+                    varDecl = new JVariableDeclaration(line, null, varDeclarators);
+                }
             }
             mustBe(SEMI);
             if(!see(SEMI)) {
@@ -856,23 +872,22 @@ classBody ::=  [SEMI] | {
             }
             mustBe(SEMI);
             if(!see(RPAREN)) {
-                update = forUpdate();
+                updateStmts = forUpdate();
             }
         }
         mustBe(RPAREN);
         body = statement();
 
         if(isForEach) {
-            return new JForEachStatement(line, decl, cond, body);
+            return new JForEachStatement(line, varDecl, cond, body);
         } else {
-            return new JForStepStatement(line, initExpr, initDecl, cond, update, body);
-
+            return new JForStepStatement(line, initStmts, varDecl, cond, updateStmts, body);
         }
     }
 
     /**
      * forUpdate ::= statementExpression {, statementExpression}
-     * @return A JForUpdateStatement
+     * @return An ArrayList of JStatementExpressions
      */
     private ArrayList<JStatement> forUpdate() {
         ArrayList<JStatement> update = new ArrayList<JStatement>();
@@ -881,23 +896,6 @@ classBody ::=  [SEMI] | {
         } while (have(COMMA));
         return update;
     }
-
-     /**
-     * forInit ::= forUpdate
-     *             | type variableDeclarators
-     * @return A JForInitStatement
-     */
-    private void forInit(ArrayList<JStatement> initExpr, ArrayList<JVariableDeclarator> initDecl) {
-        // Type variableDeclarators
-        if (seeBasicType() || seeReferenceType()) {
-           initDecl = variableDeclarators(type());
-           initExpr = new ArrayList<JStatement>();
-        } else {
-            initDecl = new ArrayList<JVariableDeclarator>();
-            initExpr = forUpdate();
-        }
-    }
-
 
     /**
      * Parse formal parameters.

@@ -201,8 +201,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // Get the Class rep for the (partial) class and make it
-        // the
-        // representation for this type
+        // the representation for this type
         Type id = this.context.lookupType(name);
         if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
             id.setClassRep(partial.toClass());
@@ -233,6 +232,16 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                     instanceFieldInitializations.add(fieldDecl);
                 }
             }
+        }
+
+        // Analyze the static initialization blocks
+        for (JBlock sib : staticInitializationBlocks) {
+            sib.analyze(context);
+        }
+        
+        // Analyze the instance initialization blocks
+        for (JBlock iib : instanceInitializationBlocks) {
+            iib.analyze(context);
         }
 
         // Finally, ensure that a non-abstract class has

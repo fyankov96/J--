@@ -206,6 +206,7 @@ TOKEN: {
 | <ASSIGN: "=">
 | <DEC: "--">
 | <EQUAL: "==">
+| <NOT_EQUAL: "!=">
 | <GT: ">">
 | <LT: "<">
 | <INC: "++">
@@ -233,8 +234,8 @@ TOKEN: {
 | <AND_ASSIGN: "&=">
 | <OR_ASSIGN: "|=">
 | <XOR_ASSIGN: "^=">
-| <USHR_ASSIGN: ">>>=">
 | <SHR_ASSIGN: ">>=">
+| <USHR_ASSIGN: ">>>=">
 | <SHL_ASSIGN: "<<=">
 | <NOT_EQUALS: "!=">
 }
@@ -1387,7 +1388,8 @@ private Type basicType(): {
     try {
         <BOOLEAN> { type = Type.BOOLEAN; } |
         <CHAR> { type = Type.CHAR; } |
-        <INT> { type = Type.INT; }
+        <INT> { type = Type.INT; } | 
+        <DOUBLE> {type = Type.DOUBLE; }
     }
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
@@ -1504,7 +1506,7 @@ private JExpression expression(): {
  *           [( ASSIGN       // must be valid lhs
  *            | PLUS_ASSIGN | MINUS_ASSIGN
  *            | MULT_ASSIGN | DIV_ASSIGN | REM_ASSIGN
- *            | AND_ASSIGN | OR_ASSIGN | XOR_ASSIGN | SHL_ASSIGN | SHR_ASSIGN | USHR_ASSIGN)
+ *            | AND_ASSIGN | NOT_ASSIGN | OR_ASSIGN | XOR_ASSIGN | SHL_ASSIGN | SHR_ASSIGN | USHR_ASSIGN)
  *            assignmentExpression]
  * </pre>
  * 
@@ -1672,7 +1674,7 @@ private JExpression conditionalAndExpression(): {
  * 
  * <pre>
  *   equalityExpression ::= relationalExpression         // level 6
- *                            {EQUAL relationalExpression}
+ *                            {EQUAL | NOT_EQUAL relationalExpression}
  * </pre>
  * 
  * @return an AST for an equalityExpression.
@@ -1688,7 +1690,11 @@ private JExpression equalityExpression(): {
         (
             <EQUAL>
             rhs = relationalExpression()
-            { lhs = new JEqualOp(line, lhs, rhs); }
+            { lhs = new JEqualOp(line, lhs, rhs); } | 
+
+            <NOT_EQUAL>
+            rhs = relationalExpression()
+            { lhs = new JNotEqualOp(line, lhs, rhs); }
         )*
     }
     catch (ParseException e) {

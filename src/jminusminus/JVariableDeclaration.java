@@ -51,6 +51,16 @@ class JVariableDeclaration extends JStatement {
     public ArrayList<String> mods() {
         return mods;
     }
+    
+    /**
+     * Returns the list of declarators.
+     * 
+     * @return list of modifiers.
+     */
+
+    public ArrayList<JVariableDeclarator> decls() {
+        return decls;
+    }
 
     /**
      * Declares the variable(s). Initializations are rewritten as assignment

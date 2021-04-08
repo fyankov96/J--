@@ -2,14 +2,10 @@
 
 package pass;
 
-import java.lang.System;
-
 public class ExceptionHandling {
-    /*
     public ExceptionHandling() throws NullPointerException {
         throw new NullPointerException();
     }
-    */
 
     public int tryCatch() throws NullPointerException {
         try {

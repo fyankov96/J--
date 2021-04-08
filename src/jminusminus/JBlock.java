@@ -20,8 +20,16 @@ class JBlock extends JStatement {
      */
     private LocalContext context;
 
+    /**
+     * A flag for detecting whether the block is static
+     */
+    private boolean isStatic = false;
 
-    private static boolean isStatic;
+    /**
+     * A flag for detecting whether the block is an initializaion block
+     */
+    private boolean isInitBlock = false;
+
 
     /**
      * Constructs an AST node for a block given its line number, and the list of
@@ -36,13 +44,13 @@ class JBlock extends JStatement {
     public JBlock(int line, ArrayList<JStatement> statements) {
         super(line);
         this.statements = statements;
-        this.isStatic = false;
     }
 
-    public JBlock(int line, ArrayList<JStatement> statements, boolean isStatic) {
+    public JBlock(int line, ArrayList<JStatement> statements, boolean isStatic, boolean isInitBlock) {
         super(line);
         this.statements = statements;
         this.isStatic = isStatic;
+        this.isInitBlock = isInitBlock;
     }
 
     /**
@@ -65,14 +73,21 @@ class JBlock extends JStatement {
      */
 
     public JBlock analyze(Context context) {
-        // { ... } defines a new level of scope.
-        this.context = new LocalContext(context);
-
-        for (int i = 0; i < statements.size(); i++) {
-            statements.set(i, (JStatement) statements.get(i).analyze(
-                    this.context));
+        // { ... } defines a new level of scope unless we are talking about an initialization block.
+        // 
+        if (isInitBlock) {
+            for (int i = 0; i < statements.size(); i++) {
+                statements.set(i, (JStatement) statements.get(i).analyze(context));
+            }
+            return this;
+        } else {
+            this.context = new LocalContext(context);
+        
+            for (int i = 0; i < statements.size(); i++) {
+                statements.set(i, (JStatement) statements.get(i).analyze(this.context));
+            }
+            return this;
         }
-        return this;
     }
 
     /**

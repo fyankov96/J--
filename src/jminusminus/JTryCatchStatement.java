@@ -90,7 +90,6 @@ class JTryCatchStatement extends JStatement {
         catchParam.writeToStdOut(p);
         p.indentLeft();
         p.printf("</CatchParameter>\n");
-        p.indentRight();
         p.printf("<CatchBlock>\n");
         p.indentRight();
         catchBlock.writeToStdOut(p);
@@ -105,6 +104,7 @@ class JTryCatchStatement extends JStatement {
         }
         p.indentLeft();
         p.printf("</JTryCatchStatement>\n");
+        
     }
 
 }

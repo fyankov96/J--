@@ -1,7 +1,6 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.DivisionAssignment;
 import pass.SubtractionAssignment;
 
 public class SubtractionAssignmentTest extends TestCase {

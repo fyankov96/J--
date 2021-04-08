@@ -990,7 +990,7 @@ private JStatement statement(): {
 private JStatement forStatement(): {
     int line = 0;
     List<JStatement> initStatements = new ArrayList<JStatement>();
-    List<JVariableDeclarator> initDeclarations = new ArrayList<JVariableDeclarator>();
+    JVariableDeclaration initDeclarations = null;
     JExpression condition = null; 
     List<JStatement> step = null;
     boolean isStep = false;

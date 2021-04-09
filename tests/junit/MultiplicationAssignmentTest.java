@@ -19,9 +19,9 @@ public class MultiplicationAssignmentTest extends TestCase {
         this.assertEquals(multiplicationAssignment.multiplyAssign(0, 42), 0);
         this.assertEquals(multiplicationAssignment.multiplyAssign(42, 1), 42);
         this.assertEquals(multiplicationAssignment.multiplyAssign(127, 3), 381);
-        this.assertEquals(multiplicationAssignment.multiplyAssign(5.5, 10), 55);
-        this.assertEquals(multiplicationAssignment.multiplyAssign(20, 3.3), 66);
-        this.assertEquals(multiplicationAssignment.multiplyAssign(2.2, 3.3), 6.6);
+        this.assertEquals(multiplicationAssignment.multiplyAssignDouble(5.5, 10), 55.0);
+        this.assertEquals(multiplicationAssignment.multiplyAssignDouble(20, 3.3), 66.0);
+        this.assertEquals(multiplicationAssignment.multiplyAssignDouble(2.2, 3.3), 7.26);
     }
 
 }

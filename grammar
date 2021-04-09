@@ -13,6 +13,7 @@ modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
 
 classDeclaration ::= CLASS IDENTIFIER 
                        [EXTENDS qualifiedIdentifier] 
+                       [IMPLEMENTS qualifiedIdentifier {, qualifiedIdentifier}]
                        classBody
 
 classBody ::= LCURLY {

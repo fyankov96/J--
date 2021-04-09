@@ -16,7 +16,7 @@ public class AndAssignTest extends TestCase {
     }
 
     public void testOrAssign() {
-        this.assertEquals(andAss.andAssign(true), true);
-        this.assertEquals(andAss.andAssign(false), false);
+        this.assertEquals(andAss.andAssign(true, true), true);
+        this.assertEquals(andAss.andAssign(false, true), false);
     }    
 }

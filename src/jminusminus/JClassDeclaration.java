@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.List;
 import static jminusminus.CLConstants.*;
 
 /**
@@ -27,6 +28,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     /** Super class type. */
     private Type superType;
+
+    private List<Type> interfaceSuperTypes;
 
     /** This class type. */
     private Type thisType;
@@ -80,12 +83,14 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        this.implement = new ArrayList<TypeName>();
+        this.extend = new ArrayList<TypeName>();
         staticInitializationBlocks = new ArrayList<JBlock>();
         instanceInitializationBlocks = new ArrayList<JBlock>();
     }
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
-    Type superType, ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+    Type superType,  ArrayList<TypeName> extend, ArrayList<TypeName> implement, ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
         super(line);
         this.mods = mods;
         this.name = name;
@@ -94,6 +99,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        this.implement = implement;
+        this.extend = extend;
         staticInitializationBlocks = SIB;
         instanceInitializationBlocks = IIB;
     }

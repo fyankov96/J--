@@ -514,7 +514,8 @@ public class Parser {
      * 
      * <pre>
      *   classDeclaration ::= CLASS IDENTIFIER 
-     *                        [EXTENDS qualifiedIdentifier] 
+     *                        [EXTENDS qualifiedIdentifier]
+     *                        [IMPLEMENTS qualifiedIdentifier {, qualifiedIdentifier}]
      *                        LCURLY classBody RCURLY
      * </pre>
      * 
@@ -527,15 +528,29 @@ public class Parser {
      */
 
     private JClassDeclaration classDeclaration(ArrayList<String> mods) {
+        ArrayList<TypeName> extend = new ArrayList<>();
+        ArrayList<TypeName> implement = new ArrayList<>();
+
         int line = scanner.token().line();
         mustBe(CLASS);
         mustBe(IDENTIFIER);
         String name = scanner.previousToken().image();
         Type superClass;
         if (have(EXTENDS)) {
-            superClass = qualifiedIdentifier();
+            TypeName ext = qualifiedIdentifier();
+            extend.add(ext);
+            superClass = ext; 
         } else {
             superClass = Type.OBJECT;
+        }
+        if (have(IMPLEMENTS)) {
+            TypeName impl = qualifiedIdentifier();
+            implement.add(impl);
+            while(!see(LCURLY) && !see(EOF)) {
+                mustBe(COMMA);
+                impl = qualifiedIdentifier();
+                implement.add(impl);
+            }
         }
         mustBe(LCURLY);
         ArrayList<JMember> members = new ArrayList<>();
@@ -543,7 +558,7 @@ public class Parser {
         ArrayList<JBlock> SIB = new ArrayList<>();
         consumeClassBody(members, SIB, IIB);
         mustBe(RCURLY);
-        return new JClassDeclaration(line, mods, name, superClass, members, SIB, IIB);
+        return new JClassDeclaration(line, mods, name, superClass, extend, implement, members, SIB, IIB);
     }
 
     /**
@@ -1187,7 +1202,9 @@ public class Parser {
                                         || expr instanceof JSuperConstruction
                                         || expr instanceof JThisConstruction 
                                         || expr instanceof JNewOp
-                                        || expr instanceof JNewArrayOp) {
+                                        || expr instanceof JAndAssignOp 
+                                        || expr instanceof JOrAssignOp
+                                        || expr instanceof JNewArrayOp ) {
             // So as not to save on stack
             expr.isStatementExpression = true;
         } else {
@@ -1250,7 +1267,11 @@ public class Parser {
             return new JShiftLeftAssignOp(line,lhs,assignmentExpression());
         } else if (have (XOR_ASSIGN)){
             return new JXOrAssignOp(line,lhs,assignmentExpression());
-        }else{
+        } else if (have (OR_ASSIGN)){
+            return new JOrAssignOp(line,lhs,assignmentExpression());
+        } else if (have (AND_ASSIGN)){
+            return new JAndAssignOp(line,lhs,assignmentExpression());
+        } else {
             return lhs;
         }
     }

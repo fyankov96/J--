@@ -1,8 +1,13 @@
 package pass;
 
 public class AndAssign {
-    public boolean andAssign(boolean a){
-        boolean b = false;
+    /**
+     * Assigns a to b and returns the value of b
+     * @param a 
+     * @param b
+     * @return
+     */
+    public boolean andAssign(boolean a, boolean b){
         b &= a;
         return b;
     }    

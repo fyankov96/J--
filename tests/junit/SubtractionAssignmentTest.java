@@ -19,6 +19,10 @@ public class SubtractionAssignmentTest extends TestCase {
         this.assertEquals(subtractionAssignment.subtractAssign(0, 42), -42);
         this.assertEquals(subtractionAssignment.subtractAssign(42, 1), 41);
         this.assertEquals(subtractionAssignment.subtractAssign(127, 3), 124);
+        this.assertEquals(subtractionAssignment.subtractAssign(5.5, 3), 2.5);
+        this.assertEquals(subtractionAssignment.subtractAssign(10, 4.5), 5.5);
+        this.assertEquals(subtractionAssignment.subtractAssign(5.5, 5.5), 0);
+
     }
-    
+
 }

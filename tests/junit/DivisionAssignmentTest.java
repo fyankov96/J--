@@ -19,6 +19,9 @@ public class DivisionAssignmentTest extends TestCase {
         this.assertEquals(divisionAssignment.divideAssign(0, 42), 0);
         this.assertEquals(divisionAssignment.divideAssign(42, 1), 42);
         this.assertEquals(divisionAssignment.divideAssign(127, 3), 42);
+        this.assertEquals(divisionAssignment.divideAssign(44.4, 2), 22.2);
+        this.assertEquals(divisionAssignment.divideAssign(10, 2.5), 4);
+
     }
-    
+
 }

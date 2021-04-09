@@ -237,7 +237,6 @@ TOKEN: {
 | <SHR_ASSIGN: ">>=">
 | <USHR_ASSIGN: ">>>=">
 | <SHL_ASSIGN: "<<=">
-| <NOT_EQUALS: "!=">
 }
 
 // Separators (these could be combined with the reserved words)

@@ -28,13 +28,12 @@ public class JavaCCParserTestCustom extends TestCase {
     public void testPass() {
         File passTestsDir = new File(System.getProperty("PASS_TESTS_DIR"));
         File[] files = passTestsDir.listFiles();
-        String toTest = "RightShiftAssignment.java";
+        String toTest = "MultiLineComment.java";
         boolean errorHasOccurred = false;
         for (int i = 0; files != null && i < files.length; i++) {
             if (files[i].toString().endsWith(toTest)) {
                 String[] args = null;
-                System.out.printf("Running javacc parser on %s ...\n\n",
-                        files[i].toString());
+                System.out.printf("Running javacc parser on %s ...\n\n", files[i].toString());
                 args = new String[] { "-p", files[i].toString() };
                 JavaCCMain.main(args);
                 System.out.printf("\n\n");
@@ -51,8 +50,7 @@ public class JavaCCParserTestCustom extends TestCase {
     /**
      * Entry point.
      * 
-     * @param args
-     *            command-line arguments.
+     * @param args command-line arguments.
      */
 
     public static void main(String[] args) {

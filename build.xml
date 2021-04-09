@@ -476,7 +476,7 @@
         <echo message="Running compiler on j-- programs up to analysis..."/>
         <javac srcdir="${basedir}/tests/"
                destdir="${CLASS_DIR}"
-               includes="junit/DivisionAssignmentTest.java"
+               includes="junit/RemainderAssignmentTest.java"
                includeantruntime="false"
                debug="on">
             <!-- Uncomment the following to see compiler warnings. -->
@@ -491,7 +491,7 @@
                 <pathelement location="${LIB_DIR}/junit.jar" />
                 <pathelement location="${basedir}/${CLASS_DIR}" />
             </classpath>
-            <test name="junit.DivisionAssignmentTest"
+            <test name="junit.RemainderAssignmentTest"
                   haltonfailure="no">
                 <formatter type="plain" usefile="false"/>
             </test>

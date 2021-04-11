@@ -528,17 +528,16 @@ public class Parser {
      */
 
     private JClassDeclaration classDeclaration(ArrayList<String> mods) {
-        ArrayList<TypeName> extend = new ArrayList<>();
-        ArrayList<TypeName> implement = new ArrayList<>();
-
+        ArrayList<Type> implement = new ArrayList<>();
+        Type superClass;
+        
         int line = scanner.token().line();
         mustBe(CLASS);
         mustBe(IDENTIFIER);
         String name = scanner.previousToken().image();
-        Type superClass;
+
         if (have(EXTENDS)) {
             TypeName ext = qualifiedIdentifier();
-            extend.add(ext);
             superClass = ext; 
         } else {
             superClass = Type.OBJECT;
@@ -558,7 +557,7 @@ public class Parser {
         ArrayList<JBlock> SIB = new ArrayList<>();
         consumeClassBody(members, SIB, IIB);
         mustBe(RCURLY);
-        return new JClassDeclaration(line, mods, name, superClass, extend, implement, members, SIB, IIB);
+        return new JClassDeclaration(line, mods, name, superClass, implement, members, SIB, IIB);
     }
 
     /**

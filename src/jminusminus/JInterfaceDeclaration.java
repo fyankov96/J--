@@ -117,7 +117,13 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
         // Resolve superclass
         superType = superType.resolve(this.context);
 
-        // Next step
+        // Create the (partial) class
+        CLEmitter partial = new CLEmitter(false);
+
+                // Add the class header to the partial class
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        : JAST.compilationUnit.packageName() + "/" + name;
+        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
     }
 

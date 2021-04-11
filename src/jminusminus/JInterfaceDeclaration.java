@@ -184,6 +184,8 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
     @Override
     public void preAnalyze(Context context, CLEmitter partial) {
 
+        // TO DO
+
     }
 
     public void writeToStdOut(PrettyPrinter p) {

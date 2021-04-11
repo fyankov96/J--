@@ -11,7 +11,12 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
 
     /** Interface name */
     private String name;
+
+    /** Interface superType */
     private Type superType;
+
+    /** Static (class) fields of this class. */
+    private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
     /** Interface block */
     private ArrayList<JMember> interfaceBlock;
@@ -87,23 +92,53 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
      */
 
     public void declareThisType(Context context) {
+        String packageName = JAST.compilationUnit.packageName();
 
+        String qualifiedName = packageName.equals("") ? name : packageName.replace(".", "/") + "/" + name;
+
+        CLEmitter partial = new CLEmitter(false);
+
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false); // Object for superClass, just for
+                                                                                   // now
+        thisType = Type.typeFor(partial.toClass());
+        context.addType(line, thisType);
     }
 
     /**
-     * Pre-analyze the members of this declaration in the parent context.
-     * Pre-analysis extends to the member headers (including method headers) but not
-     * into the bodies.
      * 
      * @param context the parent (compilation unit) context.
      */
 
+    @Override
     public void preAnalyze(Context context) {
+        // Construct a class context
+        this.context = new ClassContext(this, context);
+
+        // Resolve superclass
+        superType = superType.resolve(this.context);
 
     }
 
     @Override
     public JAST analyze(Context context) {
+        // Analyze all members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).analyze(this.context);
+        }
+
+        // Copy declared fields for purposes of initialization.
+        for (JMember member : interfaceBlock) {
+            if (member instanceof JFieldDeclaration) {
+                JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
+                if (fieldDecl.mods().contains("static")) {
+                    staticFieldInitializations.add(fieldDecl);
+                } else {
+                    JAST.compilationUnit.reportSemanticError(line(),
+                            "Field declaration is not a static member, interfaces may only have static field declarations",
+                            member.toString());
+                }
+            }
+        }
         return this;
     }
 

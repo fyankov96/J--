@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
 
@@ -20,6 +21,9 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
 
     /** Interface block */
     private ArrayList<JMember> interfaceBlock;
+
+    /** Interface super type */
+    private ArrayList<Type> interfaceSuperTypes;
 
     /** super interface */
     private ArrayList<TypeName> extend;
@@ -98,8 +102,11 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
 
         CLEmitter partial = new CLEmitter(false);
 
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false); // Object for superClass, just for
-                                                                                   // now
+        ArrayList<String> interfaceJVMNames = interfaceSuperTypes.stream()
+                .map(t -> packageName.replace(".", "/") + "/" + t.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
+
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
     }
@@ -114,17 +121,37 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
         // Construct a class context
         this.context = new ClassContext(this, context);
 
-        // Resolve superclass
-        superType = superType.resolve(this.context);
+        // Resolve superinterfaces
+        interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
 
         // Create the (partial) class
         CLEmitter partial = new CLEmitter(false);
 
-                // Add the class header to the partial class
+        // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
-        : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+                : JAST.compilationUnit.packageName() + "/" + name;
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
 
+        // Pre-analyze the members
+        for (JMember member : interfaceBlock) {
+            if (!(member instanceof JMethodDeclaration || member instanceof JFieldDeclaration)) {
+                JAST.compilationUnit.reportSemanticError(line(), "Member %s is not a valid interface member",
+                        member.toString());
+            }
+
+            member.preAnalyze(this.context, partial);
+        }
+
+        // Get the Class rep for the (partial) class and make it
+        // the representation for this type
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(partial.toClass());
+        }
     }
 
     @Override

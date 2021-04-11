@@ -32,7 +32,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Super class type. */
     private Type superType;
 
+    /** Interface super type */
     private List<Type> interfaceSuperTypes;
+
+    /** Class for implements */
+    private ArrayList<TypeName> implement;
 
     /** This class type. */
     private Type thisType;
@@ -49,10 +53,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Static (class) fields of this class. */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
-    /** Static initialization block  */
+    /** Static initialization block */
     private ArrayList<JBlock> staticInitializationBlocks;
 
-    /** Instance initialization block  */
+    /** Instance initialization block */
     private ArrayList<JBlock> instanceInitializationBlocks;
 
     /**
@@ -75,7 +79,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.mods = mods;
         this.name = name;
         this.superType = superType;
-        this.interfaceSuperTypes = new ArrayList<TypeName>();
+        this.interfaceSuperTypes = new ArrayList<Type>();
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -84,8 +88,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         instanceInitializationBlocks = new ArrayList<JBlock>();
     }
 
-    public JClassDeclaration(int line, ArrayList<String> mods, String name,
-    Type superType, ArrayList<Type> implement, ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+    public JClassDeclaration(int line, ArrayList<String> mods, String name, Type superType, ArrayList<Type> implement,
+            ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
         super(line);
         this.mods = mods;
         this.name = name;
@@ -171,8 +175,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Resolve superclass
         superType = superType.resolve(this.context);
 
-        //Resolve superinterfaces
-        interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context)).collect(Collectors.toList());
+        // Resolve superinterfaces
+        interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context))
+                .collect(Collectors.toList());
 
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
@@ -184,8 +189,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Create the (partial) class
         CLEmitter partial = new CLEmitter(false);
-        
-        ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName()).collect(Collectors.toList());
+
+        ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
 
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
@@ -244,7 +250,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         for (JBlock sib : staticInitializationBlocks) {
             sib.analyze(context);
         }
-        
+
         // Analyze the instance initialization blocks
         for (JBlock iib : instanceInitializationBlocks) {
             iib.analyze(context);

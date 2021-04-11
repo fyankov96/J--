@@ -5,7 +5,7 @@ package jminusminus;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
+class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     /** Interface modifiers. */
     private ArrayList<String> mods;
@@ -181,13 +181,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
 
     }
 
-    @Override
-    public void preAnalyze(Context context, CLEmitter partial) {
-
-        // TO DO
-
-    }
-
+    
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\">\n", line(), name);
         p.indentRight();

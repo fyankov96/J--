@@ -430,7 +430,7 @@ public class Parser {
      * Parse a type declaration.
      * 
      * <pre>
-     *   typeDeclaration ::= modifiers classDeclaration
+     *   typeDeclaration ::= modifiers (classDeclaration | interfaceDeclaration)
      * </pre>
      * 
      * @return an AST for a typeDeclaration.
@@ -438,7 +438,15 @@ public class Parser {
 
     private JAST typeDeclaration() {
         ArrayList<String> mods = modifiers();
-        return classDeclaration(mods);
+        JAST decl = null;
+        if(see(CLASS)) {
+            decl = classDeclaration(mods);
+        } else if(see(INTERFACE)) {
+            decl = interfaceDeclaration(mods);
+        } else {
+            reportParserError("Expected class or interface");
+        }
+        return decl;
     }
 
     /**
@@ -558,6 +566,25 @@ public class Parser {
         consumeClassBody(members, SIB, IIB);
         mustBe(RCURLY);
         return new JClassDeclaration(line, mods, name, superClass, implement, members, SIB, IIB);
+    }
+    /**
+     * Parse an interface declaration.
+     * 
+     * <pre>
+     *
+     *interfaceDeclaration ::= INTERFACE IDENTIFIER
+     *                            [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
+     *                            classBody
+     * </pre>
+     * 
+     * 
+     * @param mods
+     *            the interface modifiers.
+     * @return an AST for a interfaceDeclaration.
+     */
+
+    private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods) {
+        return null; //TODO
     }
 
     /**

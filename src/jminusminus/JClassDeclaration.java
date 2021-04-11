@@ -35,9 +35,6 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Interface super type */
     private List<Type> interfaceSuperTypes;
 
-    /** Class for implements */
-    private ArrayList<TypeName> implement;
-
     /** This class type. */
     private Type thisType;
 
@@ -177,7 +174,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Resolve superinterfaces
         interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
 
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
@@ -320,10 +317,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             p.println("</Modifiers>");
         }
         // JInterfaceDeclaration / checks if there are ny implements for the class
-        if (implement != null) {
+        if (interfaceSuperTypes != null) {
             p.println("<Implements>");
             p.indentRight();
-            for (TypeName implemented : implement) {
+            for (Type implemented : interfaceSuperTypes) {
                 p.printf("<Implements name=\"%s\"/>\n", implemented.toString());
             }
             p.indentLeft();

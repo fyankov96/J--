@@ -117,6 +117,8 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
         // Resolve superclass
         superType = superType.resolve(this.context);
 
+        // Next step
+
     }
 
     @Override

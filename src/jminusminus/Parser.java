@@ -574,7 +574,7 @@ public class Parser {
         mustBe(INTERFACE);
         mustBe(IDENTIFIER);
         String name = scanner.previousToken().image();
-        ArrayList<TypeName> interfaces = new ArrayList<>();
+        ArrayList<Type> interfaces = new ArrayList<>();
 
         if (have(EXTENDS)) {
             interfaces.add(qualifiedIdentifier());

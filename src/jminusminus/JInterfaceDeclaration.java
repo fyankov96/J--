@@ -25,9 +25,6 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     /** Interface super type */
     private ArrayList<Type> interfaceSuperTypes;
 
-    /** super interface */
-    private ArrayList<TypeName> extend;
-
     /** This interface type */
     private Type thisType;
 
@@ -43,12 +40,12 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     private ArrayList<JFieldDeclaration> instanceFieldInitializations;
 
-    public JInterfaceDeclaration(int line, ArrayList<String> mods, String name, ArrayList<TypeName> extend,
+    public JInterfaceDeclaration(int line, ArrayList<String> mods, String name, ArrayList<Type> extend,
             ArrayList<JMember> interfaceBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
-        this.extend = extend;
+        this.interfaceSuperTypes = extend;
         this.interfaceBlock = interfaceBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -125,16 +122,18 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context))
                 .collect(Collectors.toCollection(ArrayList::new));
 
+        //ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
+        //        .collect(Collectors.toCollection(ArrayList::new));
         ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
                 .collect(Collectors.toCollection(ArrayList::new));
-
+        
         // Create the (partial) class
         CLEmitter partial = new CLEmitter(false);
 
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
+        partial.addClass(mods, qualifiedName, null, interfaceJVMNames, false);
 
         // Pre-analyze the members
         for (JMember member : interfaceBlock) {
@@ -197,10 +196,10 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
             p.indentLeft();
             p.println("</Modifiers>");
         }
-        if (extend != null) {
+        if (interfaceSuperTypes != null) {
             p.println("<Extends>");
             p.indentRight();
-            for (TypeName extended : extend) {
+            for (Type extended : interfaceSuperTypes) {
                 p.printf("<Extends name=\"%s\"/>\n", extended.toString());
             }
             p.indentLeft();

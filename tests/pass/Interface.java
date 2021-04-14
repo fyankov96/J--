@@ -9,7 +9,7 @@ public interface Interf {
 
 }
 
-public class Interface extends Super implements Interf  {
+public class InterfaceTest extends Super implements Interf  {
     int test = 0;
 }
 

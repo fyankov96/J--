@@ -133,7 +133,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, null, interfaceJVMNames, false);
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
 
         // Pre-analyze the members
         for (JMember member : interfaceBlock) {

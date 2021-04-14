@@ -237,7 +237,6 @@ TOKEN: {
 | <SHR_ASSIGN: ">>=">
 | <USHR_ASSIGN: ">>>=">
 | <SHL_ASSIGN: "<<=">
-| <NOT_EQUALS: "!=">
 }
 
 // Separators (these could be combined with the reserved words)
@@ -1782,7 +1781,7 @@ private JExpression additiveExpression(): {
  * 
  * <pre>
  *   multiplicativeExpression ::= unaryExpression        // level 2
- *                                  {STAR unaryExpression}
+ *                                  {(STAR | DIV) unaryExpression}
  * </pre>
  * 
  * @return an AST for a multiplicativeExpression.
@@ -1798,7 +1797,10 @@ private JExpression multiplicativeExpression(): {
         (
             <STAR>
             rhs = unaryExpression()
-            { lhs = new JMultiplyOp(line, lhs, rhs); }
+            { lhs = new JMultiplyOp(line, lhs, rhs); } |
+            <DIV>
+            rhs = unaryExpression()
+            { lhs = new JDivideOp(line, lhs, rhs); }
         )*
     }
     catch (ParseException e) {

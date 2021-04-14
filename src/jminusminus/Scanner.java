@@ -242,9 +242,10 @@ class Scanner {
             if (ch == '&') {
                 nextCh();
                 return new TokenInfo(LAND, line);
+            } else if (ch == '=') {
+                nextCh();
+                return new TokenInfo(AND_ASSIGN,line);
             } else {
-
-
                 return new TokenInfo(BAND, line);
             }
         case '^':

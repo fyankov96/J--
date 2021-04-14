@@ -36,7 +36,8 @@ class JThrowStatement extends JStatement {
      */
 
     public JThrowStatement analyze(Context context) {
-        return null;
+        expr.analyze(context);
+        return this;
     }
 
     /**

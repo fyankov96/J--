@@ -2,17 +2,21 @@
 
 package pass;
 
+import javax.xml.catalog.Catalog;
+
 public class ExceptionHandling {
     public ExceptionHandling() throws NullPointerException {
         throw new NullPointerException();
     }
 
-    public int TryCatch() throws NullPointerException {
+    public int tryCatch() throws NullPointerException {
         try {
             int x = 42;
             throw new NullPointerException();
         } catch (NullPointerException e) {
             return 0;
+        } catch (IllegalArgumentException i) {
+            return 2;
         }
         finally {return 1;}  
     }

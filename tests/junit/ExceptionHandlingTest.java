@@ -16,6 +16,6 @@ public class ExceptionHandlingTest extends TestCase {
     }
 
     public void testDivide() {
-        this.assertEquals(eh.TryCatch(), 0);
+        this.assertEquals(eh.tryCatch(), 0);
     }    
 }

@@ -3,21 +3,27 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
-class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
+class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     /** Interface modifiers. */
     private ArrayList<String> mods;
 
     /** Interface name */
     private String name;
+
+    /** Interface superType */
     private Type superType;
+
+    /** Static (class) fields of this class. */
+    private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
     /** Interface block */
     private ArrayList<JMember> interfaceBlock;
 
-    /** super interface */
-    private ArrayList<TypeName> extend;
+    /** Interface super type */
+    private ArrayList<Type> interfaceSuperTypes;
 
     /** This interface type */
     private Type thisType;
@@ -34,12 +40,12 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
 
     private ArrayList<JFieldDeclaration> instanceFieldInitializations;
 
-    public JInterfaceDeclaration(int line, ArrayList<String> mods, String name, ArrayList<TypeName> extend,
+    public JInterfaceDeclaration(int line, ArrayList<String> mods, String name, ArrayList<Type> extend,
             ArrayList<JMember> interfaceBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
-        this.extend = extend;
+        this.interfaceSuperTypes = extend;
         this.interfaceBlock = interfaceBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -87,23 +93,86 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
      */
 
     public void declareThisType(Context context) {
+        String packageName = JAST.compilationUnit.packageName();
 
+        String qualifiedName = packageName.equals("") ? name : packageName.replace(".", "/") + "/" + name;
+
+        CLEmitter partial = new CLEmitter(false);
+
+        ArrayList<String> interfaceJVMNames = interfaceSuperTypes.stream()
+                .map(t -> packageName.replace(".", "/") + "/" + t.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
+
+        thisType = Type.typeFor(partial.toClass());
+        context.addType(line, thisType);
     }
 
     /**
-     * Pre-analyze the members of this declaration in the parent context.
-     * Pre-analysis extends to the member headers (including method headers) but not
-     * into the bodies.
      * 
      * @param context the parent (compilation unit) context.
      */
 
+    @Override
     public void preAnalyze(Context context) {
+        // Construct a class context
+        this.context = new ClassContext(this, context);
 
+        // Resolve superinterfaces
+        interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        //ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
+        //        .collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
+        
+        // Create the (partial) class
+        CLEmitter partial = new CLEmitter(false);
+
+        // Add the class header to the partial class
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
+
+        // Pre-analyze the members
+        for (JMember member : interfaceBlock) {
+            if (!(member instanceof JMethodDeclaration || member instanceof JFieldDeclaration)) {
+                JAST.compilationUnit.reportSemanticError(line(), "Member %s is not a valid interface member",
+                        member.toString());
+            }
+
+            member.preAnalyze(this.context, partial);
+        }
+
+        // Get the Class rep for the (partial) class and make it
+        // the representation for this type
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(partial.toClass());
+        }
     }
 
     @Override
     public JAST analyze(Context context) {
+        // Analyze all members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).analyze(this.context);
+        }
+
+        // Copy declared fields for purposes of initialization.
+        for (JMember member : interfaceBlock) {
+            if (member instanceof JFieldDeclaration) {
+                JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
+                if (fieldDecl.mods().contains("static")) {
+                    staticFieldInitializations.add(fieldDecl);
+                } else {
+                    JAST.compilationUnit.reportSemanticError(line(),
+                            "Field declaration is not a static member, interfaces may only have static field declarations",
+                            member.toString());
+                }
+            }
+        }
         return this;
     }
 
@@ -111,11 +180,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
 
     }
 
-    @Override
-    public void preAnalyze(Context context, CLEmitter partial) {
-
-    }
-
+    
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JInterfaceDeclaration line=\"%d\" name=\"%s\">\n", line(), name);
         p.indentRight();
@@ -131,10 +196,10 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl, JMember {
             p.indentLeft();
             p.println("</Modifiers>");
         }
-        if (extend != null) {
+        if (interfaceSuperTypes != null) {
             p.println("<Extends>");
             p.indentRight();
-            for (TypeName extended : extend) {
+            for (Type extended : interfaceSuperTypes) {
                 p.printf("<Extends name=\"%s\"/>\n", extended.toString());
             }
             p.indentLeft();

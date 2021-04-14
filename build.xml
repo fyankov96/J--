@@ -468,6 +468,36 @@
         </junit>
     </target>
 
+        <!--
+    testAnalysis: Runs the jminusminus compiler on each test under
+    tests/pass up to the stage where the AST has been analyzed.
+    -->
+    <target name="testAnalysisCustom" depends="compile,jar">
+        <echo message="Running compiler on j-- programs up to analysis..."/>
+        <javac srcdir="${basedir}/tests/"
+               destdir="${CLASS_DIR}"
+               includes="junit/RemainderAssignmentTest.java"
+               includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.RemainderAssignmentTest"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+    </target>
+
     <!-- clean: Removes generated files and folders. -->
     <target name="clean">
         <echo message="Removing generated files and folders..."/>

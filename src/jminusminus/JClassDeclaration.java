@@ -3,6 +3,10 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import static jminusminus.CLConstants.*;
 
 /**
@@ -28,6 +32,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Super class type. */
     private Type superType;
 
+    /** Interface super type */
+    private List<Type> interfaceSuperTypes;
+
     /** This class type. */
     private Type thisType;
 
@@ -43,18 +50,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     /** Static (class) fields of this class. */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
-    /** Static initialization block  */
+    /** Static initialization block */
     private ArrayList<JBlock> staticInitializationBlocks;
 
-    /** Instance initialization block  */
+    /** Instance initialization block */
     private ArrayList<JBlock> instanceInitializationBlocks;
-
-
-    /** Class for implements */
-    private ArrayList<TypeName> implement;
-
-    /*** Class for extends */
-    private ArrayList<TypeName> extend;
 
     /**
      * 
@@ -76,6 +76,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.mods = mods;
         this.name = name;
         this.superType = superType;
+        this.interfaceSuperTypes = new ArrayList<Type>();
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -84,12 +85,13 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         instanceInitializationBlocks = new ArrayList<JBlock>();
     }
 
-    public JClassDeclaration(int line, ArrayList<String> mods, String name,
-    Type superType, ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+    public JClassDeclaration(int line, ArrayList<String> mods, String name, Type superType, ArrayList<Type> implement,
+            ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.superType = superType;
+        this.interfaceSuperTypes = implement;
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -170,6 +172,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Resolve superclass
         superType = superType.resolve(this.context);
 
+        // Resolve superinterfaces
+        interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context))
+                .collect(Collectors.toCollection(ArrayList::new));
+
         // Creating a partial class in memory can result in a
         // java.lang.VerifyError if the semantics below are
         // violated, so we can't defer these checks to analyze()
@@ -181,10 +187,13 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Create the (partial) class
         CLEmitter partial = new CLEmitter(false);
 
+        ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
+
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+        partial.addClass(mods, qualifiedName, superType.jvmName(), interfaceJVMNames, false);
 
         // Pre-analyze the members and add them to the partial
         // class
@@ -238,7 +247,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         for (JBlock sib : staticInitializationBlocks) {
             sib.analyze(context);
         }
-        
+
         // Analyze the instance initialization blocks
         for (JBlock iib : instanceInitializationBlocks) {
             iib.analyze(context);
@@ -308,10 +317,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             p.println("</Modifiers>");
         }
         // JInterfaceDeclaration / checks if there are ny implements for the class
-        if (implement != null) {
+        if (interfaceSuperTypes != null) {
             p.println("<Implements>");
             p.indentRight();
-            for (TypeName implemented : implement) {
+            for (Type implemented : interfaceSuperTypes) {
                 p.printf("<Implements name=\"%s\"/>\n", implemented.toString());
             }
             p.indentLeft();

@@ -994,7 +994,7 @@ private JStatement forStatement(): {
     JVariableDeclaration initDeclaration = null;
 
     ArrayList<JStatement> stepStatements = new ArrayList<JStatement>();
-    JStatement aStatement;
+    JStatement aStatement = null;
 
     boolean isForEach = false;
     JForEachVariable identifier = null;
@@ -1804,7 +1804,7 @@ private JExpression additiveExpression(): {
  * 
  * <pre>
  *   multiplicativeExpression ::= unaryExpression        // level 2
- *                                  {STAR unaryExpression}
+ *                                  {(STAR | DIV) unaryExpression}
  * </pre>
  * 
  * @return an AST for a multiplicativeExpression.
@@ -1820,7 +1820,10 @@ private JExpression multiplicativeExpression(): {
         (
             <STAR>
             rhs = unaryExpression()
-            { lhs = new JMultiplyOp(line, lhs, rhs); }
+            { lhs = new JMultiplyOp(line, lhs, rhs); } |
+            <DIV>
+            rhs = unaryExpression()
+            { lhs = new JDivideOp(line, lhs, rhs); }
         )*
     }
     catch (ParseException e) {

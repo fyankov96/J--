@@ -63,15 +63,14 @@ class JTryCatchStatement extends JStatement {
      */
 
     public JStatement analyze(Context context) {
-        this.context = new LocalContext(context);
-        tryBlock.analyze(this.context);
+        tryBlock.analyze(context);
 
         // For iteration through both the catchblock and parameters
         int listSize = catchParams.size();
 
 
         for(int i = 0; i < listSize; i++) {
-            
+            this.context = new LocalContext(context);
             // Check for different catchparameters like NullPointerException
 
             LocalVariableDefn defn = new LocalVariableDefn(catchParams.get(i).type(), 
@@ -84,8 +83,9 @@ class JTryCatchStatement extends JStatement {
     
         if (finallyBlock != null) {
             this.context = new LocalContext(context);
-            finallyBlock.analyze(context);
+            finallyBlock.analyze(this.context);
         }
+
         return this;
     }
 
@@ -132,9 +132,11 @@ class JTryCatchStatement extends JStatement {
         if(this.catchBlocks != null) {
 
             for(JBlock block : this.catchBlocks) {
+                p.printf("<CatchBlock>\n");
                 p.indentRight();
                 block.writeToStdOut(p);
                 p.indentLeft();
+                p.printf("</CatchBlock>\n");
             }
         }
 

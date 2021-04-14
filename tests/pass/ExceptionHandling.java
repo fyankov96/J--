@@ -1,8 +1,8 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
 package pass;
-
-import javax.xml.catalog.Catalog;
+import java.lang.NullPointerException;
+import java.lang.IllegalArgumentException;
 
 public class ExceptionHandling {
     public ExceptionHandling() throws NullPointerException {

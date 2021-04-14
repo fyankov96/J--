@@ -158,6 +158,22 @@ class Type {
     }
 
     /**
+     * Is this an Iterable type?
+     * 
+     * @return true or false.
+     */
+
+    public boolean isIterable() {
+        //Implement the interface iterable
+        //Check the entire class hierarchy for the Iterable.class
+        return false;
+        
+        //classRep.getSuperclass() == Iterable.class;
+        //Check for is Type.ANY and other various
+
+    }
+
+    /**
      * An array type's component type. Meaningful only for array types.
      * 
      * @return the component type.

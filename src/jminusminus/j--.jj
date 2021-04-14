@@ -237,7 +237,6 @@ TOKEN: {
 | <SHR_ASSIGN: ">>=">
 | <USHR_ASSIGN: ">>>=">
 | <SHL_ASSIGN: "<<=">
-| <NOT_EQUALS: "!=">
 }
 
 // Separators (these could be combined with the reserved words)
@@ -989,39 +988,59 @@ private JStatement statement(): {
 
 private JStatement forStatement(): {
     int line = 0;
-    List<JStatement> initStatements = new ArrayList<JStatement>();
-    List<JVariableDeclarator> initDeclarations = new ArrayList<JVariableDeclarator>();
-    JExpression condition = null; 
-    List<JStatement> step = null;
-    boolean isStep = false;
-    Type typeFound = null;
-    JVariableDeclarator decl = null;
-    JExpression iterable = null;
-    JStatement body = null; 
+
+    ArrayList<JStatement> initStatements = new ArrayList<JStatement>();
+    ArrayList<JVariableDeclarator> initDeclarators = new ArrayList<JVariableDeclarator>();
+    JVariableDeclaration initDeclaration = null;
+
+    ArrayList<JStatement> stepStatements = new ArrayList<JStatement>();
+    JStatement aStatement;
+
+    boolean isForEach = false;
+    JForEachVariable identifier = null;
+
+    JExpression loopExpression = null;
+    JStatement body = null;
+
+    Type varType;
+    String varName;
 }
 {
     try {
         <LPAREN> { line = token.beginLine; }
         (
-            //Foreach
-            LOOKAHEAD(typeFound = type() variableDeclarator(typeFound) <COLON>)
-            typeFound = type()
-            decl = variableDeclarator(typeFound)
+            LOOKAHEAD(basicType() <IDENTIFIER> <COLON>)
+            varType = type()
+            <IDENTIFIER>
+            { varName = token.image; }
             <COLON>
-            iterable = expression() {isStep = false; } |
-            [                
-                typeFound = type()
-                initDeclarations = variableDeclarators(typeFound) {}
+            loopExpression = expression()
+            { identifier = new JForEachVariable(line, varName, varType);
+              isForEach = true; } |
+
+            [
+                LOOKAHEAD(basicType())
+                varType = type()
+                initDeclarators = variableDeclarators(varType)
+                { initDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), initDeclarators); } |
+
+                aStatement = statementExpression()
+                { initStatements.add(aStatement); }
+                (
+                    <COMMA>
+                    aStatement = statementExpression()
+                    { initStatements.add(aStatement); }
+                )*
             ]
             <SEMI>
             [
-                condition = expression()
+                loopExpression = expression()
             ]
             <SEMI>
             [ 
-                step = forUpdate()
+                stepStatements = forUpdate()
             ] 
-            {isStep = true; } 
+            { isForEach = false; }
         )
         <RPAREN>
         body = statement()
@@ -1030,39 +1049,42 @@ private JStatement forStatement(): {
         recoverFromError(new int[] {SEMI, EOF}, e);
     }
     {
-        if(isStep) {
-            return new JForStepStatement(line, initStatements, initDeclarations, condition, step, body); 
+        if(isForEach) {
+            return new JForEachStatement(line, identifier, loopExpression, body);
+            
         } else {
-            return new JForEachStatement(line, decl, iterable, body);
+            return new JForStepStatement(line, initStatements, initDeclaration, loopExpression, stepStatements, body); 
         }
     }
 }
 
 
 /**
- * Parse a for update.
+ * Parse a set of for statement step statements.
  * 
  * <pre>
-        forUpdate ::= statementExpression {, statementExpression}
+        forSteps ::= statementExpression {, statementExpression}
  * </pre>
  * 
  * @return an AST for a statement.
  */
-private List<JStatement> forUpdate(): {
-    List<JStatement> statements = new ArrayList();
+private ArrayList<JStatement> forUpdate(): {
+    ArrayList<JStatement> steps = new ArrayList<JStatement>();
     JStatement aStatement;
 } {
     try {
-        aStatement = statement() {statements.add(aStatement); }
+        aStatement = statementExpression()
+        {steps.add(aStatement);}
         (
             <COMMA>
-            aStatement = statement() {statements.add(aStatement); }
+            aStatement = statementExpression()
+            {steps.add(aStatement);}
         )*
     }
     catch (ParseException e) {
         recoverFromError(new int[] {SEMI, EOF}, e);
     }
-    { return statements; }
+    { return steps; }
     
 }
 

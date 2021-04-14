@@ -34,7 +34,7 @@ class JForStepStatement extends JForStatement {
     private JExpression condition;
 
     /* Step updates */
-    private ArrayList<JStatement> stepStmts;
+    private ArrayList<JStatement> stepStatements;
 
     /* The new context (built in analyze()) for defining variables used in the loop. */
     private LocalContext context;
@@ -51,19 +51,19 @@ class JForStepStatement extends JForStatement {
      *            the variable declarations
      * @param condition
      *            the termination condition
-     * @param stepStmts
+     * @param stepStatements
      *            the step updates
      * @param body
      *            the body.
      */
 
-    public JForStepStatement(int line, ArrayList<JStatement> initStatements, JVariableDeclaration initDeclarations,  
-                             JExpression condition, ArrayList<JStatement> stepStmts, JStatement body) {
+    public JForStepStatement(int line, ArrayList<JStatement> initStatements, JVariableDeclaration initDeclarations,
+                             JExpression condition, ArrayList<JStatement> stepStatements, JStatement body) {
         super(line, body);
         this.initStatements = initStatements;
         this.initDeclarations = initDeclarations;
         this.condition = condition;
-        this.stepStmts = stepStmts;
+        this.stepStatements = stepStatements;
     }
 
     /**
@@ -80,7 +80,7 @@ class JForStepStatement extends JForStatement {
     public JForStepStatement analyze(Context context) {
         this.context = new LocalContext(context);
 
-        if (initStatements != null){
+        if (initStatements.size() > 0){
             for (JStatement init : initStatements){
                 init.analyze(this.context);
             }
@@ -95,8 +95,8 @@ class JForStepStatement extends JForStatement {
             condition.type().mustMatchExpected(line(), Type.BOOLEAN);
         }
 
-        if(stepStmts != null) {
-            for (JStatement stmt : stepStmts){
+        if(stepStatements.size() > 0) {
+            for (JStatement stmt : stepStatements){
                 stmt.analyze(this.context);
             }
         }
@@ -124,7 +124,7 @@ class JForStepStatement extends JForStatement {
         p.printf("<JForStepStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Initialization>\n");
-        if(this.initStatements != null) {
+        if(this.initStatements.size() > 0) {
             for(JStatement j : this.initStatements) {
                 p.indentRight();
                 j.writeToStdOut(p);
@@ -145,8 +145,8 @@ class JForStepStatement extends JForStatement {
         p.indentLeft();
         p.printf("</Condition>\n");
         p.printf("<Step>\n");
-        if(this.stepStmts != null) {
-            for(JStatement j : this.stepStmts) {
+        if(this.stepStatements.size() > 0) {
+            for(JStatement j : this.stepStatements) {
                 p.indentRight();
                 j.writeToStdOut(p);
                 p.indentLeft();
@@ -166,11 +166,10 @@ class JForStepStatement extends JForStatement {
 
 class JForEachStatement extends JForStatement {
 
+    /* Iterating identifier */
+    private JForEachVariable identifier;
 
-    /* Element declaration */
-    private JVariableDeclaration declaration;
-
-    /* Element Iterable */
+    /* Iterable expression */
     private JExpression iterable;
 
     /* The new context (built in analyze()) for defining variables used in the loop. */
@@ -178,21 +177,21 @@ class JForEachStatement extends JForStatement {
 
     /**
      * Constructs an AST node for a for-each-statement given its line number, the
-     * element declaration and iterable.
+     * iterating identifier and iterable.
      * 
      * @param line
      *            line in which the while-statement occurs in the source file.
-     * @param declaration
-     *            the element declaration
+     * @param identifier
+     *            the iterating identifier
      * @param iterable
      *            the iterable
      * @param body
      *            the body.
      */
 
-    public JForEachStatement(int line, JVariableDeclaration declaration, JExpression iterable, JStatement body) {
+    public JForEachStatement(int line, JForEachVariable identifier, JExpression iterable, JStatement body) {
         super(line, body);
-        this.declaration = declaration;
+        this.identifier = identifier;
         this.iterable = iterable;
     }
 
@@ -209,17 +208,17 @@ class JForEachStatement extends JForStatement {
     public JForEachStatement analyze(Context context) {
         this.context = new LocalContext(context);
 
-        declaration = (JVariableDeclaration) declaration.analyze(this.context);
+        identifier = (JForEachVariable) identifier.analyze(this.context);
         iterable = (JExpression) iterable.analyze(this.context);
 
-        if (!(iterable.type().isArray())) {
+        if (!(iterable.type().isArray() || iterable.type().isIterable())) {
             JAST.compilationUnit.reportSemanticError(line(),
-                "Attempting to iterate over a non-array type");
+                "Attempting to iterate over a non-iterable type");
         }
-
-        if(declaration.decls().get(0).type() != iterable.type().componentType()){
+        
+        if(!identifier.type().equals(iterable.type().componentType())){
             JAST.compilationUnit.reportSemanticError(line(),
-                "Using " + declaration.decls().get(0).type() + " type to iterate over " + iterable.type().componentType() + " array");
+                "Using " + identifier.type() + " type to iterate over " + iterable.type().componentType() + " array");
         }
 
         body = (JStatement) body.analyze(this.context);
@@ -245,7 +244,7 @@ class JForEachStatement extends JForStatement {
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JForEachStatement line=\"%d\">\n", line());
         p.indentRight();
-        declaration.writeToStdOut(p);
+        identifier.writeToStdOut(p);
         p.indentLeft();
         p.indentRight();
         p.printf("<Iterable>\n");

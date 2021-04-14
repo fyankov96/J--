@@ -48,7 +48,7 @@ abstract class JBinaryExpression extends JExpression {
 
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JBinaryExpression line=\"%d\" type=\"%s\" "
-                + "operator=\"%s\"> %s\n", line(), ((type == null) ? "" : type
+                + "operator=\"%s\">\n", line(), ((type == null) ? "" : type
                 .toString()), Util.escapeSpecialXMLChars(operator));
         p.indentRight();
         p.printf("<Lhs>\n");
@@ -110,11 +110,7 @@ class JPlusOp extends JBinaryExpression {
                     .analyze(context);
         } else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
-        }/* else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
-            type = Type.DOUBLE;   
-        } else if (rhs.type() == Type.DOUBLE && (lhs.type() == Type.INT || lhs.type() == Type.CHAR || lhs.type() == Type.DOUBLE)) {
-            type = Type.DOUBLE;   
-        }*/
+        }
         else {
             type = Type.ANY;
             JAST.compilationUnit.reportSemanticError(line(),

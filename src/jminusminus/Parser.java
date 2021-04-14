@@ -309,6 +309,42 @@ public class Parser {
     }
 
     /**
+     * Are we looking at a for-each statement variable declaration? ie.
+     * 
+     * <pre>
+     *   type IDENTIFIER COL
+     * </pre>
+     * 
+     * Look ahead to determine.
+     * 
+     * @return true iff we are looking at a for-each statement variable declaration; false
+     *         otherwise.
+     */
+
+    private boolean seeForEachVariable() {
+        scanner.recordPosition();
+        if (have(IDENTIFIER)) {}
+        else if (seeBasicType()) {
+            scanner.next();
+        } else {
+            return false;
+        }
+        
+        if (!have(IDENTIFIER)) {
+            scanner.returnToPosition();
+            return false;
+        }
+
+        if (!have(COL)) {
+            scanner.returnToPosition();
+            return false;
+        }
+        
+        scanner.returnToPosition();
+        return true;
+    }
+
+    /**
      * Are we looking at a basic type? ie.
      * 
      * <pre>
@@ -347,6 +383,29 @@ public class Parser {
             scanner.returnToPosition();
         }
         return false;
+    }
+
+    /**
+     * Are we looking at a qualified identifier? ie.
+     * 
+     * <pre>
+     *   qualifiedIdentifier ::= IDENTIFIER {DOT IDENTIFIER}
+     * </pre>
+     * 
+     * @return true iff we're looking at a qualified identifier; false otherwise.
+     */
+
+    private boolean seeQualifiedIdentifier() {
+        scanner.recordPosition();
+        have(IDENTIFIER);
+        while (have(DOT)) {
+            if(!have(IDENTIFIER)) {
+                scanner.returnToPosition();
+                return false;
+            }
+        }
+        scanner.returnToPosition();
+        return true;
     }
 
     /**
@@ -541,7 +600,7 @@ public class Parser {
         ArrayList<JMember> members = new ArrayList<>();
         ArrayList<JBlock> IIB = new ArrayList<>();
         ArrayList<JBlock> SIB = new ArrayList<>();
-        consumeClassBody(members, SIB, IIB);
+        consumeClassBody(members, SIB, IIB); //Modifier can only be static
         mustBe(RCURLY);
         return new JClassDeclaration(line, mods, name, superClass, members, SIB, IIB);
     }
@@ -580,14 +639,16 @@ public class Parser {
                 scanner.returnToPosition();
                 if(staticInitBlock) {
                     have(STATIC);
-                    SIB.add(block(true, true));
+                    ArrayList<String> mods = new ArrayList<String>();
+                    mods.add("static");
+                    SIB.add(block(mods));
                 } else {
                     members.add(memberDecl(modifiers()));
                 }
             } else if(seeModifier() || seeBasicType() || seeReferenceType() || see(VOID)){
                 members.add(memberDecl(modifiers()));
             } else if(seeBlock()) {
-                IIB.add(block(false, true));
+                IIB.add(block());
             }
             else {
                 error = true;
@@ -690,7 +751,14 @@ public class Parser {
      */
 
     private JBlock block() {
-        return block(false, false);
+        int line = scanner.token().line();
+        ArrayList<JStatement> statements = new ArrayList<JStatement>();
+        mustBe(LCURLY);
+        while (!see(RCURLY) && !see(EOF)) {
+            statements.add(blockStatement());
+        }
+        mustBe(RCURLY);
+        return new JBlock(line, statements);
     }
 
     /**
@@ -703,7 +771,7 @@ public class Parser {
      * @return an AST for a block.
      */
 
-    private JBlock block(boolean isStatic, boolean isInitBlock) {
+    private JBlock block(ArrayList<String> mods) {
         int line = scanner.token().line();
         ArrayList<JStatement> statements = new ArrayList<JStatement>();
         mustBe(LCURLY);
@@ -711,7 +779,7 @@ public class Parser {
             statements.add(blockStatement());
         }
         mustBe(RCURLY);
-        return new JBlock(line, statements, isStatic, isInitBlock);
+        return new JBlock(line, statements, mods);
     }
 
     /**
@@ -798,90 +866,87 @@ public class Parser {
     }
 
     /**
-     *  forExpression ::= LPAREN [JStatement {COMMA JStatement} | JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}] RPAREN statement
-                | LPAREN type JVariableDeclaration COL expression RPAREN statement
+     *  Parse a for statement.
+     * 
+     *  forExpression ::= 
+     *            LPAREN [JStatement {COMMA JStatement}
+     *          | [JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}] RPAREN statement
+     *          | LPAREN JForEachVariable COL expression RPAREN statement
      * @return A JForStatement
      */
     private JForStatement forStatement() {
-        int line = scanner.token().line();
-        mustBe(LPAREN);
-
         //For Step
-        ArrayList<JStatement> initStmts = null;
-
-        ArrayList<JVariableDeclarator> varDeclarators = new ArrayList<JVariableDeclarator>();
-        JVariableDeclaration varDecl = null;
-
-        ArrayList<JStatement> updateStmts = null;
+        ArrayList<JStatement> initStatements = new ArrayList<JStatement>();
+        ArrayList<JVariableDeclarator> initDeclarators = new ArrayList<JVariableDeclarator>();
+        JVariableDeclaration initDeclaration = null;
+        ArrayList<JStatement> stepStatements = new ArrayList<JStatement>();
 
         //For Each
-        Type typeFound;
-        JVariableDeclarator decl = null;
+        boolean isForEach = false;
+        JForEachVariable identifier = null;
 
         //Common
-        JExpression cond = null;
+        Type varType;
+        JExpression loopExpression = null;
         JStatement body = null;
+
+
+        int line = scanner.token().line();
+        mustBe(LPAREN);
         
-        boolean isForEach = false;
-        if(seeBasicType() || seeReferenceType()) {
-            scanner.recordPosition();
-            typeFound = type();
-            if(see(IDENTIFIER)) {
-                variableDeclarator(typeFound);
-                if(have(COL)) {
-                    isForEach = true;
-                }
-            }
-            scanner.returnToPosition();
-        }
+        isForEach = seeForEachVariable();
              
         if(isForEach) {
-            typeFound = type();
-            varDeclarators = variableDeclarators(typeFound);
-            varDecl = new JVariableDeclaration(line, null, varDeclarators);
+            varType = type();
+            mustBe(IDENTIFIER);
+            String name = scanner.previousToken().image();
+
+            identifier = new JForEachVariable(line, name, varType);
+        
             mustBe(COL);
-            cond = expression();
+            loopExpression = expression();
         } else {
             if(!see(SEMI)) {
-                if (seeReferenceType()) {
-                    initStmts = new ArrayList<JStatement>();
+                if(seeBasicType()) {
+                    initDeclarators = variableDeclarators(type());
+                    initDeclaration = new JVariableDeclaration(line, null, initDeclarators);
+                } else {
                     do {
-                        initStmts.add(statementExpression());
+                        initStatements.add(statementExpression());
                     } while (have(COMMA));
-                } else if(seeBasicType()){
-                    varDeclarators = variableDeclarators(type());
-                    varDecl = new JVariableDeclaration(line, null, varDeclarators);
                 }
             }
             mustBe(SEMI);
             if(!see(SEMI)) {
-                cond = expression();
+                loopExpression = expression();
             }
             mustBe(SEMI);
             if(!see(RPAREN)) {
-                updateStmts = forUpdate();
+                stepStatements = forSteps();
             }
         }
         mustBe(RPAREN);
         body = statement();
 
         if(isForEach) {
-            return new JForEachStatement(line, varDecl, cond, body);
+            return new JForEachStatement(line, identifier, loopExpression, body);
         } else {
-            return new JForStepStatement(line, initStmts, varDecl, cond, updateStmts, body);
+            return new JForStepStatement(line, initStatements, initDeclaration, loopExpression, stepStatements, body);
         }
     }
 
     /**
-     * forUpdate ::= statementExpression {, statementExpression}
-     * @return An ArrayList of JStatementExpressions
+     *  Parse a set of for statement step statements
+     * 
+     *  forSteps ::= statementExpression {, statementExpression}
+     *  @return An ArrayList of JStatementExpressions
      */
-    private ArrayList<JStatement> forUpdate() {
-        ArrayList<JStatement> update = new ArrayList<JStatement>();
+    private ArrayList<JStatement> forSteps() {
+        ArrayList<JStatement> steps = new ArrayList<JStatement>();
         do {
-            update.add(statementExpression());
+            steps.add(statementExpression());
         } while (have(COMMA));
-        return update;
+        return steps;
     }
 
     /**

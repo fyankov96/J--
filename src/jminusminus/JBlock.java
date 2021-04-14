@@ -20,15 +20,8 @@ class JBlock extends JStatement {
      */
     private LocalContext context;
 
-    /**
-     * A flag for detecting whether the block is static
-     */
-    private boolean isStatic = false;
-
-    /**
-     * A flag for detecting whether the block is an initializaion block
-     */
-    private boolean isInitBlock = false;
+    /** Block modifiers. */
+    private ArrayList<String> mods = new ArrayList<String>();
 
 
     /**
@@ -46,11 +39,10 @@ class JBlock extends JStatement {
         this.statements = statements;
     }
 
-    public JBlock(int line, ArrayList<JStatement> statements, boolean isStatic, boolean isInitBlock) {
+    public JBlock(int line, ArrayList<JStatement> statements, ArrayList<String> mods) {
         super(line);
         this.statements = statements;
-        this.isStatic = isStatic;
-        this.isInitBlock = isInitBlock;
+        this.mods = mods;
     }
 
     /**
@@ -73,21 +65,13 @@ class JBlock extends JStatement {
      */
 
     public JBlock analyze(Context context) {
-        // { ... } defines a new level of scope unless we are talking about an initialization block.
-        // 
-        if (isInitBlock) {
-            for (int i = 0; i < statements.size(); i++) {
-                statements.set(i, (JStatement) statements.get(i).analyze(context));
-            }
-            return this;
-        } else {
-            this.context = new LocalContext(context);
-        
-            for (int i = 0; i < statements.size(); i++) {
-                statements.set(i, (JStatement) statements.get(i).analyze(this.context));
-            }
-            return this;
+        // { ... } defines a new level of scope
+        this.context = new LocalContext(context);
+    
+        for (int i = 0; i < statements.size(); i++) {
+            statements.set(i, (JStatement) statements.get(i).analyze(this.context));
         }
+        return this;
     }
 
     /**
@@ -110,7 +94,7 @@ class JBlock extends JStatement {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JBlock line=\"%d\" static=\"%s\">\n", line(), isStatic ? "true" : "false");
+        p.printf("<JBlock line=\"%d\" static=\"%s\">\n", line(), mods.contains("static") ? "true" : "false");
         if (context != null) {
             p.indentRight();
             context.writeToStdOut(p);

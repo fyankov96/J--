@@ -8,10 +8,18 @@ public class ForStatement {
 
         int res = 0;
         
-        // For-step loop tests
-        for(int i = 0; i = 2; ++i) {
-            not_arr += 1;
-        }
+        //Parse errors
+        
+        for(i = 0; int i = 2; ++i) {}
+
+        for(;) {}
+
+        for(;;;) {}
+        
+        //Type errors
+        for(i = 0; i <= 2; ++i) {}
+
+        for(int i = 0; i = 2; ++i) {}
         
         for(int i = 0; i <= 2; i++) {
             int res = 2;
@@ -21,35 +29,6 @@ public class ForStatement {
         int i = 0;
         for(int i = 0; i <= 2; i++) {
             not_arr += 1;
-        }
-
-        
-        
-        //for(;) {}
-
-        //for(;;)
-
-        //for(;;;) {}
-
-
-        // For-each loop tests    
-        /*
-        for(x : i_arr) {
-            res += 2;
-        }
-        */
-
-        for(int x : not_arr) {
-            res += x;
-        }
-
-        for(int x : c_arr) {
-            res += x;
-        }
-        
-        int x = 2;
-        for(int x : i_arr) {
-            res += x;
         }
     }
 }

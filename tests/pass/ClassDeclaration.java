@@ -1,9 +1,11 @@
 package pass;
 
-public class classDeclaration {
+public class ClassDeclaration {
     int a = 5;
-    private static int b;
+    private static int b = 1;
+    
     {
+        int x = 0;
         a = 3;
     }
 
@@ -18,7 +20,7 @@ public class classDeclaration {
     static {
         b = 2;
     }
-
+    
     static {
         b = 3;
     }

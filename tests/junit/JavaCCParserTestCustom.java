@@ -27,8 +27,10 @@ public class JavaCCParserTestCustom extends TestCase {
 
     public void testPass() {
         File passTestsDir = new File(System.getProperty("PASS_TESTS_DIR"));
+        //File passTestsDir = new File("C:\\Users\\thoma\\Kandidat4\\CompilerConstruction\\j--/tests/fail");
+
         File[] files = passTestsDir.listFiles();
-        String toTest = "RightShiftAssignment.java";
+        String toTest = "ForStatement.java";
         boolean errorHasOccurred = false;
         for (int i = 0; files != null && i < files.length; i++) {
             if (files[i].toString().endsWith(toTest)) {

@@ -10,7 +10,6 @@ public class ForEachStatement {
             res += x;
         }
 
-        //Could add support for this
-        //for(java.lang.Integer x : b) {}
+        for(java.lang.Integer x : b) {}
     }
 }

@@ -989,59 +989,65 @@ private JStatement statement(): {
 private JStatement forStatement(): {
     int line = 0;
 
-    ArrayList<JStatement> initStatements = new ArrayList<JStatement>();
-    ArrayList<JVariableDeclarator> initDeclarators = new ArrayList<JVariableDeclarator>();
-    JVariableDeclaration initDeclaration = null;
+    ArrayList<JStatement> initStatements            = new ArrayList<JStatement>();
+    ArrayList<String> mods                          = new ArrayList<String>();
+    ArrayList<JVariableDeclarator> initDeclarators  = new ArrayList<JVariableDeclarator>();
+    JVariableDeclaration initDeclaration            = null;
+    ArrayList<JStatement> stepStatements            = new ArrayList<JStatement>();
 
-    ArrayList<JStatement> stepStatements = new ArrayList<JStatement>();
-    JStatement aStatement = null;
+    JStatement aStatement       = null;
+    boolean isFinal             = false;
 
-    boolean isForEach = false;
     JForEachVariable identifier = null;
 
-    JExpression loopExpression = null;
-    JStatement body = null;
 
-    Type varType;
+    JExpression loopExpression  = null;
+    JStatement body             = null;
+
+    Type varType                = null;
     String varName;
 }
 {
     try {
         <LPAREN> { line = token.beginLine; }
-        (
-            LOOKAHEAD(basicType() <IDENTIFIER> <COLON>)
-            varType = type()
-            <IDENTIFIER>
-            { varName = token.image; }
-            <COLON>
-            loopExpression = expression()
-            { identifier = new JForEachVariable(line, varName, varType);
-              isForEach = true; } |
-
             [
-                LOOKAHEAD(basicType())
+                LOOKAHEAD(<FINAL>)
+                <FINAL>
+                { isFinal = true; 
+                  mods.add("final"); }
+            ]
+            (
+                LOOKAHEAD((basicType() | qualifiedIdentifier()) <IDENTIFIER> <COLON>)
                 varType = type()
-                initDeclarators = variableDeclarators(varType)
-                { initDeclaration = new JVariableDeclaration(line, new ArrayList<String>(), initDeclarators); } |
+                <IDENTIFIER>
+                { varName = token.image; }
+                <COLON>
+                loopExpression = expression()
+                { identifier = new JForEachVariable(line, varName, varType, isFinal); } |
 
-                aStatement = statementExpression()
-                { initStatements.add(aStatement); }
-                (
-                    <COMMA>
+                [
+                    LOOKAHEAD(basicType() | qualifiedIdentifier())
+                    varType = type()
+                    initDeclarators = variableDeclarators(varType)
+                    { initDeclaration = new JVariableDeclaration(line, mods, initDeclarators); } |
+
                     aStatement = statementExpression()
                     { initStatements.add(aStatement); }
-                )*
-            ]
-            <SEMI>
-            [
-                loopExpression = expression()
-            ]
-            <SEMI>
-            [ 
-                stepStatements = forUpdate()
-            ] 
-            { isForEach = false; }
-        )
+                    (
+                        <COMMA>
+                        aStatement = statementExpression()
+                        { initStatements.add(aStatement); }
+                    )*
+                ]
+                <SEMI>
+                [
+                    loopExpression = expression()
+                ]
+                <SEMI>
+                [ 
+                    stepStatements = forUpdate()
+                ]
+                )
         <RPAREN>
         body = statement()
     }
@@ -1049,9 +1055,8 @@ private JStatement forStatement(): {
         recoverFromError(new int[] {SEMI, EOF}, e);
     }
     {
-        if(isForEach) {
+        if(identifier != null) {
             return new JForEachStatement(line, identifier, loopExpression, body);
-            
         } else {
             return new JForStepStatement(line, initStatements, initDeclaration, loopExpression, stepStatements, body); 
         }

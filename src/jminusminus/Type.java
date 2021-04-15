@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
@@ -164,12 +165,12 @@ class Type {
      */
 
     public boolean isIterable() {
-        if (this == Type.ANY | classRep.getSuperclass() == Iterable.class){
+        if (this == Type.ANY | classRep == Iterable.class){
             return true;
         }
-
+        
         List<Class<?>> classes = new ArrayList<Class<?>>();
-        return computeClassHierarchy(this, classes);
+        return computeClassHierarchy(this.classRep, classes);
     }
 
     private static boolean computeClassHierarchy(Class<?> clazz, List<Class<?>> classes) {
@@ -178,19 +179,17 @@ class Type {
             if(classes.contains(current)) {
                 return false;
             }
-
-            if(current == Iterable.class){
-                return true;
-            }
-
+            classes.add(current);
+            
             for (Class currentInterface : current.getInterfaces()) {
-                isIterable |= computeClassHierarchy(currentInterface, classes);
+                isIterable = isIterable || computeClassHierarchy(currentInterface, classes);
             }
 
             if (isIterable) {
                 return true;
             }
         }
+        return false;
     }
 
 

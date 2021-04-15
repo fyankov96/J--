@@ -12,8 +12,7 @@ public class ForStatement {
         
         for(b = 0, c = 0; c <= 3 && b <= 3; b++) {}
 
-        //Could add support for this
-        //for(java.lang.Integer x = 1; res <= 2; res++) {}
+        for(java.lang.Integer x = 1; res <= 2; res++) {}
         
         for(;;) {}
     }

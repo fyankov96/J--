@@ -212,7 +212,7 @@ class JForEachStatement extends JForStatement {
         identifier = (JForEachVariable) identifier.analyze(this.context);
         iterable = (JExpression) iterable.analyze(this.context);
 
-        if (!(iterable.type().isArray() || iterable.type().isIterable())) {
+        if (!(iterable.type().isArray() || iterable.type().isSubType(Type.typeFor(Iterable.class)))) {
             JAST.compilationUnit.reportSemanticError(line(),
                 "Attempting to iterate over a non-iterable type");
         }

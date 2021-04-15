@@ -150,7 +150,13 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     public void declareThisType(Context context) {
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
+        
+        ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream()
+                .map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
+
         CLEmitter partial = new CLEmitter(false);
+
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false); // Object for superClass, just for
                                                                                    // now
         thisType = Type.typeFor(partial.toClass());

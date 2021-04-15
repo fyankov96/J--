@@ -1,15 +1,12 @@
 package pass;
 
-public class Super {
 
-}
- 
-
-public interface Interf {
+interface Interf {
 
 }
 
-public class InterfaceTest extends Super implements Interf  {
+
+class InterfaceTest implements Interf  {
     int test = 0;
 }
 

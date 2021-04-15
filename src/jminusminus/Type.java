@@ -164,31 +164,34 @@ class Type {
      * @return true or false.
      */
 
-    public boolean isIterable() {
-        if (this == Type.ANY | classRep == Iterable.class){
+
+    public boolean isSubType(Type superClass) {
+        if (this == Type.ANY || this.equals(superClass) || classRep.getSuperclass() == superClass.classRep){
             return true;
         }
-        
-        List<Class<?>> classes = new ArrayList<Class<?>>();
-        return computeClassHierarchy(this.classRep, classes);
+        return computeClassHierarchy(superClass.classRep, this.classRep, new ArrayList<Class<?>>());
     }
 
-    private static boolean computeClassHierarchy(Class<?> clazz, List<Class<?>> classes) {
-        boolean isIterable = false;
-        for (Class current = clazz; current != null; current = current.getSuperclass()) {
-            if(classes.contains(current)) {
+    private static boolean computeClassHierarchy(Class<?> target, Class<?> currentLevel, ArrayList<Class<?>> explored) {
+        boolean isTarget = false;
+        for (Class current = currentLevel; current != null; current = current.getSuperclass()) {
+            if(explored.contains(current)) {
                 return false;
             }
-            classes.add(current);
-            
+
             for (Class currentInterface : current.getInterfaces()) {
-                isIterable = isIterable || computeClassHierarchy(currentInterface, classes);
+                if (computeClassHierarchy(target, currentInterface, explored)) {
+                    isTarget = true;
+                    break;
+                }
+                explored.add(currentInterface);
             }
 
-            if (isIterable) {
+            if (isTarget) {
                 return true;
             }
         }
+
         return false;
     }
 

@@ -36,6 +36,7 @@ class JThrowStatement extends JStatement {
      */
 
     public JThrowStatement analyze(Context context) {
+        // Analyzing the expr makes the JThrowStatement use the imported libraries
         expr.analyze(context);
         return this;
     }
@@ -49,7 +50,11 @@ class JThrowStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        
+        // if 
+        // output.addNoArgInstruction(NEW);
+        // output.addNoArgInstruction(DUP);
+        // output.addNoArgInstruction(INVOKESPECIAL);
+        // output.addNoArgInstruction(ATHROW);
     }
 
     /**

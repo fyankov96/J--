@@ -1,8 +1,8 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
 package pass;
-import java.lang.NullPointerException;
 import java.lang.IllegalArgumentException;
+import java.lang.NullPointerException;
 
 public class ExceptionHandling {
     public ExceptionHandling() throws NullPointerException {

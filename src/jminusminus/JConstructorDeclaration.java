@@ -100,6 +100,9 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
             this.context.nextOffset();
         }
 
+        /*ArrayList<String> exceptionsJVMNames = this.exceptions.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));*/
+
         // Declare the parameters. We consider a formal parameter
         // to be always initialized, via a function call. 
         for (JFormalParameter param : params) {
@@ -126,7 +129,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      */
 
     public void partialCodegen(Context context, CLEmitter partial) {
-        partial.addMethod(mods, "<init>", descriptor, null, false);
+        partial.addMethod(mods, "<init>", descriptor, exceptionJVMNames, false);
         if (!invokesConstructor) {
             partial.addNoArgInstruction(ALOAD_0);
             partial.addMemberAccessInstruction(INVOKESPECIAL,
@@ -145,7 +148,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      */
 
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, "<init>", descriptor, null, false);
+        output.addMethod(mods, "<init>", descriptor, exceptionJVMNames, false);
         if (!invokesConstructor) {
             output.addNoArgInstruction(ALOAD_0);
             output.addMemberAccessInstruction(INVOKESPECIAL,

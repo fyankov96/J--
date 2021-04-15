@@ -180,12 +180,6 @@ class JSubtractOp extends JBinaryExpression {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
         
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
-        return this;
-
-        /*
         if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
         } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
@@ -199,7 +193,6 @@ class JSubtractOp extends JBinaryExpression {
                     "Invalid operand types for -");
         }
         return this;
-        */
     }
 
     /**
@@ -259,12 +252,6 @@ class JMultiplyOp extends JBinaryExpression {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
         
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
-        return this;
-
-        /*
         if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
         } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
@@ -278,8 +265,6 @@ class JMultiplyOp extends JBinaryExpression {
                     "Invalid operand types for *");
         }
         return this;
-        */
-
     }
 
     /**
@@ -316,13 +301,7 @@ class JDivideOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
-        return this;
-
-        /*
+        
         if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
         } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
@@ -336,7 +315,6 @@ class JDivideOp extends JBinaryExpression {
                     "Invalid operand types for /");
         }
         return this;
-        */
     }
 
     public void codegen(CLEmitter output)  {
@@ -364,12 +342,6 @@ class JRemainderOp extends JBinaryExpression {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
 
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
-        return this; 
-
-        /*
         if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
             type = Type.INT;
         } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
@@ -383,7 +355,6 @@ class JRemainderOp extends JBinaryExpression {
                     "Invalid operand types for %");
         }
         return this;
-        */
     }
 
     public void codegen(CLEmitter output) {

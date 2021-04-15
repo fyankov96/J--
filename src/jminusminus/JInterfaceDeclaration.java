@@ -44,6 +44,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
             ArrayList<JMember> interfaceBlock) {
         super(line);
         this.mods = mods;
+        mods.add("interface");
         this.name = name;
         this.interfaceSuperTypes = extend;
         this.interfaceBlock = interfaceBlock;
@@ -90,18 +91,25 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      * Declare this interface in the parent (compilation unit) context.
      * 
      * @param context the parent (compilation unit) context.
+     * 
+     * pass/Interface
      */
 
     public void declareThisType(Context context) {
         String packageName = JAST.compilationUnit.packageName();
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? 
+            name : JAST.compilationUnit.packageName() + "/" + name;
 
-        String qualifiedName = packageName.equals("") ? name : packageName.replace(".", "/") + "/" + name;
+
+
+        ArrayList<String> interfaceJVMNames = interfaceSuperTypes.stream()
+                .map(t -> t.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
 
         CLEmitter partial = new CLEmitter(false);
 
-        ArrayList<String> interfaceJVMNames = interfaceSuperTypes.stream()
-                .map(t -> packageName.replace(".", "/") + "/" + t.jvmName())
-                .collect(Collectors.toCollection(ArrayList::new));
+
+
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
 
         thisType = Type.typeFor(partial.toClass());
@@ -112,7 +120,6 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
      * 
      * @param context the parent (compilation unit) context.
      */
-
     @Override
     public void preAnalyze(Context context) {
         // Construct a class context

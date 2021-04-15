@@ -164,14 +164,35 @@ class Type {
      */
 
     public boolean isIterable() {
-        //Implement the interface iterable
-        //Check the entire class hierarchy for the Iterable.class
-        return false;
-        
-        //classRep.getSuperclass() == Iterable.class;
-        //Check for is Type.ANY and other various
+        if (this == Type.ANY | classRep.getSuperclass() == Iterable.class){
+            return true;
+        }
 
+        List<Class<?>> classes = new ArrayList<Class<?>>();
+        return computeClassHierarchy(this, classes);
     }
+
+    private static boolean computeClassHierarchy(Class<?> clazz, List<Class<?>> classes) {
+        boolean isIterable = false;
+        for (Class current = clazz; current != null; current = current.getSuperclass()) {
+            if(classes.contains(current)) {
+                return false;
+            }
+
+            if(current == Iterable.class){
+                return true;
+            }
+
+            for (Class currentInterface : current.getInterfaces()) {
+                isIterable |= computeClassHierarchy(currentInterface, classes);
+            }
+
+            if (isIterable) {
+                return true;
+            }
+        }
+    }
+
 
     /**
      * An array type's component type. Meaningful only for array types.

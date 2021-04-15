@@ -980,7 +980,7 @@ private JStatement statement(): {
  * <pre>
  *
  *  forExpression ::= LPAREN [(forUpdate | type variableDeclarators)] SEMI [expression] SEMI [forUpdate] RPAREN statement
- *                  | LPAREN type variableDeclarator COL expression RPAREN statement
+ *                  | LPAREN type <IDENTIFIER> COL expression RPAREN statement
  * </pre>
  * 
  * @return an AST for a statement.

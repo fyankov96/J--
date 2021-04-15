@@ -73,7 +73,7 @@ class JBlock extends JStatement {
         }
         return this;
     }
-
+    
     /**
      * Generating code for a block consists of generating code for each of its
      * statements.

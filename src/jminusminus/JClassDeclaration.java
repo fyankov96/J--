@@ -245,12 +245,12 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Analyze the static initialization blocks
         for (JBlock sib : staticInitializationBlocks) {
-            sib.analyze(context);
+            sib.analyze(this.context);
         }
 
         // Analyze the instance initialization blocks
         for (JBlock iib : instanceInitializationBlocks) {
-            iib.analyze(context);
+            iib.analyze(this.context);
         }
 
         // Finally, ensure that a non-abstract class has

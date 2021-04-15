@@ -686,16 +686,10 @@ public class Parser {
                 }
             } else if (seeModifier() || seeBasicType() || seeReferenceType() || see(VOID)) {
                 members.add(memberDecl(modifiers()));
-<<<<<<< HEAD
             } else if(seeBlock()) {
                 IIB.add(block());
             }
             else {
-=======
-            } else if (seeBlock()) {
-                IIB.add(block(false, true));
-            } else {
->>>>>>> e1ff39fc41e9816d22d54e2605ab291f74eaa641
                 error = true;
                 break;
             }
@@ -1013,8 +1007,8 @@ public class Parser {
      * 
      *  forExpression ::= 
      *            LPAREN [JStatement {COMMA JStatement}
-     *          | [JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}] RPAREN statement
-     *          | LPAREN JForEachVariable COL expression RPAREN statement
+     *          | [JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}] RPAREN JStatement
+     *          | LPAREN type <IDENTIFIER> COL expression RPAREN JStatement
      * @return A JForStatement
      */
     private JForStatement forStatement() {

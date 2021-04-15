@@ -30,7 +30,7 @@ public class JavaCCParserTestCustom extends TestCase {
         //File passTestsDir = new File("C:\\Users\\thoma\\Kandidat4\\CompilerConstruction\\j--/tests/fail");
 
         File[] files = passTestsDir.listFiles();
-        String toTest = "ForStatement.java";
+        String toTest = "ExceptionHandling.java";
         boolean errorHasOccurred = false;
         for (int i = 0; files != null && i < files.length; i++) {
             if (files[i].toString().endsWith(toTest)) {

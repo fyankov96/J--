@@ -476,9 +476,10 @@ private ArrayList<String> modifiers(): {
  * (super) class implicitly extends the superclass java.lang.Object.
  * 
  * <pre>
- *   classDeclaration ::= CLASS IDENTIFIER
- *                        [EXTENDS qualifiedIdentifier]
- *                        classBody
+ * classDeclaration ::= CLASS IDENTIFIER 
+ *                    [EXTENDS qualifiedIdentifier] 
+ *                    [IMPLEMENTS qualifiedIdentifier {, qualifiedIdentifier}]
+ *                    classBody
  * </pre>
  * 
  * 
@@ -491,7 +492,9 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
     int line = 0;
     String name = "";
     Type superClass = Type.OBJECT;
+    Type superInt = null;
     ArrayList<JMember> classBody = null;
+    ArrayList<Type> superInterfaces = new ArrayList<Type>();
     ArrayList<JBlock> SIB = new ArrayList<JBlock>();
     ArrayList<JBlock> IIB = new ArrayList<JBlock>();
 }
@@ -500,10 +503,15 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
         <CLASS> { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         [
-            <IMPLEMENTS> superClass = qualifiedIdentifier() 
+            <EXTENDS> superClass = qualifiedIdentifier()
         ]
         [
-            <EXTENDS> superClass = qualifiedIdentifier()
+            <IMPLEMENTS>
+            superInt = qualifiedIdentifier() {superInterfaces.add(superInt); }
+            (
+                <COMMA>
+                superInt = qualifiedIdentifier() {superInterfaces.add(superInt); }
+            )*
         ]
         classBody = classBody(SIB,IIB)
     }
@@ -511,7 +519,7 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
     {
-        return new JClassDeclaration(line, mods, name, superClass, classBody, SIB, IIB);
+        return new JClassDeclaration(line, mods, name, superClass, superInterfaces, classBody, SIB, IIB);
     }
 }
 
@@ -571,8 +579,8 @@ private ArrayList<JMember> classBody(ArrayList<JBlock> SIB, ArrayList<JBlock> II
 private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods): {
     int line = 0;
     String name = "";
-    ArrayList<TypeName> superClasses = new ArrayList<TypeName>();
-    TypeName superClass = null;
+    ArrayList<Type> superClasses = new ArrayList<Type>();
+    Type superClass = null;
     ArrayList<JMember> interfaceBody = null;
 }
 {
@@ -901,7 +909,8 @@ private JStatement statement(): {
     JExpression expr      = null;
     
     JBlock tryBlock       = null;
-    JFormalParameter catchParam = null;
+    JFormalParameter catchParam;
+    ArrayList<JFormalParameter> catchParams = new ArrayList<JFormalParameter>();
     JBlock catchBlock     = null;
     JBlock finallyBlock   = null;
 

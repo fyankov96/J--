@@ -1,4 +1,5 @@
 package jminusminus;
+import static jminusminus.CLConstants.*;
 
 public class JTernaryExpression extends JExpression{
         /** The condition to Evaluate */
@@ -64,7 +65,19 @@ public class JTernaryExpression extends JExpression{
         return this;
     }
 
+
     public void codegen(CLEmitter output) {
-        //TODO
+        String elseLabel = output.createLabel();
+        String endLabel = output.createLabel();
+        condition.codegen(output, elseLabel, false);
+        trueExpr.codegen(output);
+        if (falseExpr != null) {
+            output.addBranchInstruction(GOTO, endLabel);
+        }
+        output.addLabel(elseLabel);
+        if (falseExpr != null) {
+            falseExpr.codegen(output);
+            output.addLabel(endLabel);
+        }
     }
 }

@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import static jminusminus.CLConstants.*;
 
 /**
@@ -25,6 +26,9 @@ class JMethodDeclaration extends JAST implements JMember {
 
     /** The potentially thrown exceptions */
     protected ArrayList<TypeName> exceptions;
+
+    /** Exceptions */
+    protected ArrayList<String> exceptionJVMNames;
 
     /** Method body. */
     protected JBlock body;
@@ -150,6 +154,10 @@ class JMethodDeclaration extends JAST implements JMember {
             this.context.nextOffset();
         }
 
+        // Convert the typenames for exceptions to jvmNames
+        exceptionJVMNames = this.exceptions.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
+
         // Declare the parameters. We consider a formal parameter 
         // to be always initialized, via a function call.
         for (JFormalParameter param : params) {
@@ -181,7 +189,7 @@ class JMethodDeclaration extends JAST implements JMember {
     public void partialCodegen(Context context, CLEmitter partial) {
         // Generate a method with an empty body; need a return to
         // make the class verifier happy.
-        partial.addMethod(mods, name, descriptor, null, false);
+        partial.addMethod(mods, name, descriptor, exceptionJVMNames, false);
 
         // Add implicit RETURN
         if (returnType == Type.VOID) {
@@ -206,7 +214,7 @@ class JMethodDeclaration extends JAST implements JMember {
      */
 
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, name, descriptor, null, false);
+        output.addMethod(mods, name, descriptor, exceptionJVMNames, false);
         if (body != null) {
             body.codegen(output);
         }

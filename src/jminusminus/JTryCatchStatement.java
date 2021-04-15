@@ -64,28 +64,24 @@ class JTryCatchStatement extends JStatement {
 
     public JStatement analyze(Context context) {
         this.context = new LocalContext(context);
+
+        // Analyse try block
         tryBlock.analyze(this.context);
 
-        // For iteration through both the catchblock and parameters
-        int listSize = catchParams.size();
+        // For every catch param, analyse the catch block
+        for(int i = 0; i < catchParams.size(); i++) {
 
-
-        for(int i = 0; i < listSize; i++) {
-            
-            // Check for different catchparameters like NullPointerException
-
-            LocalVariableDefn defn = new LocalVariableDefn(catchParams.get(i).type(), 
-                this.context.nextOffset());
-            defn.initialize();
-            this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), defn);
-            
+            // Declare each catchparam into the local context
+            this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), 
+            new LocalVariableDefn(catchParams.get(i).type(), this.context.nextOffset()));
             catchBlocks.get(i).analyze(this.context);
         }
-    
+        
+        // Analyse finally block
         if (finallyBlock != null) {
-            this.context = new LocalContext(context);
-            finallyBlock.analyze(context);
+            finallyBlock.analyze(this.context);
         }
+
         return this;
     }
 
@@ -115,26 +111,23 @@ class JTryCatchStatement extends JStatement {
         tryBlock.writeToStdOut(p);
         p.indentLeft();
         p.printf("</TryBlock>\n");
-        p.printf("<CatchParameter>\n");
-
-        if(this.catchParams != null) {
-            for(JFormalParameter param : this.catchParams) {
-                p.indentRight();
-                param.writeToStdOut(p);
-                p.indentLeft();
-            }
-        }
-
-        p.printf("</CatchParameter>\n");
 
         p.printf("<CatchBlocks>\n");
 
         if(this.catchBlocks != null) {
 
-            for(JBlock block : this.catchBlocks) {
+            for(int i = 0; i < catchBlocks.size(); i++) {
+                p.printf("<CatchParameter>\n");
                 p.indentRight();
-                block.writeToStdOut(p);
+                catchParams.get(i).writeToStdOut(p);
                 p.indentLeft();
+                p.printf("</CatchParameter>\n");
+
+                p.printf("<CatchBlock>\n");
+                p.indentRight();
+                catchBlocks.get(i).writeToStdOut(p);
+                p.indentLeft();
+                p.printf("</CatchBlock>\n");
             }
         }
 

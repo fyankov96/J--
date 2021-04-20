@@ -137,6 +137,17 @@ class JSingleVariableDeclaration extends JStatement {
     }
 
     /**
+     * Sets the initializer to the specified JExpression.
+     * 
+     * @param initializer
+     *            the new initializer.
+     */
+
+    public void setInitializer(JExpression initializer) {
+        this.initializer = initializer;
+    }
+
+    /**
      * Determine whether the variable is valid to declare here.
      * 
      * @param context

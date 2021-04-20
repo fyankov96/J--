@@ -241,6 +241,9 @@ class JForEachStatement extends JForStatement {
     private JBlock forStepBlock;
 
 
+    private static int iterableNum = 0;
+    private static int iteratorNum = 0;
+
     /**
      * Constructs an AST node for a for-each-statement given its line number, the
      * iterating identifier and iterable.
@@ -290,27 +293,41 @@ class JForEachStatement extends JForStatement {
         body.analyze(this.context);
 
 
-        // Analyze the for-step statement
-        if (iterable.type().isArray()) {
-            String iterableName = "a'";
-            String iteratorName = "i'";
+        // Rewrite to a for-step block and analyze
+        if (iterable.type().isArray()) {      //Thomas: Report
+            String iterableName = generateIterableName();
+            String iteratorName = generateIteratorName();
             
-            iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), null, iterable);
+            // Create the iterable _a' = iterable
+            iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), null, iterable); 
 
+            // Create the iterator (int _i' = 0 ; ...
             JVariableDeclarator init = new JVariableDeclarator(line, iteratorName, Type.INT, new JLiteralInt(line(), "0"));
             ArrayList<JVariableDeclarator> initList = new ArrayList<JVariableDeclarator>();
             initList.add(init);
-            initDecl = new JVariableDeclaration(line, null, initList);  //int i' = 0
+            initDecl = new JVariableDeclaration(line, null, initList);
 
+            // Create the condition ... ; _i' < _a'.length ; ...
             JExpression lhs = new JVariable(line(), iteratorName);
             JExpression rhs = new JFieldSelection(line, new JVariable(line(), iterableName), "length");
-            condition = new JLessOp(line(), lhs, rhs);                  // i' < a'.length
+            condition = new JLessOp(line(), lhs, rhs);
 
-            loopSteps.add(new JPostIncrementOp(line(), (JExpression) new JVariable(line(), iteratorName))); //i'++
+            // Create the step ... ; _i'++
+            loopSteps.add(new JPostIncrementOp(line(), (JExpression) new JVariable(line(), iteratorName)));
+
+            // Create the identifier Type identifier = _a'[_i']            
+            identifier.setInitializer(new JArrayExpression(line(), new JVariable(line(), iterableName), new JVariable(line(), iteratorName)));
 
         } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) {
+            // Create the iterator (I _i' = Expression.iterator() ; ...
+
+            // Create the condition ... ; _i'.hasNext() ;
             //condition = new JNotEqualOp(line, lhs, rhs);
+
             //stepStatements = null;
+
+            // Create the identifier Type identifier = _i'.next()
+            //JSingleVariableDeclaration identifier
             
         }
 
@@ -321,10 +338,26 @@ class JForEachStatement extends JForStatement {
         blockStatements.add(forStepNode);
         forStepBlock = new JBlock(line(), blockStatements);
         forStepBlock.analyze(context);
-
-
+        
         return this;
     }
+
+    /**
+     * Generate the next name of the iterable used for rewriting to
+     * a for-step block.
+     */
+    private static String generateIterableName() {
+        return "_a'" + iterableNum++;
+    }
+
+    /**
+     * Generate the next name of the iterator used for rewriting to
+     * a for-step block.
+     */
+    private static String generateIteratorName() {
+        return "_i'" + iteratorNum++;
+    }
+
 
     /**
      * Generates code for the for-each statement by generating the code for the analyzed for-step block.

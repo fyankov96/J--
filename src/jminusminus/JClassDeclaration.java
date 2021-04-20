@@ -142,6 +142,16 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     }
 
     /**
+     * Returns the initialization blocks for instance fields.
+     * 
+     * @return the instance field declaration blocks.
+     */
+
+    public ArrayList<JBlock> instanceInitializationBlocks() {
+        return instanceInitializationBlocks;
+    }
+
+    /**
      * Declares this class in the parent (compilation unit) context.
      * 
      * @param context the parent (compilation unit) context.
@@ -250,13 +260,13 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // Analyze the static initialization blocks
-        for (JBlock sib : staticInitializationBlocks) {
-            sib.analyze(this.context);
+        for (JBlock block : staticInitializationBlocks) {
+            block.analyze(this.context);
         }
 
         // Analyze the instance initialization blocks
-        for (JBlock iib : instanceInitializationBlocks) {
-            iib.analyze(this.context);
+        for (JBlock block : instanceInitializationBlocks) {
+            block.analyze(this.context);
         }
 
         // Finally, ensure that a non-abstract class has
@@ -298,7 +308,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // Generate a class initialization method?
-        if (staticFieldInitializations.size() > 0) {
+        if (staticFieldInitializations.size() > 0 || staticInitializationBlocks.size() > 0) {
             codegenClassInit(output);
         }
     }
@@ -405,8 +415,23 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             instanceField.codegenInitializations(output);
         }
 
+        // If there are instance initialization blocks, generate code for them
+        codegenInstanceInitialization(output);        
+
         // Return
         output.addNoArgInstruction(RETURN);
+    }
+
+    /**
+     * Generates code for instance initialization blocks. Used both when an explicit and implicit constructor is used.
+     * 
+     * @param output the code emitter (basically an abstraction for producing the
+     *               .class file).
+     */
+    protected void codegenInstanceInitialization(CLEmitter output){
+        for (JBlock block : instanceInitializationBlocks) {
+            block.codegen(output);
+        }
     }
 
     /**
@@ -427,6 +452,11 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // for them
         for (JFieldDeclaration staticField : staticFieldInitializations) {
             staticField.codegenInitializations(output);
+        }
+
+        // If there are static initialization blocks, generate code for them
+        for (JBlock block : staticInitializationBlocks) {
+            block.codegen(output);
         }
 
         // Return

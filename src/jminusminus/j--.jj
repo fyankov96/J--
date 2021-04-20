@@ -950,7 +950,7 @@ private JStatement statement(): {
             <FINALLY>
             finallyBlock = block()
         ]
-        { statement = new JTryCatchStatement(line, tryBlock, catchParam, catchBlock, finallyBlock); } |
+        { statement = new JTryCatchStatement(line, tryBlock, null, null, finallyBlock); } |
 
         <FOR> { line = token.beginLine; }
         statement = forStatement() {}  |
@@ -1005,15 +1005,13 @@ private JStatement forStatement(): {
     ArrayList<JStatement> stepStatements            = new ArrayList<JStatement>();
 
     JStatement aStatement       = null;
-    boolean isFinal             = false;
 
-    JForEachVariable identifier = null;
+    JSingleVariableDeclaration identifier = null;
 
-
+    Type varType                = null;
     JExpression loopExpression  = null;
     JStatement body             = null;
 
-    Type varType                = null;
     String varName;
 }
 {
@@ -1022,8 +1020,7 @@ private JStatement forStatement(): {
             [
                 LOOKAHEAD(<FINAL>)
                 <FINAL>
-                { isFinal = true; 
-                  mods.add("final"); }
+                { mods.add("final"); }
             ]
             (
                 LOOKAHEAD((basicType() | qualifiedIdentifier()) <IDENTIFIER> <COLON>)
@@ -1032,10 +1029,10 @@ private JStatement forStatement(): {
                 { varName = token.image; }
                 <COLON>
                 loopExpression = expression()
-                { identifier = new JForEachVariable(line, varName, varType, isFinal); } |
+                { identifier = new JSingleVariableDeclaration(line, varName, varType, mods); } |
 
                 [
-                    LOOKAHEAD(basicType() | qualifiedIdentifier())
+                    LOOKAHEAD((basicType() | qualifiedIdentifier()) <IDENTIFIER>)
                     varType = type()
                     initDeclarators = variableDeclarators(varType)
                     { initDeclaration = new JVariableDeclaration(line, mods, initDeclarators); } |

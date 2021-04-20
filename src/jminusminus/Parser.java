@@ -1029,27 +1029,26 @@ public class Parser {
         ArrayList<JStatement> stepStatements            = new ArrayList<JStatement>();
 
         //For Each
-        boolean isFinal             = false;
-        JForEachVariable identifier = null;
+        JSingleVariableDeclaration identifier = null;
 
         //Common
         Type varType                = null;
         JExpression loopExpression  = null;
         JStatement body             = null;
 
-
+        
         int line = scanner.token().line();
         mustBe(LPAREN);
         
         if(seeForEachVariable()) {
             if(have(FINAL)) {
-                isFinal = true;
+                mods.add("final");
             }
 
             varType = type();
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
-            identifier = new JForEachVariable(line, name, varType, isFinal);
+            identifier = new JSingleVariableDeclaration(line, name, varType, mods);
             mustBe(COL);
             loopExpression = expression();
         } else {
@@ -1642,7 +1641,7 @@ public class Parser {
      * Parse a shift expression.
      * 
      * <pre>
-     *   relationalExpression ::= additiveExpression  // level 4
+     *   shiftExpression ::= additiveExpression  // level 4
      *                              [(GT | LE) additiveExpression 
      *                              | INSTANCEOF referenceType]
      * </pre>
@@ -1669,7 +1668,7 @@ public class Parser {
      * 
      * <pre>
      *   additiveExpression ::= multiplicativeExpression // level 3
-     *                            {MINUS multiplicativeExpression}
+     *                            {(MINUS | PLUS) multiplicativeExpression}
      * </pre>
      * 
      * @return an AST for an additiveExpression.

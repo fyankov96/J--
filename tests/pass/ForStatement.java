@@ -6,7 +6,7 @@ public class ForStatement {
         int b, c;
         int res = 0;
         
-        for(int i = 0, k = 1; 1 + i <= 3; ++i) {
+        for(int i = 0, k = 1; i <= a.length; ++i) {
             res += a[k];
         }
         

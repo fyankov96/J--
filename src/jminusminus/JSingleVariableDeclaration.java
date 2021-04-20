@@ -1,20 +1,29 @@
 package jminusminus;
 
+import java.util.ArrayList;
+
 /**
  * The AST node for a for-each variable declaration.
  */
 
-class JForEachVariable extends JAST {
+class JSingleVariableDeclaration extends JStatement {
 
-    /** Modifiers. */
-    private boolean isFinal;
-
-    /** variable name. */
-    private String name;
-
-    /** variable type. */
+    /** Variable type. */
     private Type type;
 
+    /** Variable Modifiers. */
+    private ArrayList<String> mods;
+
+    /** Variable name. */
+    private String name;
+
+    /** Original Variable initializer. */
+    private JExpression initializer;
+
+    /** Analyzed Variable initializer. */
+    private JStatement initialization;
+
+
     /**
      * Constructs an AST node for a for-each variable declaration given its line
      * number, name, and type.
@@ -27,11 +36,13 @@ class JForEachVariable extends JAST {
      *            variable type.
      */
 
-    public JForEachVariable(int line, String name, Type type) {
+    public JSingleVariableDeclaration(int line, String name, Type type) {
         super(line);
         this.name = name;
         this.type = type;
-        this.isFinal = false;
+        this.mods = null;
+        this.initializer = null;
+        this.initialization = null;
     }
 
     /**
@@ -44,17 +55,45 @@ class JForEachVariable extends JAST {
      *            variable name.
      * @param type
      *            variable type.
-     * @param isFinal
-     *            a flag for whether the variable is final
+     * @param mods
+     *            the modifiers of the variable
      */
 
-    public JForEachVariable(int line, String name, Type type, boolean isFinal) {
+    public JSingleVariableDeclaration(int line, String name, Type type, ArrayList<String> mods) {
         super(line);
         this.name = name;
         this.type = type;
-        this.isFinal = isFinal;
+        this.mods = mods;
+        this.initializer = null;
+        this.initialization = null;
     }
 
+    /**
+     * Constructs an AST node for a for-each variable declaration given its line
+     * number, name, and type.
+     * 
+     * @param line
+     *            line in which the variable occurs in the source file.
+     * @param name
+     *            variable name.
+     * @param type
+     *            variable type.
+     * @param mods
+     *            the modifiers of the variable
+     * @param initializer
+     *            the initialization of the variable
+     */
+
+    public JSingleVariableDeclaration(int line, String name, Type type, ArrayList<String> mods, JExpression initializer) {
+        super(line);
+        this.name = name;
+        this.type = type;
+        this.mods = mods;
+        this.initializer = initializer;
+        this.initialization = null;
+    }
+
+    
     /**
      * Returns the variable's name.
      * 
@@ -76,13 +115,13 @@ class JForEachVariable extends JAST {
     }
 
     /**
-     * Return the flag isFinal.
+     * Return the modifiers
      * 
-     * @return the isFinal boolean.
+     * @return the mods ArrayList.
      */
 
-    public boolean isFinal() {
-        return isFinal;
+    public ArrayList<String> mods() {
+        return mods;
     }
 
     /**
@@ -105,12 +144,11 @@ class JForEachVariable extends JAST {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-    public JAST analyze(Context context) {
+    public JAST analyze(Context context) {        //Thomas: Report
         // Get the local variable declaration
         int offset = ((LocalContext) context).nextOffset();
         LocalVariableDefn defn = new LocalVariableDefn(type.resolve(context), offset);
         
-
         // Check for shadowing
         IDefn previousDefn = context.lookup(name);
         if (previousDefn != null
@@ -118,10 +156,19 @@ class JForEachVariable extends JAST {
             JAST.compilationUnit.reportSemanticError(line,
                     "The name " + name + " overshadows another local variable.");
         }
-        //Thomas: Report
-        // Then initialize it and declare it in the local context
-        defn.initialize();
-        context.addEntry(line, name, defn);
+
+        // Then declare it in the local context and initialize it
+        context.addEntry(line(), name, defn);
+
+        // Initialization must be turned into assignment statement and analyzed
+        if (initializer != null) {
+            defn.initialize();
+            JAssignOp assignOp = new JAssignOp(line(),
+                                  new JVariable(line(), name), initializer);
+            assignOp.isStatementExpression = true;
+            initialization = new JStatementExpression(line(), assignOp).analyze(context);
+        }
+
         return this;
     }
 
@@ -134,7 +181,7 @@ class JForEachVariable extends JAST {
      */
 
     public void codegen(CLEmitter output) {
-        //TODO implement   
+        initialization.codegen(output);
     }
 
     /**
@@ -142,7 +189,7 @@ class JForEachVariable extends JAST {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JForEachVariable line=\"%d\" name=\"%s\" "
+        p.printf("<JSingleVariableDeclaration line=\"%d\" name=\"%s\" "
                 + "type=\"%s\"/>\n", line(), name, (type == null) ? "" : type
                 .toString());
     }

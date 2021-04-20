@@ -30,6 +30,7 @@ public class JavaCCParserTestCustom extends TestCase {
         //File passTestsDir = new File("C:\\Users\\thoma\\Kandidat4\\CompilerConstruction\\j--/tests/fail");
 
         File[] files = passTestsDir.listFiles();
+
         String toTest = "ForEachStatement.java";
         boolean errorHasOccurred = false;
         for (int i = 0; files != null && i < files.length; i++) {

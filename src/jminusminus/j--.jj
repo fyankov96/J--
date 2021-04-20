@@ -909,8 +909,9 @@ private JStatement statement(): {
     JExpression expr      = null;
     
     JBlock tryBlock       = null;
-    JFormalParameter catchParam;
+    JFormalParameter catchParam = null;
     ArrayList<JFormalParameter> catchParams = new ArrayList<JFormalParameter>();
+    ArrayList<JBlock> catchBlocks = new ArrayList<JBlock>();
     JBlock catchBlock     = null;
     JBlock finallyBlock   = null;
 
@@ -940,17 +941,22 @@ private JStatement statement(): {
 
         <TRY> { line = token.beginLine; }
         tryBlock = block()
-        <CATCH>
-        <LPAREN>
-        catchParam = formalParameter()
-        <RPAREN>
-        catchBlock = block()
+        (
+            <CATCH>
+            <LPAREN>
+            catchParam = formalParameter()
+            { catchParams.add(catchParam); }
+            <RPAREN>
+            catchBlock = block()
+            { catchBlocks.add(catchBlock); }
+        )*
+
         [
             LOOKAHEAD(<FINALLY>)
             <FINALLY>
             finallyBlock = block()
         ]
-        { statement = new JTryCatchStatement(line, tryBlock, null, null, finallyBlock); } |
+        { statement = new JTryCatchStatement(line, tryBlock, catchParams, catchBlocks, finallyBlock); } |
 
         <FOR> { line = token.beginLine; }
         statement = forStatement() {}  |

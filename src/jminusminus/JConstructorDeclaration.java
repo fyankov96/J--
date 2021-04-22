@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 import static jminusminus.CLConstants.*;
 
 /**
@@ -100,8 +101,22 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
             this.context.nextOffset();
         }
 
-        /*ArrayList<String> exceptionsJVMNames = this.exceptions.stream().map(x -> x.jvmName())
-                .collect(Collectors.toCollection(ArrayList::new));*/
+        // Resolve exception types
+        ArrayList<Type> exceptionTypes = new ArrayList<Type>();
+        exceptionTypes = exceptions.stream().map(x -> x.resolve(this.context))
+        .collect(Collectors.toCollection(ArrayList::new));
+        
+        // Add the exceptions into the context
+        if (!exceptionTypes.isEmpty()) {
+            for(Type exception : exceptionTypes) {
+                methodContext.addException(exception);
+                System.out.println("exception added to context, check methoddelcaration 166");
+            }
+        }
+                
+        // Convert the typenames for exceptions to jvmNames
+        exceptionJVMNames = this.exceptions.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
 
         // Declare the parameters. We consider a formal parameter
         // to be always initialized, via a function call. 
@@ -160,6 +175,15 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
                 .instanceFieldInitializations()) {
             field.codegenInitializations(output);
         }
+        
+        // Field initialization blocks
+        definingClass.codegenInstanceInitialization(output);
+        /*
+        for (JBlock block : definingClass.instanceInitializationBlocks()) {
+            block.codegen(output);
+        }
+        */
+
         // And then the body
         body.codegen(output);
         output.addNoArgInstruction(RETURN);

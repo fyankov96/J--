@@ -4,7 +4,6 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The AST node for a for-statement.
@@ -23,7 +22,6 @@ abstract class JForStatement extends JStatement {
 
 class JForStepStatement extends JForStatement {
 
-
     /* Variable update statements */
     private ArrayList<JStatement> initStatements;
 
@@ -39,6 +37,13 @@ class JForStepStatement extends JForStatement {
     /* The new context (built in analyze()) for defining variables used in the loop. */
     private LocalContext context;
 
+
+    /* Ingredients for re-writing to while-statement*/
+    private ArrayList<JStatement> statements = new ArrayList<JStatement>();
+    private JWhileStatement whileStatement;
+    private JBlock whileBlock;
+
+    
     /**
      * Constructs an AST node for a while-statement given its line number, the
      * test expression, and the body.
@@ -72,17 +77,35 @@ class JForStepStatement extends JForStatement {
      * analyzing each update statement
      * and finally analyzing the body statement.
      * 
+     * Possibly we rewrite this as a while-statement
+     * 
      * @param context
      *            context in which names are resolved.
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-    public JForStepStatement analyze(Context context) {
+    public /*JBlock*/ JForStepStatement analyze(Context context) {  
+        /*
+        if (initStatements.size() > 0){
+            for (JStatement init : initStatements){
+                statements.add(init);
+            }
+        }
+        if(initDeclarations != null) {
+            statements.add((JStatement)initDeclarations);
+        }
+
+        whileStatement = new JWhileStatement(line(), condition, body);
+        statements.add(whileStatement);
+        
+        whileBlock = new JBlock(line(), statements).analyze(context);
+        return whileBlock;
+        */
         this.context = new LocalContext(context);
 
         if (initStatements.size() > 0){
-            for (JStatement init : initStatements){
-                init.analyze(this.context);
+            for (JStatement statement : initStatements){
+                statement.analyze(this.context);
             }
         }
     
@@ -91,22 +114,22 @@ class JForStepStatement extends JForStatement {
         }
 
         if(condition != null) {
-            condition = (JExpression) condition.analyze(this.context);
+            condition.analyze(this.context);
             condition.type().mustMatchExpected(line(), Type.BOOLEAN);
         }
 
         if(stepStatements.size() > 0) {
-            for (JStatement stmt : stepStatements){
-                stmt.analyze(this.context);
+            for (JStatement statement : stepStatements){
+                statement.analyze(this.context);
             }
         }
 
-        body = (JStatement) body.analyze(this.context);
+        body.analyze(context);
         return this;
     }
 
     /**
-     * Generates code for the while loop.
+     * Generates code for the for-loop loop.
      * 
      * @param output
      *            the code emitter (basically an abstraction for producing the
@@ -114,7 +137,37 @@ class JForStepStatement extends JForStatement {
      */
 
     public void codegen(CLEmitter output) {
-        //TODO implement
+        String loopLabel = output.createLabel();
+        String endLabel = output.createLabel();
+
+        if (initStatements.size() > 0){
+            for (JStatement init : initStatements){
+                init.codegen(output);
+            }
+        }
+    
+        if(initDeclarations != null) {
+            initDeclarations.codegen(output);
+        }
+
+        //Label
+        output.addLabel(loopLabel);
+
+        if(condition != null) {
+            condition.codegen(output, endLabel, false);
+        }
+
+        if(stepStatements.size() > 0) {
+            for (JStatement stmt : stepStatements){
+                stmt.codegen(output);
+            }
+        }
+
+        body.codegen(output);
+
+        output.addBranchInstruction(GOTO, loopLabel);
+
+        output.addLabel(endLabel);
     }
 
     /**
@@ -164,16 +217,32 @@ class JForStepStatement extends JForStatement {
 
 }
 
+
 class JForEachStatement extends JForStatement {
 
     /* Iterating identifier */
-    private JForEachVariable identifier;
+    private JSingleVariableDeclaration identifier;
 
     /* Iterable expression */
     private JExpression iterable;
 
     /* The new context (built in analyze()) for defining variables used in the loop. */
     private LocalContext context;
+
+
+    /* For-step statement resulting from analysis */
+    private JSingleVariableDeclaration iterableDecl;
+    private JVariableDeclaration initDecl;
+    private JExpression condition;
+    private ArrayList<JStatement> loopSteps;
+
+    private JForStepStatement forStepNode;
+    private ArrayList<JStatement> blockStatements;
+    private JBlock forStepBlock;
+
+
+    private static int iterableNum = 0;
+    private static int iteratorNum = 0;
 
     /**
      * Constructs an AST node for a for-each-statement given its line number, the
@@ -189,7 +258,7 @@ class JForEachStatement extends JForStatement {
      *            the body.
      */
 
-    public JForEachStatement(int line, JForEachVariable identifier, JExpression iterable, JStatement body) {
+    public JForEachStatement(int line, JSingleVariableDeclaration identifier, JExpression iterable, JStatement body) {
         super(line, body);
         this.identifier = identifier;
         this.iterable = iterable;
@@ -205,11 +274,11 @@ class JForEachStatement extends JForStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-    public JForEachStatement analyze(Context context) {
+    public /*JBlock*/ JForEachStatement analyze(Context context) {  //Thomas: Report
         this.context = new LocalContext(context);
 
-        identifier = (JForEachVariable) identifier.analyze(this.context);
-        iterable = (JExpression) iterable.analyze(this.context);
+        identifier.analyze(this.context);
+        iterable.analyze(this.context);
 
         if (!(iterable.type().isArray() || iterable.type().isSubType(Type.typeFor(Iterable.class)))) {
             JAST.compilationUnit.reportSemanticError(line(),
@@ -221,12 +290,77 @@ class JForEachStatement extends JForStatement {
                 "Using " + identifier.type() + " type to iterate over " + iterable.type().componentType() + " array");
         }
 
-        body = (JStatement) body.analyze(this.context);
+        body.analyze(this.context);
+
+
+        // Rewrite to a for-step block and analyze
+        if (iterable.type().isArray()) {      //Thomas: Report
+            String iterableName = generateIterableName();
+            String iteratorName = generateIteratorName();
+            
+            // Create the iterable _a' = iterable
+            iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), null, iterable); 
+
+            // Create the iterator (int _i' = 0 ; ...
+            JVariableDeclarator init = new JVariableDeclarator(line, iteratorName, Type.INT, new JLiteralInt(line(), "0"));
+            ArrayList<JVariableDeclarator> initList = new ArrayList<JVariableDeclarator>();
+            initList.add(init);
+            initDecl = new JVariableDeclaration(line, null, initList);
+
+            // Create the condition ... ; _i' < _a'.length ; ...
+            JExpression lhs = new JVariable(line(), iteratorName);
+            JExpression rhs = new JFieldSelection(line, new JVariable(line(), iterableName), "length");
+            condition = new JLessOp(line(), lhs, rhs);
+
+            // Create the step ... ; _i'++
+            loopSteps.add(new JPostIncrementOp(line(), (JExpression) new JVariable(line(), iteratorName)));
+
+            // Create the identifier Type identifier = _a'[_i']            
+            identifier.setInitializer(new JArrayExpression(line(), new JVariable(line(), iterableName), new JVariable(line(), iteratorName)));
+
+        } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) {
+            // Create the iterator (I _i' = Expression.iterator() ; ...
+
+            // Create the condition ... ; _i'.hasNext() ;
+            //condition = new JNotEqualOp(line, lhs, rhs);
+
+            //stepStatements = null;
+
+            // Create the identifier Type identifier = _i'.next()
+            //JSingleVariableDeclaration identifier
+            
+        }
+
+        forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, body);
+
+        blockStatements = new ArrayList<JStatement>();
+        blockStatements.add(iterableDecl);
+        blockStatements.add(forStepNode);
+        forStepBlock = new JBlock(line(), blockStatements);
+        forStepBlock.analyze(context);
+        
         return this;
     }
 
     /**
-     * Generates code for the while loop.
+     * Generate the next name of the iterable used for rewriting to
+     * a for-step block.
+     */
+    private static String generateIterableName() {
+        return "_a'" + iterableNum++;
+    }
+
+    /**
+     * Generate the next name of the iterator used for rewriting to
+     * a for-step block.
+     */
+    private static String generateIteratorName() {
+        return "_i'" + iteratorNum++;
+    }
+
+
+    /**
+     * Generates code for the for-each statement by generating the code for the analyzed for-step block.
      * 
      * @param output
      *            the code emitter (basically an abstraction for producing the
@@ -234,7 +368,7 @@ class JForEachStatement extends JForStatement {
      */
 
     public void codegen(CLEmitter output) {
-        //TODO implement
+        forStepBlock.codegen(output);
     }
 
     /**

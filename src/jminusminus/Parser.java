@@ -310,10 +310,20 @@ public class Parser {
 
     private boolean seeForEachVariable() {
         scanner.recordPosition();
-        if (have(IDENTIFIER)) {}
-        else if (seeBasicType()) {
+        have(FINAL);
+
+        if (have(IDENTIFIER)) {
+            // A qualified identifier is ok
+            while (have(DOT)) {
+                if (!have(IDENTIFIER)) {
+                    scanner.returnToPosition();
+                    return false;
+                }
+            }
+        } else if (seeBasicType()) {
             scanner.next();
         } else {
+            scanner.returnToPosition();
             return false;
         }
         
@@ -373,10 +383,10 @@ public class Parser {
     }
 
     /**
-     * Are we looking at a qualified identifier? ie.
+     * Are we looking at a qualified identifier and NOT just an identifier? ie.
      * 
      * <pre>
-     *   qualifiedIdentifier ::= IDENTIFIER {DOT IDENTIFIER}
+     *   qualifiedIdentifier ::= IDENTIFIER DOT IDENTIFIER {DOT IDENTIFIER}
      * </pre>
      * 
      * @return true iff we're looking at a qualified identifier; false otherwise.
@@ -384,9 +394,8 @@ public class Parser {
 
     private boolean seeQualifiedIdentifier() {
         scanner.recordPosition();
-        have(IDENTIFIER);
-        while (have(DOT)) {
-            if(!have(IDENTIFIER)) {
+        if(have(IDENTIFIER)) {
+            if(!have(DOT)) {
                 scanner.returnToPosition();
                 return false;
             }
@@ -1013,44 +1022,53 @@ public class Parser {
      */
     private JForStatement forStatement() {
         //For Step
-        ArrayList<JStatement> initStatements = new ArrayList<JStatement>();
-        ArrayList<JVariableDeclarator> initDeclarators = new ArrayList<JVariableDeclarator>();
-        JVariableDeclaration initDeclaration = null;
-        ArrayList<JStatement> stepStatements = new ArrayList<JStatement>();
+        ArrayList<JStatement> initStatements            = new ArrayList<JStatement>();
+        ArrayList<String> mods                          = new ArrayList<String>();
+        ArrayList<JVariableDeclarator> initDeclarators  = new ArrayList<JVariableDeclarator>();
+        JVariableDeclaration initDeclaration            = null;
+        ArrayList<JStatement> stepStatements            = new ArrayList<JStatement>();
 
         //For Each
-        boolean isForEach = false;
-        JForEachVariable identifier = null;
+        JSingleVariableDeclaration identifier = null;
 
         //Common
-        Type varType;
-        JExpression loopExpression = null;
-        JStatement body = null;
+        Type varType                = null;
+        JExpression loopExpression  = null;
+        JStatement body             = null;
 
-
+        
         int line = scanner.token().line();
         mustBe(LPAREN);
         
-        isForEach = seeForEachVariable();
-             
-        if(isForEach) {
+        if(seeForEachVariable()) {
+            if(have(FINAL)) {
+                mods.add("final");
+            }
+
             varType = type();
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
-
-            identifier = new JForEachVariable(line, name, varType);
-        
+            identifier = new JSingleVariableDeclaration(line, name, varType, mods);
             mustBe(COL);
             loopExpression = expression();
         } else {
             if(!see(SEMI)) {
-                if(seeBasicType()) {
+                if(have(FINAL)) {
+                    mods.add("final");
                     initDeclarators = variableDeclarators(type());
-                    initDeclaration = new JVariableDeclaration(line, null, initDeclarators);
-                } else {
+                    initDeclaration = new JVariableDeclaration(line, mods, initDeclarators);
+                } else if(seeBasicType()) {
+                    initDeclarators = variableDeclarators(type());
+                    initDeclaration = new JVariableDeclaration(line, mods, initDeclarators);
+                } else if(seeQualifiedIdentifier()) {
+                    initDeclarators = variableDeclarators(type());
+                    initDeclaration = new JVariableDeclaration(line, mods, initDeclarators);
+                } else if(see(IDENTIFIER)) {
                     do {
                         initStatements.add(statementExpression());
                     } while (have(COMMA));
+                } else {
+                    reportParserError("Invalid for-step-statement initialization.");
                 }
             }
             mustBe(SEMI);
@@ -1065,7 +1083,7 @@ public class Parser {
         mustBe(RPAREN);
         body = statement();
 
-        if(isForEach) {
+        if(identifier != null) {
             return new JForEachStatement(line, identifier, loopExpression, body);
         } else {
             return new JForStepStatement(line, initStatements, initDeclaration, loopExpression, stepStatements, body);
@@ -1623,7 +1641,7 @@ public class Parser {
      * Parse a shift expression.
      * 
      * <pre>
-     *   relationalExpression ::= additiveExpression  // level 4
+     *   shiftExpression ::= additiveExpression  // level 4
      *                              [(GT | LE) additiveExpression 
      *                              | INSTANCEOF referenceType]
      * </pre>
@@ -1650,7 +1668,7 @@ public class Parser {
      * 
      * <pre>
      *   additiveExpression ::= multiplicativeExpression // level 3
-     *                            {MINUS multiplicativeExpression}
+     *                            {(MINUS | PLUS) multiplicativeExpression}
      * </pre>
      * 
      * @return an AST for an additiveExpression.

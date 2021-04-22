@@ -38,7 +38,31 @@ class JThrowStatement extends JStatement {
     public JThrowStatement analyze(Context context) {
         // Analyzing the expr makes the JThrowStatement use the imported libraries
         expr.analyze(context);
-        return this;
+
+        // Check if the expr is the type throwable
+        if (!(expr.type().isSubType(Type.typeFor(Throwable.class))))  {
+            JAST.compilationUnit.reportSemanticError(line(),
+                "Attempting to throw a non-throwable type");
+                // System.out.println(context.getExceptions().toString());
+        } else if (context.getExceptions().contains(expr.type())) {
+            // Check if it exists or not in the local context, if it does, don't add it.
+            JAST.compilationUnit.reportSemanticError(line, "Exception already exists: "
+            + expr.type().toString());
+        } else if (context.methodContext().getExceptions().contains(expr.type()) &&
+                    !context.getExceptions().contains(expr.type())){
+            // Check if it exists in the methodcontext, but doesn't exist in the local context
+            // then add to local
+            context.addException(expr.line(), expr.type());
+            return this;
+        } else if (!context.methodContext().getExceptions().contains(expr.type()) &&
+        !context.getExceptions().contains(expr.type())){
+            // If it doesn't exist in both
+            context.addException(expr.line(), expr.type());
+            context.methodContext().addException(expr.line(), expr.type());
+            return this;
+        }
+        // Return null, if it break rules
+        return null;
     }
 
     /**

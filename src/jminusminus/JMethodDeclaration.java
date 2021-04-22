@@ -154,6 +154,19 @@ class JMethodDeclaration extends JAST implements JMember {
             this.context.nextOffset();
         }
 
+        // Resolve exception types
+        ArrayList<Type> exceptionTypes = new ArrayList<Type>();
+        exceptionTypes = exceptions.stream().map(x -> x.resolve(this.context))
+        .collect(Collectors.toCollection(ArrayList::new));
+
+        // Add the exceptions into the context
+        if (!exceptionTypes.isEmpty()) {
+            for(Type exception : exceptionTypes) {
+                methodContext.addException(exception);
+                // System.out.println("exception added to context, check methoddelcaration 166");
+            }
+        }
+        
         // Convert the typenames for exceptions to jvmNames
         exceptionJVMNames = this.exceptions.stream().map(x -> x.jvmName())
                 .collect(Collectors.toCollection(ArrayList::new));

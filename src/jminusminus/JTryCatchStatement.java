@@ -4,7 +4,7 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 import java.util.ArrayList;
-
+import java.util.stream.Collectors;
 
 /**
  * The AST node for a try-catch-statement.
@@ -63,22 +63,40 @@ class JTryCatchStatement extends JStatement {
      */
 
     public JStatement analyze(Context context) {
-        this.context = new LocalContext(context);
-
         // Analyse try block
-        tryBlock.analyze(this.context);
+        tryBlock.analyze(context);
+
+        // Convert the catchparams to the formats of exceptions
+        ArrayList<Type> catchExceptions = new ArrayList<>();
+
+        /*for(JFormalParameter catchParam : catchParams) {
+            catchExceptions.add(("java.lang." + catchParam));
+        }*/
 
         // For every catch param, analyse the catch block
         for(int i = 0; i < catchParams.size(); i++) {
+            this.context = new LocalContext(context);
 
-            // Declare each catchparam into the local context
-            this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), 
-            new LocalVariableDefn(catchParams.get(i).type(), this.context.nextOffset()));
+            // Check if current catchparam is valid
+            //System.out.print(catchParams.get(i).type().toString());
+            if (!(catchParams.get(i).type().equals(Type.typeFor(Throwable.class)))) {
+                                JAST.compilationUnit.reportSemanticError(catchParams.get(i).line(),
+                "Attempting to catch a non-throwable type");
+            } else {
+                this.context.addException(catchParams.get(i).line(), catchParams.get(i).type());
+            
+            }
+
+            //System.out.println(context.methodContext().getExceptions().toString());
+            // System.out.println(this.context.getExceptions().toString());
+            //this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), 
+            //new LocalVariableDefn(catchParams.get(i).type(), this.context.nextOffset()));
             catchBlocks.get(i).analyze(this.context);
         }
         
         // Analyse finally block
         if (finallyBlock != null) {
+            this.context = new LocalContext(context);
             finallyBlock.analyze(this.context);
         }
 
@@ -96,7 +114,29 @@ class JTryCatchStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
+        /*String tryLabel = output.createLabel();
+        String catchLabel = output.createLabel();
+        String finallyLabel = output.createLabel();
 
+        tryBlock.codegen(output,tryLabel,false);
+
+        for(Block catchblock : catchBlocks) {
+            catchblock.codegen(output);
+            output.addLabel(catchLabel);
+        }*/
+
+        //if (finallyBlock !=)
+        
+        /*condition.codegen(output, elseLabel, false);
+        thenPart.codegen(output);
+        if (elsePart != null) {
+            output.addBranchInstruction(GOTO, endLabel);
+        }
+        output.addLabel(elseLabel);
+        if (elsePart != null) {
+            elsePart.codegen(output);
+            output.addLabel(endLabel);
+        }*/
     }
 
     /**

@@ -187,6 +187,10 @@ class Type {
                 explored.add(currentInterface);
             }
 
+            if(current.equals(target)){
+                return true;
+            }
+
             if (isTarget) {
                 return true;
             }

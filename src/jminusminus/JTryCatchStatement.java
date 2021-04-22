@@ -66,20 +66,23 @@ class JTryCatchStatement extends JStatement {
         // Analyse try block
         tryBlock.analyze(context);
 
-        // Convert the catchparams to the formats of exceptions
-        ArrayList<Type> catchExceptions = new ArrayList<>();
-
-        /*for(JFormalParameter catchParam : catchParams) {
-            catchExceptions.add(("java.lang." + catchParam));
-        }*/
+        for(JFormalParameter catchParam : catchParams) {
+            catchParam.setType((new TypeName(catchParam.line(), "java.lang." + catchParam.type().toString())).resolve(context.methodContext()));
+        }
 
         // For every catch param, analyse the catch block
         for(int i = 0; i < catchParams.size(); i++) {
             this.context = new LocalContext(context);
+            catchParams.get(i).analyze(this.context);
+            catchBlocks.get(i).analyze(this.context);
+
+            /*catchParams.get(i).setType(new TypeName(catchParams.get(i).line(), 
+            "java.lang." + catchParams.get(i).type().toString()));
+            catchParams.get(i).type().resolve(this.context);*/
 
             // Check if current catchparam is valid
-            //System.out.print(catchParams.get(i).type().toString());
-            if (!(catchParams.get(i).type().equals(Type.typeFor(Throwable.class)))) {
+            System.out.println(catchParams.get(i).type().toString());
+            if (!(catchParams.get(i).type().isSubType(Type.typeFor(Throwable.class)))) {
                                 JAST.compilationUnit.reportSemanticError(catchParams.get(i).line(),
                 "Attempting to catch a non-throwable type");
             } else {
@@ -91,7 +94,7 @@ class JTryCatchStatement extends JStatement {
             // System.out.println(this.context.getExceptions().toString());
             //this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), 
             //new LocalVariableDefn(catchParams.get(i).type(), this.context.nextOffset()));
-            catchBlocks.get(i).analyze(this.context);
+           
         }
         
         // Analyse finally block
@@ -104,9 +107,7 @@ class JTryCatchStatement extends JStatement {
     }
 
     /**
-     * Code generation for an if-statement. We generate code to branch over the
-     * consequent if !test; the consequent is followed by an unconditonal branch
-     * over (any) alternate.
+     * Code generation for an trycatch-statement. 
      * 
      * @param output
      *            the code emitter (basically an abstraction for producing the

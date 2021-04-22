@@ -166,6 +166,9 @@ class Type {
 
 
     public boolean isSubType(Type superClass) {
+        if (classRep == null) {
+            System.out.println("something");
+        }
         if (this == Type.ANY || this.equals(superClass) || classRep.getSuperclass() == superClass.classRep){
             return true;
         }

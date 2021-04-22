@@ -15,24 +15,6 @@ class InterfaceTest implements SubInterf  {
     void b(int a) {
 
     }
-
-    void a(int a) {
-
-    }
-
-    void a() {
-
-    }
-
-
-    void b() {
-        
-    }
-
-    int b() {
-        return 2;
-    }
-
 }
 
 

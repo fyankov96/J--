@@ -130,6 +130,25 @@ class JMethodDeclaration extends JAST implements JMember {
         partialCodegen(context, partial);
     }
 
+    public void setAbstract() {
+        this.isAbstract = true;
+        if(!this.mods.contains("abstract")) {
+            this.mods.add("abstract");
+        }
+    }
+
+    public void setStatic(boolean isStatic) {
+        this.isStatic = true;
+        if(!this.mods.contains("static")) {
+            this.mods.add("static");
+        }
+    }
+
+    public boolean isStatic() {
+        return this.isStatic;
+    }
+
+
     /**
      * Analysis for a method declaration involves (1) creating a
      * new method context (that records the return type; this is
@@ -206,7 +225,7 @@ class JMethodDeclaration extends JAST implements JMember {
     }
 
     /**
-     * Generates code for the method declaration.
+     * Generates code for the method declaration.setAbstract
      * 
      * @param output
      *                the code emitter (basically an abstraction

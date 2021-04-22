@@ -45,6 +45,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         super(line);
         this.mods = mods;
         mods.add("interface");
+        mods.add("abstract");
         this.name = name;
         this.interfaceSuperTypes = extend;
         this.interfaceBlock = interfaceBlock;
@@ -148,6 +149,19 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
                 JAST.compilationUnit.reportSemanticError(line(), "Member %s is not a valid interface member",
                         member.toString());
             }
+            if (member instanceof JMethodDeclaration) {
+                JMethodDeclaration method = (JMethodDeclaration) member;
+                if(!method.isStatic()) {
+                    method.setAbstract();
+                } //If the method is not static set it to abstract
+                member = method;
+            }   
+            if (member instanceof JFieldDeclaration) {
+                JFieldDeclaration field = (JFieldDeclaration) member;
+                field.setStatic();
+                field.setFinal();
+                member = field;
+            }   
 
             member.preAnalyze(this.context, partial);
         }

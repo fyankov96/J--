@@ -9,6 +9,8 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * For representing j-- types. All types are represented underneath (in the
@@ -220,6 +222,17 @@ class Type {
                 : typeFor(classRep.getSuperclass());
     }
 
+
+    public ArrayList<Type> superInterfaces() {
+        if(classRep == null) {
+            return new ArrayList<Type>();
+        }
+        Class<?>[] interfaces = classRep.getInterfaces();
+
+        return interfaces == null ? new ArrayList<Type>() : Arrays.stream(interfaces).map(x -> typeFor(x))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
     /**
      * Is this a primitive type?
      * 
@@ -296,8 +309,11 @@ class Type {
      */
 
     public ArrayList<Method> abstractMethods() {
-        ArrayList<Method> inheritedAbstractMethods = superClass() == null ? new ArrayList<Method>()
-                : superClass().abstractMethods();
+        ArrayList<Method> inheritedAbstractMethods = new ArrayList<>();
+        if(superClass() != null) {
+            inheritedAbstractMethods.addAll(superClass().abstractMethods());
+        } 
+        superInterfaces().forEach(interf -> inheritedAbstractMethods.addAll(interf.abstractMethods()));
         ArrayList<Method> abstractMethods = new ArrayList<Method>();
         ArrayList<Method> declaredConcreteMethods = declaredConcreteMethods();
         ArrayList<Method> declaredAbstractMethods = declaredAbstractMethods();

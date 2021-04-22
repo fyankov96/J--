@@ -18,7 +18,7 @@ classDeclaration ::= CLASS IDENTIFIER
 
 interfaceDeclaration ::= INTERFACE IDENTIFIER
                           [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
-                          classBody
+                          interfaceBody
 
 classBody ::= LCURLY {
             SEMI
@@ -27,7 +27,13 @@ classBody ::= LCURLY {
             | block
             } RCURLY
 
-interfaceBody ::= LCURLY {(VOID | type) IDENTIFIER formalParameters SEMI} RCURLY            
+interfaceBody ::= LCURLY
+                  { modifiers interfaceMemberDecl }
+                  RCURLY       
+
+interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
+                        formalParameters SEMI
+                        | type variableDeclarators SEMI
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block

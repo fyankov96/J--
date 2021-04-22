@@ -7,7 +7,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.stream.Collector;
@@ -166,7 +165,6 @@ class Type {
      * @return true or false.
      */
 
-
     public boolean isSubType(Type superClass) {
         if (this == Type.ANY || this.equals(superClass) || classRep.getSuperclass() == superClass.classRep){
             return true;
@@ -181,16 +179,16 @@ class Type {
                 return false;
             }
 
+            if(current.equals(target)){
+                return true;
+            }
+
             for (Class currentInterface : current.getInterfaces()) {
                 if (computeClassHierarchy(target, currentInterface, explored)) {
                     isTarget = true;
                     break;
                 }
                 explored.add(currentInterface);
-            }
-
-            if(current.equals(target)){
-                return true;
             }
 
             if (isTarget) {
@@ -321,8 +319,10 @@ class Type {
         ArrayList<Method> declaredAbstractMethods = declaredAbstractMethods();
         abstractMethods.addAll(declaredAbstractMethods);
         for (Method method : inheritedAbstractMethods) {
-            if (!declaredConcreteMethods.contains(method)
-                    && !declaredAbstractMethods.contains(method)) {
+            boolean isImplementation = declaredConcreteMethods.stream().filter(x -> method.equals(x)).count() > 0;
+            boolean isAbstractDeclaration = declaredConcreteMethods.stream().filter(x -> method.equals(x)).count() > 0;
+            if (!isImplementation
+                    && !isAbstractDeclaration) {
                 abstractMethods.add(method);
             }
         }

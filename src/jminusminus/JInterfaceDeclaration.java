@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 class JInterfaceDeclaration extends JAST implements JTypeDecl {
@@ -49,6 +50,10 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         this.name = name;
         this.interfaceSuperTypes = extend;
         this.interfaceBlock = interfaceBlock;
+        this.staticFieldInitializations = this.interfaceBlock.stream()
+            .filter(x -> x instanceof JFieldDeclaration)
+            .map(x -> (JFieldDeclaration) x)
+            .collect(Collectors.toCollection(ArrayList::new));
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
     }
@@ -198,7 +203,23 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     }
 
     public void codegen(CLEmitter output) {
+        ArrayList<String> interfaceJVMNames = interfaceSuperTypes.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
 
+        // Add the class header
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        output.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
+
+        // Generate code for the interface members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).codegen(output);
+        }
+
+        // Generate code for the static fields
+        for (JFieldDeclaration staticField : staticFieldInitializations) {
+            staticField.codegenInitializations(output);
+        }
     }
 
     

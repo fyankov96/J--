@@ -2,14 +2,18 @@ package pass;
 
 
 interface Interf {
-    void a();
+    static int d = 4;
+
+    int e = 5;
+    
+    int a();
 }
 
 interface SubInterf extends pass.Interf {
-    void b();
+    int b();
 }
 
-
+/*
 class InterfaceTest implements SubInterf  {
     int test = 1;
     void b(int a) {
@@ -20,19 +24,25 @@ class InterfaceTest implements SubInterf  {
 
     }
 
-    void a() {
-
+    int a() {
+        return 1;
     }
 
-
-    void b() {
-        
-    }
 
     int b() {
         return 2;
     }
 
-}
+}*/
 
+class SubClass implements Interf {
+    int c = 4;
+
+
+
+    public int a() {
+        return 2;
+    }
+
+}
 

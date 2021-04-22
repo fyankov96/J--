@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 class JInterfaceDeclaration extends JAST implements JTypeDecl {
@@ -45,9 +46,14 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         super(line);
         this.mods = mods;
         mods.add("interface");
+        mods.add("abstract");
         this.name = name;
         this.interfaceSuperTypes = extend;
         this.interfaceBlock = interfaceBlock;
+        this.staticFieldInitializations = this.interfaceBlock.stream()
+            .filter(x -> x instanceof JFieldDeclaration)
+            .map(x -> (JFieldDeclaration) x)
+            .collect(Collectors.toCollection(ArrayList::new));
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
     }
@@ -148,6 +154,19 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
                 JAST.compilationUnit.reportSemanticError(line(), "Member %s is not a valid interface member",
                         member.toString());
             }
+            if (member instanceof JMethodDeclaration) {
+                JMethodDeclaration method = (JMethodDeclaration) member;
+                if(!method.isStatic()) {
+                    method.setAbstract();
+                } //If the method is not static set it to abstract
+                member = method;
+            }   
+            if (member instanceof JFieldDeclaration) {
+                JFieldDeclaration field = (JFieldDeclaration) member;
+                field.setStatic();
+                field.setFinal();
+                member = field;
+            }   
 
             member.preAnalyze(this.context, partial);
         }
@@ -184,7 +203,23 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
     }
 
     public void codegen(CLEmitter output) {
+        ArrayList<String> interfaceJVMNames = interfaceSuperTypes.stream().map(x -> x.jvmName())
+                .collect(Collectors.toCollection(ArrayList::new));
 
+        // Add the class header
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        output.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
+
+        // Generate code for the interface members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).codegen(output);
+        }
+
+        // Generate code for the static fields
+        for (JFieldDeclaration staticField : staticFieldInitializations) {
+            staticField.codegenInitializations(output);
+        }
     }
 
     

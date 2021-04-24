@@ -7,9 +7,10 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * For representing j-- types. All types are represented underneath (in the
@@ -164,8 +165,10 @@ class Type {
      * @return true or false.
      */
 
-
     public boolean isSubType(Type superClass) {
+        if (classRep == null) {
+            System.out.println("something");
+        }
         if (this == Type.ANY || this.equals(superClass) || classRep.getSuperclass() == superClass.classRep){
             return true;
         }
@@ -177,6 +180,10 @@ class Type {
         for (Class current = currentLevel; current != null; current = current.getSuperclass()) {
             if(explored.contains(current)) {
                 return false;
+            }
+
+            if(current.equals(target)){
+                return true;
             }
 
             for (Class currentInterface : current.getInterfaces()) {
@@ -216,6 +223,17 @@ class Type {
     public Type superClass() {
         return classRep == null || classRep.getSuperclass() == null ? null
                 : typeFor(classRep.getSuperclass());
+    }
+
+
+    public ArrayList<Type> superInterfaces() {
+        if(classRep == null) {
+            return new ArrayList<Type>();
+        }
+        Class<?>[] interfaces = classRep.getInterfaces();
+
+        return interfaces == null ? new ArrayList<Type>() : Arrays.stream(interfaces).map(x -> typeFor(x))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -294,15 +312,20 @@ class Type {
      */
 
     public ArrayList<Method> abstractMethods() {
-        ArrayList<Method> inheritedAbstractMethods = superClass() == null ? new ArrayList<Method>()
-                : superClass().abstractMethods();
+        ArrayList<Method> inheritedAbstractMethods = new ArrayList<>();
+        if(superClass() != null) {
+            inheritedAbstractMethods.addAll(superClass().abstractMethods());
+        } 
+        superInterfaces().forEach(interf -> inheritedAbstractMethods.addAll(interf.abstractMethods()));
         ArrayList<Method> abstractMethods = new ArrayList<Method>();
         ArrayList<Method> declaredConcreteMethods = declaredConcreteMethods();
         ArrayList<Method> declaredAbstractMethods = declaredAbstractMethods();
         abstractMethods.addAll(declaredAbstractMethods);
         for (Method method : inheritedAbstractMethods) {
-            if (!declaredConcreteMethods.contains(method)
-                    && !declaredAbstractMethods.contains(method)) {
+            boolean isImplementation = declaredConcreteMethods.stream().filter(x -> method.equals(x)).count() > 0;
+            boolean isAbstractDeclaration = declaredConcreteMethods.stream().filter(x -> method.equals(x)).count() > 0;
+            if (!isImplementation
+                    && !isAbstractDeclaration) {
                 abstractMethods.add(method);
             }
         }

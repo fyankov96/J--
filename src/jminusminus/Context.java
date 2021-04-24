@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -52,6 +53,8 @@ class Context {
      */
     protected Map<String, IDefn> entries;
 
+    protected ArrayList<Type> exceptions = new ArrayList<>();
+
     /**
      * Constructs a Context.
      * 
@@ -92,6 +95,32 @@ class Context {
             entries.put(name, definition);
         }
     }
+
+    // Adds an exception the to current context.
+    public void addException(int line, Type exception) {
+        if (exceptions.isEmpty() || !exceptions.contains(exception)) {
+            // System.out.println(exception.toString());
+            exceptions.add(exception);
+        } else if (exceptions.contains(exception)) {
+            JAST.compilationUnit.reportSemanticError(line, "Exception already exists: "
+            + exception.toString());
+        }     
+    }
+
+    // Adds an exception the to current context.
+    public void addException(Type exception) {
+            if (exceptions.isEmpty() || !exceptions.contains(exception)) {
+                // System.out.println(exception.toString());
+                exceptions.add(exception);
+            } 
+        }     
+    
+
+    // Get execeptions
+    public ArrayList<Type> getExceptions() {
+        return exceptions;
+    }
+
 
     /**
      * Returns the definition for a name in the environment. If it's not found in

@@ -304,8 +304,8 @@ public class Parser {
      * 
      * Look ahead to determine.
      * 
-     * @return true iff we are looking at a for-each statement variable declaration; false
-     *         otherwise.
+     * @return true iff we are looking at a for-each statement variable declaration;
+     *         false otherwise.
      */
 
     private boolean seeForEachVariable() {
@@ -326,7 +326,7 @@ public class Parser {
             scanner.returnToPosition();
             return false;
         }
-        
+
         if (!have(IDENTIFIER)) {
             scanner.returnToPosition();
             return false;
@@ -336,7 +336,7 @@ public class Parser {
             scanner.returnToPosition();
             return false;
         }
-        
+
         scanner.returnToPosition();
         return true;
     }
@@ -394,8 +394,8 @@ public class Parser {
 
     private boolean seeQualifiedIdentifier() {
         scanner.recordPosition();
-        if(have(IDENTIFIER)) {
-            if(!have(DOT)) {
+        if (have(IDENTIFIER)) {
+            if (!have(DOT)) {
                 scanner.returnToPosition();
                 return false;
             }
@@ -616,7 +616,7 @@ public class Parser {
         ArrayList<JMember> members = new ArrayList<>();
         ArrayList<JBlock> IIB = new ArrayList<>();
         ArrayList<JBlock> SIB = new ArrayList<>();
-        consumeClassBody(members, SIB, IIB); //Modifier can only be static
+        consumeClassBody(members, SIB, IIB); // Modifier can only be static
         mustBe(RCURLY);
         return new JClassDeclaration(line, mods, name, superClass, implement, members, SIB, IIB);
     }
@@ -628,7 +628,7 @@ public class Parser {
      *
      *interfaceDeclaration ::= INTERFACE IDENTIFIER
      *                            [EXTENDS qualifiedIdentifier {COMMA qualifiedIdentifier}]
-     *                            classBody
+     *                            interfaceBody
      * </pre>
      * 
      * 
@@ -696,10 +696,9 @@ public class Parser {
                 }
             } else if (seeModifier() || seeBasicType() || seeReferenceType() || see(VOID)) {
                 members.add(memberDecl(modifiers()));
-            } else if(seeBlock()) {
+            } else if (seeBlock()) {
                 IIB.add(block());
-            }
-            else {
+            } else {
                 error = true;
                 break;
             }
@@ -714,7 +713,7 @@ public class Parser {
      * 
      * <pre>
      *      interfaceBody ::= LCURLY
-     * { modifiers interfaceMemberDecl }
+     *                       { modifiers interfaceMemberDecl }
      *                        RCURLY
      * </pre>
      *
@@ -1013,36 +1012,35 @@ public class Parser {
     }
 
     /**
-     *  Parse a for statement.
+     * Parse a for statement.
      * 
-     *  forExpression ::= 
-     *            LPAREN [JStatement {COMMA JStatement}
-     *          | [JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}] RPAREN JStatement
-     *          | LPAREN type <IDENTIFIER> COL expression RPAREN JStatement
+     * forExpression ::= LPAREN [JStatement {COMMA JStatement} |
+     * [JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}]
+     * RPAREN JStatement | LPAREN type <IDENTIFIER> COL expression RPAREN JStatement
+     * 
      * @return A JForStatement
      */
     private JForStatement forStatement() {
-        //For Step
-        ArrayList<JStatement> initStatements            = new ArrayList<JStatement>();
-        ArrayList<String> mods                          = new ArrayList<String>();
-        ArrayList<JVariableDeclarator> initDeclarators  = new ArrayList<JVariableDeclarator>();
-        JVariableDeclaration initDeclaration            = null;
-        ArrayList<JStatement> stepStatements            = new ArrayList<JStatement>();
+        // For Step
+        ArrayList<JStatement> initStatements = new ArrayList<JStatement>();
+        ArrayList<String> mods = new ArrayList<String>();
+        ArrayList<JVariableDeclarator> initDeclarators = new ArrayList<JVariableDeclarator>();
+        JVariableDeclaration initDeclaration = null;
+        ArrayList<JStatement> stepStatements = new ArrayList<JStatement>();
 
-        //For Each
+        // For Each
         JSingleVariableDeclaration identifier = null;
 
-        //Common
-        Type varType                = null;
-        JExpression loopExpression  = null;
-        JStatement body             = null;
+        // Common
+        Type varType = null;
+        JExpression loopExpression = null;
+        JStatement body = null;
 
-        
         int line = scanner.token().line();
         mustBe(LPAREN);
-        
-        if(seeForEachVariable()) {
-            if(have(FINAL)) {
+
+        if (seeForEachVariable()) {
+            if (have(FINAL)) {
                 mods.add("final");
             }
 
@@ -1053,18 +1051,18 @@ public class Parser {
             mustBe(COL);
             loopExpression = expression();
         } else {
-            if(!see(SEMI)) {
-                if(have(FINAL)) {
+            if (!see(SEMI)) {
+                if (have(FINAL)) {
                     mods.add("final");
                     initDeclarators = variableDeclarators(type());
                     initDeclaration = new JVariableDeclaration(line, mods, initDeclarators);
-                } else if(seeBasicType()) {
+                } else if (seeBasicType()) {
                     initDeclarators = variableDeclarators(type());
                     initDeclaration = new JVariableDeclaration(line, mods, initDeclarators);
-                } else if(seeQualifiedIdentifier()) {
+                } else if (seeQualifiedIdentifier()) {
                     initDeclarators = variableDeclarators(type());
                     initDeclaration = new JVariableDeclaration(line, mods, initDeclarators);
-                } else if(see(IDENTIFIER)) {
+                } else if (see(IDENTIFIER)) {
                     do {
                         initStatements.add(statementExpression());
                     } while (have(COMMA));
@@ -1073,18 +1071,18 @@ public class Parser {
                 }
             }
             mustBe(SEMI);
-            if(!see(SEMI)) {
+            if (!see(SEMI)) {
                 loopExpression = expression();
             }
             mustBe(SEMI);
-            if(!see(RPAREN)) {
+            if (!see(RPAREN)) {
                 stepStatements = forSteps();
             }
         }
         mustBe(RPAREN);
         body = statement();
 
-        if(identifier != null) {
+        if (identifier != null) {
             return new JForEachStatement(line, identifier, loopExpression, body);
         } else {
             return new JForStepStatement(line, initStatements, initDeclaration, loopExpression, stepStatements, body);
@@ -1092,10 +1090,11 @@ public class Parser {
     }
 
     /**
-     *  Parse a set of for statement step statements
+     * Parse a set of for statement step statements
      * 
-     *  forSteps ::= statementExpression {, statementExpression}
-     *  @return An ArrayList of JStatementExpressions
+     * forSteps ::= statementExpression {, statementExpression}
+     * 
+     * @return An ArrayList of JStatementExpressions
      */
     private ArrayList<JStatement> forSteps() {
         ArrayList<JStatement> steps = new ArrayList<JStatement>();

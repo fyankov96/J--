@@ -130,6 +130,25 @@ class JMethodDeclaration extends JAST implements JMember {
         partialCodegen(context, partial);
     }
 
+    public void setAbstract() {
+        this.isAbstract = true;
+        if(!this.mods.contains("abstract")) {
+            this.mods.add("abstract");
+        }
+    }
+
+    public void setStatic(boolean isStatic) {
+        this.isStatic = true;
+        if(!this.mods.contains("static")) {
+            this.mods.add("static");
+        }
+    }
+
+    public boolean isStatic() {
+        return this.isStatic;
+    }
+
+
     /**
      * Analysis for a method declaration involves (1) creating a
      * new method context (that records the return type; this is
@@ -154,6 +173,19 @@ class JMethodDeclaration extends JAST implements JMember {
             this.context.nextOffset();
         }
 
+        // Resolve exception types
+        ArrayList<Type> exceptionTypes = new ArrayList<Type>();
+        exceptionTypes = exceptions.stream().map(x -> x.resolve(this.context))
+        .collect(Collectors.toCollection(ArrayList::new));
+
+        // Add the exceptions into the context
+        if (!exceptionTypes.isEmpty()) {
+            for(Type exception : exceptionTypes) {
+                methodContext.addException(exception);
+                // System.out.println("exception added to context, check methoddelcaration 166");
+            }
+        }
+        
         // Convert the typenames for exceptions to jvmNames
         exceptionJVMNames = this.exceptions.stream().map(x -> x.jvmName())
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -206,7 +238,7 @@ class JMethodDeclaration extends JAST implements JMember {
     }
 
     /**
-     * Generates code for the method declaration.
+     * Generates code for the method declaration.setAbstract
      * 
      * @param output
      *                the code emitter (basically an abstraction

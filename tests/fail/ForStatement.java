@@ -9,7 +9,6 @@ public class ForStatement {
         int res = 0;
         
         //Parse errors
-        
         for(i = 0; int i = 2; ++i) {}
 
         for(;) {}

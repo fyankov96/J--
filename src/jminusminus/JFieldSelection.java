@@ -109,10 +109,9 @@ class JFieldSelection extends JExpression implements JLhs {
                 context.definingType().checkAccess(line, (Member) field);
                 type = field.type();
 
-                // Non-static field cannot be referenced from a static context.
+                // Non-static field cannot be referenced from a static context. //Thomas: Report
                 if (!field.isStatic()) {
-                    if (target instanceof JVariable && 
-                       ((JVariable) target).iDefn() instanceof TypeNameDefn) {
+                    if ((target instanceof JVariable && ((JVariable) target).iDefn() instanceof TypeNameDefn) || (context.blockContext() != null && context.blockContext().isStatic())) {
                         JAST.compilationUnit.reportSemanticError(line(),
                                     "Non-static field " + fieldName +
                                 " cannot be referenced from a static context");

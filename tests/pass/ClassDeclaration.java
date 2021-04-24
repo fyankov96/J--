@@ -1,8 +1,8 @@
 package pass;
 
 public class ClassDeclaration {
-    int a;
-    private static int b;
+    int a = 1;
+    private static int b = 2;
 
     public ClassDeclaration() {}
 
@@ -10,11 +10,27 @@ public class ClassDeclaration {
         this.a = a;
     }
     
-    //double x = 3.14;
+    /*
+    double x = 3.14;
     {
-        //x = 0.0;
+        x = 0.0;
+    }
+    */
+
+    {
         int x = 0;
+    }
+
+    {
+        int a = 3;
+    }
+
+    {
         a = 3;
+    }
+
+    {
+        this.a = b;
     }
 
     static {

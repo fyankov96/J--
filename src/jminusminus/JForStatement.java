@@ -103,7 +103,7 @@ class JForStepStatement extends JForStatement {
         */
         this.context = new LocalContext(context);
 
-        if (initStatements.size() > 0){
+        if (initStatements != null && initStatements.size() > 0){
             for (JStatement statement : initStatements){
                 statement.analyze(this.context);
             }
@@ -118,18 +118,19 @@ class JForStepStatement extends JForStatement {
             condition.type().mustMatchExpected(line(), Type.BOOLEAN);
         }
 
-        if(stepStatements.size() > 0) {
+        if(stepStatements != null && stepStatements.size() > 0) {
             for (JStatement statement : stepStatements){
                 statement.analyze(this.context);
             }
         }
 
-        body.analyze(context);
+        body.analyze(this.context);
         return this;
     }
 
     /**
-     * Generates code for the for-loop loop.
+     * Generates code for the statement. For this, labels are required pointing
+     * to the condition and the end of the loop.
      * 
      * @param output
      *            the code emitter (basically an abstraction for producing the
@@ -140,7 +141,7 @@ class JForStepStatement extends JForStatement {
         String loopLabel = output.createLabel();
         String endLabel = output.createLabel();
 
-        if (initStatements.size() > 0){
+        if (initStatements != null && initStatements.size() > 0){
             for (JStatement init : initStatements){
                 init.codegen(output);
             }
@@ -150,23 +151,26 @@ class JForStepStatement extends JForStatement {
             initDeclarations.codegen(output);
         }
 
-        //Label
+        //Condition label
         output.addLabel(loopLabel);
 
+        //Jump to end label if condition is false
         if(condition != null) {
             condition.codegen(output, endLabel, false);
         }
 
-        if(stepStatements.size() > 0) {
+        body.codegen(output);
+
+        if(stepStatements != null && stepStatements.size() > 0) {
             for (JStatement stmt : stepStatements){
                 stmt.codegen(output);
             }
         }
 
-        body.codegen(output);
-
+        //Go back and test the condition
         output.addBranchInstruction(GOTO, loopLabel);
 
+        //End label
         output.addLabel(endLabel);
     }
 
@@ -177,29 +181,29 @@ class JForStepStatement extends JForStatement {
         p.printf("<JForStepStatement line=\"%d\">\n", line());
         p.indentRight();
         p.printf("<Initialization>\n");
-        if(this.initStatements.size() > 0) {
-            for(JStatement j : this.initStatements) {
+        if(initStatements != null && initStatements.size() > 0) {
+            for(JStatement j : initStatements) {
                 p.indentRight();
                 j.writeToStdOut(p);
                 p.indentLeft();
             }
         }
-        if(this.initDeclarations != null) {
+        if(initDeclarations != null) {
             p.indentRight();
-            this.initDeclarations.writeToStdOut(p);
+            initDeclarations.writeToStdOut(p);
             p.indentLeft();
         } 
         p.printf("</Initialization>\n");
         p.printf("<Condition>\n");
         p.indentRight();
-        if(this.condition != null) {
+        if(condition != null) {
             condition.writeToStdOut(p);
         }
         p.indentLeft();
         p.printf("</Condition>\n");
         p.printf("<Step>\n");
-        if(this.stepStatements.size() > 0) {
-            for(JStatement j : this.stepStatements) {
+        if(stepStatements != null && stepStatements.size() > 0) {
+            for(JStatement j : stepStatements) {
                 p.indentRight();
                 j.writeToStdOut(p);
                 p.indentLeft();
@@ -231,12 +235,14 @@ class JForEachStatement extends JForStatement {
 
 
     /* For-step statement resulting from analysis */
-    private JSingleVariableDeclaration iterableDecl;
     private JVariableDeclaration initDecl;
     private JExpression condition;
     private ArrayList<JStatement> loopSteps;
 
+    private JSingleVariableDeclaration iterableDecl;
     private JForStepStatement forStepNode;
+    private ArrayList<JStatement> forStepStatements;
+    private JSingleVariableDeclaration identAssign;
     private ArrayList<JStatement> blockStatements;
     private JBlock forStepBlock;
 
@@ -262,6 +268,16 @@ class JForEachStatement extends JForStatement {
         super(line, body);
         this.identifier = identifier;
         this.iterable = iterable;
+        
+        this.initDecl = null;
+        this.condition = null;
+        this.loopSteps = new ArrayList<JStatement>();
+        this.iterableDecl = null;
+        this.forStepNode = null;
+        this.forStepStatements = null;
+        this.identAssign = null;
+        this.blockStatements  = new ArrayList<JStatement>();
+        this.forStepBlock = null;
     }
 
     /**
@@ -292,52 +308,64 @@ class JForEachStatement extends JForStatement {
 
         body.analyze(this.context);
 
+        // Rewrite to a for-step block and analyze //Thomas: Report
+        blockStatements = new ArrayList<JStatement>();
 
-        // Rewrite to a for-step block and analyze
-        if (iterable.type().isArray()) {      //Thomas: Report
+        if (iterable.type().isArray()) {   
+            // Create the iterable $a' = iterable and add it to the block statements
             String iterableName = generateIterableName();
             String iteratorName = generateIteratorName();
-            
-            // Create the iterable _a' = iterable
             iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), null, iterable); 
 
-            // Create the iterator (int _i' = 0 ; ...
+            blockStatements.add(iterableDecl);
+
+            // Create the iterator (int $i' = 0 ; ...
             JVariableDeclarator init = new JVariableDeclarator(line, iteratorName, Type.INT, new JLiteralInt(line(), "0"));
             ArrayList<JVariableDeclarator> initList = new ArrayList<JVariableDeclarator>();
             initList.add(init);
             initDecl = new JVariableDeclaration(line, null, initList);
 
-            // Create the condition ... ; _i' < _a'.length ; ...
+            // Create the condition ... ; $i' < $a'.length ; ...
             JExpression lhs = new JVariable(line(), iteratorName);
             JExpression rhs = new JFieldSelection(line, new JVariable(line(), iterableName), "length");
             condition = new JLessOp(line(), lhs, rhs);
 
-            // Create the step ... ; _i'++
-            loopSteps.add(new JPostIncrementOp(line(), (JExpression) new JVariable(line(), iteratorName)));
+            // Create the step ... ; $i'++
+            loopSteps.add(new JPostIncrementOp(line(), new JVariable(line(), iteratorName)));
 
-            // Create the identifier Type identifier = _a'[_i']            
-            identifier.setInitializer(new JArrayExpression(line(), new JVariable(line(), iterableName), new JVariable(line(), iteratorName)));
+            // Create the identifier assignment: Type identifier = $a'[$i']
+            identAssign = new JSingleVariableDeclaration(line(), identifier.name(), Type.INT, null,
+                                                                new JArrayExpression(line(), 
+                                                                    new JVariable(line(), iterableName),
+                                                                        new JVariable(line(), iteratorName)));
 
-        } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) {
-            // Create the iterator (I _i' = Expression.iterator() ; ...
+        } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) { //Dario: For-Each-Statement. Book page 194-195
+            // Create the iterator (I $i' = Expression.iterator() ; ...
+            //iterableDecl = new JSingleVariableDeclaration(line(), ..., ..., ..., ...);
+            //This is an AST node I made, it is the exact same as JVariableDeclaration, but only takes a single variable to declare.
 
-            // Create the condition ... ; _i'.hasNext() ;
-            //condition = new JNotEqualOp(line, lhs, rhs);
+            // Create the condition ... ; $i'.hasNext() ;
+            //condition = new JNotEqualOp(line(), ..., ...);
 
-            //stepStatements = null;
+            // No step statements are required
 
-            // Create the identifier Type identifier = _i'.next()
-            //JSingleVariableDeclaration identifier
+            // Create the identifier Type identifier = $i'.next()
+            //JSingleVariableDeclaration identifier = ...
             
+
+            // Create the identifier assignment: Type identifier = $i'.next`()
+            //identAssign = ...
+
         }
+        
+        forStepStatements = ((JBlock) body).statements();
+        forStepStatements.add(0, identAssign);
 
-        forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, body);
-
-        blockStatements = new ArrayList<JStatement>();
-        blockStatements.add(iterableDecl);
+        forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, new JBlock(line(), forStepStatements));       
         blockStatements.add(forStepNode);
-        forStepBlock = new JBlock(line(), blockStatements);
-        forStepBlock.analyze(context);
+
+        this.forStepBlock = new JBlock(line(), blockStatements);
+        this.forStepBlock.analyze(context);
         
         return this;
     }
@@ -347,7 +375,7 @@ class JForEachStatement extends JForStatement {
      * a for-step block.
      */
     private static String generateIterableName() {
-        return "_a'" + iterableNum++;
+        return "$a'" + iterableNum++;
     }
 
     /**
@@ -355,9 +383,8 @@ class JForEachStatement extends JForStatement {
      * a for-step block.
      */
     private static String generateIteratorName() {
-        return "_i'" + iteratorNum++;
+        return "$i'" + iteratorNum++;
     }
-
 
     /**
      * Generates code for the for-each statement by generating the code for the analyzed for-step block.
@@ -376,6 +403,12 @@ class JForEachStatement extends JForStatement {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
+        p.printf("<JForEachStatementBlock line=\"%d\">\n", line());
+        p.indentRight();
+        forStepBlock.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</JForEachStatementBlock>\n");
+        /*
         p.printf("<JForEachStatement line=\"%d\">\n", line());
         p.indentRight();
         identifier.writeToStdOut(p);
@@ -394,6 +427,7 @@ class JForEachStatement extends JForStatement {
         p.printf("</Body>\n");
         p.indentLeft();
         p.printf("</JForEachStatement>\n");
+        */
     }
 
 }

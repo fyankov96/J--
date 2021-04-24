@@ -6,15 +6,24 @@ public class ForStatement {
         int b, c;
         int res = 0;
         
+        for(int i = 0; i <= a.length-1; i++) {}
+
         for(int i = 0, k = 1; i <= a.length-1; i++) {
-            res = res + 1;
+            res = k;
         }
-        /*
+
+        for(b = 0; b <= 3; b++) {}
+
         for(b = 0, c = 0; c <= 3 && b <= 3; b++) {}
 
-        for(java.lang.Integer x = 1; res <= 2; res++) {}
+        for(int i = 0, k = 1; i <= a.length-1; i++) {
+            res = k;
+        }
+        
+
+        //for(java.lang.Integer x = 1; res <= 2; res++) {}
         
         for(;;) {}
-        */
+        
     }
 }

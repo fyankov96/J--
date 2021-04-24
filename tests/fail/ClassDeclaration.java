@@ -5,7 +5,19 @@ public class ClassDeclaration {
     private static int b = 1;
     
     static {
-        x = 0.0;
-        b = 3;
+        a = 2;
     }
+
+    static {
+        int c = a;
+    }
+
+    static {
+        this.a = 2;
+    }
+
+    static {
+        x = 0.0;
+    }
+    
 }

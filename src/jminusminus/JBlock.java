@@ -21,7 +21,7 @@ class JBlock extends JStatement {
     private LocalContext context;
 
     /** Block modifiers. */
-    private ArrayList<String> mods = new ArrayList<String>();
+    private ArrayList<String> mods;
 
 
     /**
@@ -37,6 +37,7 @@ class JBlock extends JStatement {
     public JBlock(int line, ArrayList<JStatement> statements) {
         super(line);
         this.statements = statements;
+        this.mods = new ArrayList<String>();
     }
 
     public JBlock(int line, ArrayList<JStatement> statements, ArrayList<String> mods) {
@@ -64,10 +65,14 @@ class JBlock extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-    public JBlock analyze(Context context) {
+    public JBlock analyze(Context context) { //Thomas: Report
         // { ... } defines a new level of scope
-        this.context = new LocalContext(context);
-    
+        if(context.methodContext() == null){
+            this.context = new BlockContext(context, mods.contains("static"));
+        } else {
+            this.context = new LocalContext(context);
+        } 
+        
         for (int i = 0; i < statements.size(); i++) {
             statements.set(i, (JStatement) statements.get(i).analyze(this.context));
         }

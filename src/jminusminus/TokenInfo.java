@@ -14,7 +14,6 @@ enum TokenKind {
     EOF("<EOF>"), 
 
     // Reserved words
-
     ABSTRACT("abstract"), BOOLEAN("boolean"), BREAK("break"), BYTE("byte"), 
     CASE("case"), CATCH("catch"), CHAR("char"), CLASS("class"), 
     CONST("const"), CONTINUE("continue"), DEFAULT("default"), DO("do"),

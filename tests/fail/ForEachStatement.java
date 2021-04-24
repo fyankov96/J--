@@ -9,7 +9,6 @@ public class ForEachStatement {
         int res = 0;
         
         //Parse errors
-        
         //for(x : i_arr) {}
         //for(x : ) {}
         //for( : ) {}

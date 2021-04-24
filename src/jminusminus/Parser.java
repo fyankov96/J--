@@ -399,9 +399,10 @@ public class Parser {
                 scanner.returnToPosition();
                 return false;
             }
+            scanner.returnToPosition();
+            return true;
         }
-        scanner.returnToPosition();
-        return true;
+        return false;
     }
 
     /**
@@ -1048,7 +1049,7 @@ public class Parser {
             varType = type();
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
-            identifier = new JSingleVariableDeclaration(line, name, varType, mods);
+            identifier = new JSingleVariableDeclaration(line, name, varType, mods, true);
             mustBe(COL);
             loopExpression = expression();
         } else {

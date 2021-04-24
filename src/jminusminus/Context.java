@@ -198,6 +198,21 @@ class Context {
     }
 
     /**
+     * Returns the closest surrounding block context. Returns null if we're not
+     * within a block.
+     * 
+     * @return the block context.
+     */
+
+    public BlockContext blockContext() {
+        Context context = this;
+        while (context != null && !(context instanceof BlockContext)) {
+            context = context.surroundingContext();
+        }
+        return (BlockContext) context;
+    }
+
+    /**
      * Returns the names declared in this context.
      * 
      * @return the set of declared names.
@@ -456,6 +471,57 @@ class MethodContext extends LocalContext {
         super.writeToStdOut(p);
         p.indentLeft();
         p.println("</MethodContext>");
+    }
+
+}
+
+
+/**
+ * A block context is where we start computing the offsets for
+ * local variables, which are allocated in the current stack
+ * frame.
+ */
+
+class BlockContext extends LocalContext { //Thomas: Report
+
+    /** Is this method static? */
+    private boolean isStatic;
+
+    /**
+     * Constructs a method context.
+     * 
+     * @param surrounding
+     *            the surrounding (class) context.
+     * @param isStatic
+     *            is this method static?
+     */
+
+    public BlockContext(Context surrounding, boolean isStatic) {
+        super(surrounding);
+        this.isStatic = isStatic;
+        offset = 0;
+    }
+
+    /**
+     * Is this method static?
+     * 
+     * @return true or false.
+     */
+
+    public boolean isStatic() {
+        return isStatic;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
+    public void writeToStdOut(PrettyPrinter p) {
+        p.println("<BlockContext>");
+        p.indentRight();
+        super.writeToStdOut(p);
+        p.indentLeft();
+        p.println("</BlockContext>");
     }
 
 }

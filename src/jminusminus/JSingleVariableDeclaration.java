@@ -17,33 +17,14 @@ class JSingleVariableDeclaration extends JStatement {
     /** Variable name. */
     private String name;
 
+    /** Flag denoting whether this variable is initialized stealthily */
+    private Boolean hiddenInit;
+
     /** Original Variable initializer. */
     private JExpression initializer;
 
     /** Analyzed Variable initializer. */
     private JStatement initialization;
-
-
-    /**
-     * Constructs an AST node for a for-each variable declaration given its line
-     * number, name, and type.
-     * 
-     * @param line
-     *            line in which the variable occurs in the source file.
-     * @param name
-     *            variable name.
-     * @param type
-     *            variable type.
-     */
-
-    public JSingleVariableDeclaration(int line, String name, Type type) {
-        super(line);
-        this.name = name;
-        this.type = type;
-        this.mods = null;
-        this.initializer = null;
-        this.initialization = null;
-    }
 
     /**
      * Constructs an AST node for a for-each variable declaration given its line
@@ -59,13 +40,14 @@ class JSingleVariableDeclaration extends JStatement {
      *            the modifiers of the variable
      */
 
-    public JSingleVariableDeclaration(int line, String name, Type type, ArrayList<String> mods) {
+    public JSingleVariableDeclaration(int line, String name, Type type, ArrayList<String> mods, Boolean hiddenInit) {
         super(line);
         this.name = name;
         this.type = type;
         this.mods = mods;
         this.initializer = null;
         this.initialization = null;
+        this.hiddenInit = hiddenInit;
     }
 
     /**
@@ -91,6 +73,7 @@ class JSingleVariableDeclaration extends JStatement {
         this.mods = mods;
         this.initializer = initializer;
         this.initialization = null;
+        this.hiddenInit = false;
     }
 
     
@@ -148,6 +131,15 @@ class JSingleVariableDeclaration extends JStatement {
     }
 
     /**
+     * Sets the initializer to the specified JExpression.
+     * 
+     */
+
+    public void initialize() {
+        
+    }
+
+    /**
      * Determine whether the variable is valid to declare here.
      * 
      * @param context
@@ -170,6 +162,11 @@ class JSingleVariableDeclaration extends JStatement {
 
         // Then declare it in the local context and initialize it
         context.addEntry(line(), name, defn);
+
+        // Set the variable to having been initialized if it is done in a hidden fashion
+        if (hiddenInit) {
+            defn.initialize();
+        }
 
         // Initialization must be turned into assignment statement and analyzed
         if (initializer != null) {
@@ -203,6 +200,16 @@ class JSingleVariableDeclaration extends JStatement {
         p.printf("<JSingleVariableDeclaration line=\"%d\" name=\"%s\" "
                 + "type=\"%s\"/>\n", line(), name, (type == null) ? "" : type
                 .toString());
+        p.indentRight();
+        if (initializer != null) {
+            p.println("<Initializer>");
+            p.indentRight();
+            initializer.writeToStdOut(p);
+            p.indentLeft();
+            p.println("</Initializer>");
+        }
+        p.indentLeft();
+        p.println("</JSingleVariableDeclaration>");
     }
 
 }

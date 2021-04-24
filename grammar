@@ -103,7 +103,7 @@ assignmentExpression ::= ternaryExpression  // must be a valid lhs
                            | SHR_ASSIGN | SHL_ASSIGN | OR_ASSIGN | XOR_ASSIGN) assignmentExpression]
 
 ternaryExpression ::= conditionalOrExpression  //level 12
-                        [COND ternaryExpression COLON ternaryExpression] 
+                        [COND ternaryExpression COL ternaryExpression] 
 
 conditionalOrExpression ::= conditionalAndExpression //level 11
                                {LOR conditionalAndExpression}

@@ -1047,7 +1047,7 @@ public class Parser {
             varType = type();
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
-            identifier = new JSingleVariableDeclaration(line, name, varType, mods, true);
+            identifier = new JSingleVariableDeclaration(line, name, varType, mods);
             mustBe(COL);
             loopExpression = expression();
         } else {

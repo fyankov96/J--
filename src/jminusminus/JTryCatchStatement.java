@@ -115,13 +115,13 @@ class JTryCatchStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        /*String tryLabel = output.createLabel();
+        String tryLabel = output.createLabel();
         String catchLabel = output.createLabel();
         String finallyLabel = output.createLabel();
 
-        tryBlock.codegen(output,tryLabel,false);
+        /*tryBlock.codegen(output,tryLabel,false);
 
-        for(Block catchblock : catchBlocks) {
+        for(JBlock catchblock : catchBlocks) {
             catchblock.codegen(output);
             output.addLabel(catchLabel);
         }*/

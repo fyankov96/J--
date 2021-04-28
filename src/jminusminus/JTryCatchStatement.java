@@ -118,17 +118,17 @@ class JTryCatchStatement extends JStatement {
         String tryLabel = output.createLabel();
         String catchLabel = output.createLabel();
         String finallyLabel = output.createLabel();
-
-        /*tryBlock.codegen(output,tryLabel,false);
+        
+        tryBlock.codegen(output,tryLabel,false);
 
         for(JBlock catchblock : catchBlocks) {
             catchblock.codegen(output);
             output.addLabel(catchLabel);
-        }*/
+        }
 
         //if (finallyBlock !=)
         
-        /*condition.codegen(output, elseLabel, false);
+        condition.codegen(output, elseLabel, false);
         thenPart.codegen(output);
         if (elsePart != null) {
             output.addBranchInstruction(GOTO, endLabel);
@@ -137,7 +137,7 @@ class JTryCatchStatement extends JStatement {
         if (elsePart != null) {
             elsePart.codegen(output);
             output.addLabel(endLabel);
-        }*/
+        }
     }
 
     /**

@@ -115,11 +115,16 @@ class JTryCatchStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        String tryLabel = output.createLabel();
-        String catchLabel = output.createLabel();
-        String finallyLabel = output.createLabel();
-        
-        tryBlock.codegen(output,tryLabel,false);
+        String startTryLabel = output.createLabel();
+        String endTryLabel = output.createLabel();
+        String startCatchLabel = output.createLabel();
+        String endCatchLabel = output.createLabel();
+        String startFinallyLabel = output.createLabel();
+        String endFinallyLabel = output.createLabel();
+
+        // Add a start try label and generate code for try block
+        // output.add
+        tryBlock.codegen(output,startTryLabel,false);
 
         for(JBlock catchblock : catchBlocks) {
             catchblock.codegen(output);
@@ -138,6 +143,7 @@ class JTryCatchStatement extends JStatement {
             elsePart.codegen(output);
             output.addLabel(endLabel);
         }
+        output.addExceptionHandler(tryLabel, endLabel, handlerLabel, catchType);
     }
 
     /**

@@ -124,26 +124,26 @@ class JTryCatchStatement extends JStatement {
 
         // Add a start try label and generate code for try block
         // output.add
-        tryBlock.codegen(output,startTryLabel,false);
+        // tryBlock.codegen(output,startTryLabel,false);
 
         for(JBlock catchblock : catchBlocks) {
             catchblock.codegen(output);
-            output.addLabel(catchLabel);
+            //output.addLabel(catchLabel);
         }
 
         //if (finallyBlock !=)
         
-        condition.codegen(output, elseLabel, false);
+        /*condition.codegen(output, elseLabel, false);
         thenPart.codegen(output);
         if (elsePart != null) {
-            output.addBranchInstruction(GOTO, endLabel);
+            //output.addBranchInstruction(GOTO, endLabel);
         }
         output.addLabel(elseLabel);
         if (elsePart != null) {
             elsePart.codegen(output);
-            output.addLabel(endLabel);
-        }
-        output.addExceptionHandler(tryLabel, endLabel, handlerLabel, catchType);
+            //output.addLabel(endLabel);
+        }*/
+        //output.addExceptionHandler(tryLabel, endLabel, handlerLabel, catchType);
     }
 
     /**

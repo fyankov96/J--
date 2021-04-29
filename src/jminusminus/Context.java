@@ -101,10 +101,10 @@ class Context {
         if (exceptions.isEmpty() || !exceptions.contains(exception)) {
             // System.out.println(exception.toString());
             exceptions.add(exception);
-        } else if (exceptions.contains(exception)) {
+        } /*else if (exceptions.contains(exception)) {
             JAST.compilationUnit.reportSemanticError(line, "Exception already exists: "
             + exception.toString());
-        }     
+        }     */
     }
 
     // Adds an exception the to current context.
@@ -379,6 +379,8 @@ class LocalContext extends Context {
     public int offset() {
         return offset;
     }
+
+    
 
     /**
      * Allocates a new offset (for example, for a parameter or local variable).

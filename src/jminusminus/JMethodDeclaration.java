@@ -187,7 +187,7 @@ class JMethodDeclaration extends JAST implements JMember {
         }
         
         // Convert the typenames for exceptions to jvmNames
-        exceptionJVMNames = this.exceptions.stream().map(x -> x.jvmName())
+        exceptionJVMNames = this.exceptions.stream().map(x -> "java.lang." + x)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         // Declare the parameters. We consider a formal parameter 

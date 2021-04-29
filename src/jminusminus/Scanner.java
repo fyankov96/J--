@@ -139,7 +139,7 @@ class Scanner {
                         nextCh();
                     }
                 } else if (ch == '*'){
-                    while (true){
+                    while (ch != EOFCH){
                         nextCh();
                         if(ch == '*'){
                             nextCh();

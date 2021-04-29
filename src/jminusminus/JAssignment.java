@@ -354,7 +354,7 @@ class JAndAssignOp extends JAssignment {
             rhs.type().mustMatchExpected(line(), Type.INT);
             type = Type.INT;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for %=: " + lhs.type());
+            JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for: " + lhs.type());
         }
         return this;
     }
@@ -382,7 +382,7 @@ class JOrAssignOp extends JAssignment {
             rhs.type().mustMatchExpected(line(), Type.INT);
             type = Type.INT;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for %=: " + lhs.type());
+            JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for: " + lhs.type());
         }
         return this;
     }

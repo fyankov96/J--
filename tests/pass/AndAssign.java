@@ -7,7 +7,7 @@ public class AndAssign {
      * @param b
      * @return
      */
-    public boolean andAssign(boolean a, boolean b){
+    public int andAssign(int a, int b){
         b &= a;
         return b;
     }    

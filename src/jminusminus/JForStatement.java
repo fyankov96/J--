@@ -4,6 +4,8 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 import java.util.ArrayList;
+import java.lang.Iterable;
+import java.util.Iterator;
 
 /**
  * The AST node for a for-statement.
@@ -301,17 +303,18 @@ class JForEachStatement extends JForStatement {
                 "Attempting to iterate over a non-iterable type");
         }
         
-        if(!identifier.type().equals(iterable.type().componentType())){
-            JAST.compilationUnit.reportSemanticError(line(),
-                "Using " + identifier.type() + " type to iterate over " + iterable.type().componentType() + " array");
-        }
+ 
 
         body.analyze(this.context);
 
         // Rewrite to a for-step block and analyze //Thomas: Report
         blockStatements = new ArrayList<JStatement>();
 
-        if (iterable.type().isArray()) {   
+        if (iterable.type().isArray()) {  
+            if(!identifier.type().equals(iterable.type().componentType())){
+                JAST.compilationUnit.reportSemanticError(line(),
+                    "Using " + identifier.type() + " type to iterate over " + iterable.type().componentType() + " array");
+            } 
             // Create the iterable $a' = iterable and add it to the block statements
             String iterableName = generateIterableName();
             String iteratorName = generateIteratorName();
@@ -338,32 +341,48 @@ class JForEachStatement extends JForStatement {
                                                                 new JArrayExpression(line(), 
                                                                     new JVariable(line(), iterableName),
                                                                         new JVariable(line(), iteratorName)));
+            
+
+
+
 
         } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) { //Dario: For-Each-Statement. Book page 194-195
             // Create the iterator (I $i' = Expression.iterator() ; ...
             //iterableDecl = new JSingleVariableDeclaration(line(), ..., ..., ..., ...);
             //This is an AST node I made, it is the exact same as JVariableDeclaration, but only takes a single variable to declare.
-
+            String iteratorName = generateIteratorName();
+            String identifierName = identifier.name();
+            
+            ArrayList<JVariableDeclarator> initList = new ArrayList<JVariableDeclarator>();
+            JExpression iterableInit = new JMessageExpression(line, new JVariable(line, iteratorName), "iterator", new ArrayList());
+            JVariableDeclarator init = new JVariableDeclarator(line, iteratorName, Type.typeFor(Iterator.class), iterableInit);
+            initList.add(init);
+            initDecl = new JVariableDeclaration(line, null, initList);
+            
             // Create the condition ... ; $i'.hasNext() ;
             //condition = new JNotEqualOp(line(), ..., ...);
-
+            JExpression iteratorExpr = new JVariable(line, iteratorName);
+            condition = new JMessageExpression(line, iteratorExpr, "has_next", new ArrayList());
             // No step statements are required
-
+            
             // Create the identifier Type identifier = $i'.next()
             //JSingleVariableDeclaration identifier = ...
-            
-
+            JMessageExpression nextInvocation = new JMessageExpression(line, new JVariable(line, iteratorName), "next", new ArrayList());
             // Create the identifier assignment: Type identifier = $i'.next`()
             //identAssign = ...
+            identAssign = new JSingleVariableDeclaration(line, identifier.name(), identifier.type(), new ArrayList(), nextInvocation);
 
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+            "Unsupported foreach");
         }
-        
+
         forStepStatements = ((JBlock) body).statements();
         forStepStatements.add(0, identAssign);
-
+                                                            
         forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, new JBlock(line(), forStepStatements));       
         blockStatements.add(forStepNode);
-
+                                                            
         this.forStepBlock = new JBlock(line(), blockStatements);
         this.forStepBlock.analyze(context);
         

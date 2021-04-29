@@ -119,6 +119,7 @@ class JSingleVariableDeclaration extends JStatement {
         return type = newType;
     }
 
+
     /**
      * Sets the initializer to the specified JExpression.
      * 

@@ -94,15 +94,9 @@ class JTryCatchStatement extends JStatement {
                     this.context.methodContext().nextOffset();
                 }
 
-                System.out.println(this.context.methodContext().getExceptions().toString());
-                System.out.println(this.context.getExceptions().toString());
-            }
-
-            //System.out.println(context.methodContext().getExceptions().toString());
-            // System.out.println(this.context.getExceptions().toString());
-            //this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), 
-            //new LocalVariableDefn(catchParams.get(i).type(), this.context.nextOffset()));
-           
+                //System.out.println(this.context.methodContext().getExceptions().toString());
+                //System.out.println(this.context.getExceptions().toString());
+            }          
         }
         
         // Analyse finally block
@@ -132,45 +126,71 @@ class JTryCatchStatement extends JStatement {
         String endFinallyLabel = output.createLabel();
 
 
+
         // Add a start try label and generate code for try block
+        System.out.println("adding startTryLabel: " + output.pc());
         output.addLabel(startTryLabel);
+        System.out.println("generate code for tryblock: " + output.pc());
         tryBlock.codegen(output);
         
         // generate code for finally block, if it has one
         if(finallyBlock != null) {
+            System.out.println("generate code for finallyblock: " + output.pc());
             finallyBlock.codegen(output);
+            System.out.println("jump to endfinallylabel: " + output.pc());
             output.addBranchInstruction(GOTO, endFinallyLabel);
+            System.out.println("adding endTryLabel: " + output.pc());
             output.addLabel(endTryLabel);
         }
 
         for(int i = 0; i < catchBlocks.size(); i++) {
+            System.out.println("adding startcatchLabel" + i  + ": " + output.pc());
             output.addLabel(startCatchLabel + i);
+            System.out.println("AStore_1: " + output.pc());
             output.addNoArgInstruction(ASTORE_1);
+            System.out.println("generate code for catch block" + i + ": " + output.pc());
             catchBlocks.get(i).codegen(output);
+            System.out.println("adding endcatchLabel" + i  + ": " + output.pc());
             output.addLabel(endCatchLabel + i);
+            System.out.println("adding exceptionhandler for catchblock" + i  + ": " + output.pc());
             output.addExceptionHandler(startTryLabel, endTryLabel, startCatchLabel + i,
-                this.context.methodContext().getExceptions().get(i).jvmName());
+                catchParams.get(i).type().jvmName());
+
+            // output.addExceptionHandler(startCatchLabel + i, endCatchLabel + i, startFinallyLabel, null);
+           
          
             if(finallyBlock != null) {
+                System.out.println("generate code for finallyblock: " + output.pc());
                 finallyBlock.codegen(output);
-                output.addBranchInstruction(GOTO, endFinallyLabel);
+                System.out.println("jump to endfinallylabel: " + output.pc());
+                output.addBranchInstruction(GOTO, endFinallyLabel);  
             }
         }
 
 
         if (finallyBlock != null) {
+            System.out.println("adding startFinallyLabel: " + output.pc());
             output.addLabel(startFinallyLabel);
+            System.out.println("AStore and it's offset: " + output.pc());
             output.addOneArgInstruction(ASTORE, this.context.methodContext().offset());
             // output.addLabel(startFinallyLabel + "+1");
+            System.out.println("generate code for finallyblock: " + output.pc());
             finallyBlock.codegen(output);
+            System.out.println("ALoad and it's offset: " + output.pc());
             output.addOneArgInstruction(ALOAD, this.context.methodContext().offset());
+            System.out.println("Athrow: " + output.pc());
             output.addNoArgInstruction(ATHROW);
+            System.out.println("adding endfinallyLabel: " + output.pc());
             output.addLabel(endFinallyLabel);
-
+           
+            System.out.println("adding exceptionhandler for finallyblock: " + output.pc());
             output.addExceptionHandler(startTryLabel, endTryLabel, startFinallyLabel, null);
+            
 
             for(int i = 0; i < catchBlocks.size(); i++) {
+                System.out.println("adding exceptionhandler for catchblock" + i + ": " + output.pc());
                 output.addExceptionHandler(startCatchLabel + i, endCatchLabel + i, startFinallyLabel, null);
+               
             }
             // output.addExceptionHandler(startFinallyLabel, startFinallyLabel + "+1", startFinallyLabel, null);
         }

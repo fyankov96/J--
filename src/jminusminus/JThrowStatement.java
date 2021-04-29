@@ -39,6 +39,8 @@ class JThrowStatement extends JStatement {
         // Analyzing the expr makes the JThrowStatement use the imported libraries
         expr.analyze(context);
 
+        System.out.println(expr.type().toString());
+
         // Check if the expr is the type throwable
         if (!(expr.type().isSubType(Type.typeFor(Throwable.class))))  {
             JAST.compilationUnit.reportSemanticError(line(),
@@ -74,10 +76,14 @@ class JThrowStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
+        System.out.println("adding NEW: " + output.pc());
         output.addReferenceInstruction(NEW, expr.type().jvmName());
+        System.out.println("adding DUP: " + output.pc());
         output.addNoArgInstruction(DUP);
+        System.out.println("adding INVOKESPECIAL: " + output.pc());
         output.addMemberAccessInstruction(INVOKESPECIAL, expr.type().jvmName(), 
         "<init>", "()V");
+        System.out.println("adding ATHROW: " + output.pc());
         output.addNoArgInstruction(ATHROW);
     }
 

@@ -4,6 +4,8 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 import java.util.ArrayList;
+import java.lang.Iterable;
+import java.util.Iterator;
 
 /**
  * The AST node for a for-statement.
@@ -309,6 +311,7 @@ class JForEachStatement extends JForStatement {
                 String iterableName = generateIterableName();
                 String iteratorName = generateIteratorName();
                 iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), null, iterable); 
+                blockStatements.add(iterableDecl);
 
                 // Create the iterator (int $i' = 0 ; ...
                 JVariableDeclarator init = new JVariableDeclarator(line, iteratorName, Type.INT, new JLiteralInt(line(), "0"));
@@ -330,30 +333,37 @@ class JForEachStatement extends JForStatement {
                                                                         new JVariable(line(), iterableName),
                                                                             new JVariable(line(), iteratorName)));
 
-            } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) { //Dario: For-Each-Statement. Book page 194-195
+            } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) {
                 // Create the iterator (I $i' = Expression.iterator() ; ...
-                //iterableDecl = new JSingleVariableDeclaration(line(), ..., ..., ..., ...);
-                //This is an AST node I made, it is the exact same as JVariableDeclaration, but only takes a single variable to declare.
-
+                String iteratorName = generateIteratorName();
+                
+                ArrayList<JVariableDeclarator> initList = new ArrayList<JVariableDeclarator>();
+                JExpression iterableInit = new JMessageExpression(line(), new JVariable(line, iteratorName), "iterator", new ArrayList());
+                JVariableDeclarator init = new JVariableDeclarator(line(), iteratorName, Type.typeFor(Iterator.class), iterableInit);
+                initList.add(init);
+                initDecl = new JVariableDeclaration(line(), null, initList);
+                
                 // Create the condition ... ; $i'.hasNext() ;
-                //condition = new JNotEqualOp(line(), ..., ...);
+                JExpression iteratorExpr = new JVariable(line(), iteratorName);
+                condition = new JMessageExpression(line(), iteratorExpr, "has_next", new ArrayList());
 
                 // No step statements are required
-
-                // Create the identifier Type identifier = $i'.next()
-                //JSingleVariableDeclaration identifier = ...
                 
+                // Create the identifier Type identifier = $i'.next()
+                JMessageExpression nextInvocation = new JMessageExpression(line, new JVariable(line, iteratorName), "next", new ArrayList());
 
                 // Create the identifier assignment: Type identifier = $i'.next`()
-                //identAssign = ...
-
+                identAssign = new JSingleVariableDeclaration(line, identifier.name(), identifier.type(), new ArrayList(), nextInvocation);
+    
+            } else {
+                JAST.compilationUnit.reportSemanticError(line(),
+                "Unsupported foreach");
             }
             
             ArrayList<JStatement> forStepStatements = ((JBlock) body).statements();
             forStepStatements.add(0, identAssign);
 
-            JForStepStatement forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, new JBlock(line(), forStepStatements));       
-            blockStatements.add(iterableDecl);
+            JForStepStatement forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, new JBlock(line(), forStepStatements));
             blockStatements.add(forStepNode);
 
             this.forStepBlock = new JBlock(line(), blockStatements);

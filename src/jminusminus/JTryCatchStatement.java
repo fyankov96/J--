@@ -81,13 +81,21 @@ class JTryCatchStatement extends JStatement {
             catchParams.get(i).type().resolve(this.context);*/
 
             // Check if current catchparam is valid
-            System.out.println(catchParams.get(i).type().toString());
             if (!(catchParams.get(i).type().isSubType(Type.typeFor(Throwable.class)))) {
                                 JAST.compilationUnit.reportSemanticError(catchParams.get(i).line(),
                 "Attempting to catch a non-throwable type");
             } else {
+                // Add to both localcontext and methodcontext (so tryblock can search for them)
                 this.context.addException(catchParams.get(i).line(), catchParams.get(i).type());
-            
+                this.context.methodContext().addException(catchParams.get(i).line(), catchParams.get(i).type());
+
+                // next off set for the context, if a new exception is added
+                if (i > 0) {
+                    this.context.methodContext().nextOffset();
+                }
+
+                System.out.println(this.context.methodContext().getExceptions().toString());
+                System.out.println(this.context.getExceptions().toString());
             }
 
             //System.out.println(context.methodContext().getExceptions().toString());
@@ -115,29 +123,57 @@ class JTryCatchStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        /*String tryLabel = output.createLabel();
-        String catchLabel = output.createLabel();
-        String finallyLabel = output.createLabel();
+        // Making all necessary jump labels
+        String startTryLabel = output.createLabel();
+        String endTryLabel = output.createLabel();
+        String startCatchLabel = output.createLabel();
+        String endCatchLabel = output.createLabel();
+        String startFinallyLabel = output.createLabel();
+        String endFinallyLabel = output.createLabel();
 
-        tryBlock.codegen(output,tryLabel,false);
 
-        for(Block catchblock : catchBlocks) {
-            catchblock.codegen(output);
-            output.addLabel(catchLabel);
-        }*/
-
-        //if (finallyBlock !=)
+        // Add a start try label and generate code for try block
+        output.addLabel(startTryLabel);
+        tryBlock.codegen(output);
         
-        /*condition.codegen(output, elseLabel, false);
-        thenPart.codegen(output);
-        if (elsePart != null) {
-            output.addBranchInstruction(GOTO, endLabel);
+        // generate code for finally block, if it has one
+        if(finallyBlock != null) {
+            finallyBlock.codegen(output);
+            output.addBranchInstruction(GOTO, endFinallyLabel);
+            output.addLabel(endTryLabel);
         }
-        output.addLabel(elseLabel);
-        if (elsePart != null) {
-            elsePart.codegen(output);
-            output.addLabel(endLabel);
-        }*/
+
+        for(int i = 0; i < catchBlocks.size(); i++) {
+            output.addLabel(startCatchLabel + i);
+            output.addNoArgInstruction(ASTORE_1);
+            catchBlocks.get(i).codegen(output);
+            output.addLabel(endCatchLabel + i);
+            output.addExceptionHandler(startTryLabel, endTryLabel, startCatchLabel + i,
+                this.context.methodContext().getExceptions().get(i).jvmName());
+         
+            if(finallyBlock != null) {
+                finallyBlock.codegen(output);
+                output.addBranchInstruction(GOTO, endFinallyLabel);
+            }
+        }
+
+
+        if (finallyBlock != null) {
+            output.addLabel(startFinallyLabel);
+            output.addOneArgInstruction(ASTORE, this.context.methodContext().offset());
+            // output.addLabel(startFinallyLabel + "+1");
+            finallyBlock.codegen(output);
+            output.addOneArgInstruction(ALOAD, this.context.methodContext().offset());
+            output.addNoArgInstruction(ATHROW);
+            output.addLabel(endFinallyLabel);
+
+            output.addExceptionHandler(startTryLabel, endTryLabel, startFinallyLabel, null);
+
+            for(int i = 0; i < catchBlocks.size(); i++) {
+                output.addExceptionHandler(startCatchLabel + i, endCatchLabel + i, startFinallyLabel, null);
+            }
+            // output.addExceptionHandler(startFinallyLabel, startFinallyLabel + "+1", startFinallyLabel, null);
+        }
     }
 
     /**

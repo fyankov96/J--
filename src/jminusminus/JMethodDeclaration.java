@@ -187,7 +187,7 @@ class JMethodDeclaration extends JAST implements JMember {
         }
         
         // Convert the typenames for exceptions to jvmNames
-        exceptionJVMNames = this.exceptions.stream().map(x -> x.jvmName())
+        exceptionJVMNames = this.exceptions.stream().map(x -> "java.lang." + x)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         // Declare the parameters. We consider a formal parameter 
@@ -227,9 +227,12 @@ class JMethodDeclaration extends JAST implements JMember {
         if (returnType == Type.VOID) {
             partial.addNoArgInstruction(RETURN);
         } else if (returnType == Type.INT
-            || returnType == Type.BOOLEAN || returnType == Type.CHAR) {
+            || returnType == Type.BOOLEAN || returnType == Type.CHAR ) {
             partial.addNoArgInstruction(ICONST_0);
             partial.addNoArgInstruction(IRETURN);
+        } else if(returnType == Type.DOUBLE){
+            partial.addNoArgInstruction(DCONST_0);
+            partial.addNoArgInstruction(DRETURN);
         } else {
             // A reference type.
             partial.addNoArgInstruction(ACONST_NULL);

@@ -142,9 +142,14 @@ class JUnaryPlusOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
-        
-        arg.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
+        if(arg.type() != Type.INT && arg.type() != Type.DOUBLE) {
+            JAST.compilationUnit.reportSemanticError(line(),
+            "Invalid operand type for - (Unary)");
+        } else if(arg.type() == Type.INT){
+            type = Type.INT;
+        } else if(arg.type() == Type.DOUBLE) {
+            type = Type.DOUBLE;
+        }
         return this;
 
         /*

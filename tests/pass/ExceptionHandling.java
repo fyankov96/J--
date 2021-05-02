@@ -4,21 +4,27 @@ package pass;
 import java.lang.IllegalArgumentException;
 import java.lang.NullPointerException;
 import java.lang.IndexOutOfBoundsException;
+import java.lang.System;
 
 public class ExceptionHandling {
-    public ExceptionHandling() throws IndexOutOfBoundsException {
-        throw new IndexOutOfBoundsException();
+    public ExceptionHandling() throws IllegalArgumentException {
+        int x = tryCatch();
+        System.out.println(x);
+        throw new IndexOutOfBoundsException("out of bounds");
     }
 
-    public int tryCatch() throws IllegalArgumentException {
+    public int tryCatch() throws IndexOutOfBoundsException {
+        int x = 0;
         try {
-            int x = 42;
-            throw new NullPointerException();
+            x = 42;
+            throw new NullPointerException("null");
         } catch (NullPointerException e) {
-            return 0;
+            x = 2;
         } catch (IllegalArgumentException i) {
-            return 2;
-        }
-        finally {return 1;}  
+            x = 3;
+        } finally {
+            System.out.println("done"); 
+        }  
+        return x;
     }
 }

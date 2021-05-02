@@ -40,14 +40,14 @@ class JSingleVariableDeclaration extends JStatement {
      *            the modifiers of the variable
      */
 
-    public JSingleVariableDeclaration(int line, String name, Type type, ArrayList<String> mods, Boolean hiddenInit) {
+    public JSingleVariableDeclaration(int line, String name, Type type, ArrayList<String> mods) {
         super(line);
         this.name = name;
         this.type = type;
         this.mods = mods;
         this.initializer = null;
         this.initialization = null;
-        this.hiddenInit = hiddenInit;
+        this.hiddenInit = true;
     }
 
     /**
@@ -118,6 +118,7 @@ class JSingleVariableDeclaration extends JStatement {
     public Type setType(Type newType) {
         return type = newType;
     }
+
 
     /**
      * Sets the initializer to the specified JExpression.

@@ -1,5 +1,6 @@
 package pass;
 
+
 public class ForEachStatement {
     public void forEachStatementAnalyze() {
         int[] a = {2, 3};
@@ -8,6 +9,8 @@ public class ForEachStatement {
         for(int x : a) {
             res += x;
         }
+        
+
 
         //MyIterable b = new MyIterable();
         //for(int x : b) {}

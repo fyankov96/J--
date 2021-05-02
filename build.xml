@@ -201,6 +201,69 @@
             </test>
         </junit>
     </target>
+
+    <!--
+        runCompilerTests: We first compile the tests in tests/pass and
+        tests/fail directories using the jminusminus compiler. We
+        use a JUnit test JMinusMinusTest.java to run the jminusminus
+        compiler on each of the tests. We then run the
+        JMinusMinusTestRunner JUnit test suite, which includes a JUnit test
+        case for each jminusminus test file under tests/pass directory.
+        For example, there is a GCDTest.java test case under tests/junit
+        corresponding to the jminusminus test GCD.java under tests/pass.
+    -->
+    <target name="runCompilerTestSingle" depends="compile,compileSPIM,jar">
+        <echo message="Compiling and running j-- (JVM) programs..."/>
+        <javac srcdir="${basedir}/tests/"
+               destdir="${CLASS_DIR}"
+               includes="junit/JMinusMinusTest.java"
+               includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <sysproperty key="PASS_TESTS_DIR" value="${PASS_TESTS_DIR}" />
+            <sysproperty key="FAIL_TESTS_DIR" value="${FAIL_TESTS_DIR}" />
+            <sysproperty key="GEN_CLASS_DIR" value="${GEN_CLASS_DIR}" />
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.JMinusMinusTest"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+        <javac srcdir="${basedir}/tests"
+               sourcepath=""
+               destdir="${CLASS_DIR}"
+               includes="junit/**"
+               excludes="junit/JavaCCScannerTest.java,junit/JavaCCParserTest.java,junit/JMinusMinusTestJavaCC.java"
+               includeantruntime="false"
+               debug="on">
+            <!-- Uncomment the following to see compiler warnings. -->
+            <!-- <compilerarg value="-Xlint" />                    -->
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+        </javac>
+        <junit printsummary="yes" haltonfailure="no" showoutput="yes">
+            <classpath>
+                <pathelement location="${LIB_DIR}/junit.jar" />
+                <pathelement location="${basedir}/${CLASS_DIR}" />
+            </classpath>
+            <test name="junit.JMinusMinusTestRunnerSingle"
+                  haltonfailure="no">
+                <formatter type="plain" usefile="false"/>
+            </test>
+        </junit>
+    </target>
+    
     
     <!--
     runCompilerTestsJavaCC: Same as run compilerTests, but using

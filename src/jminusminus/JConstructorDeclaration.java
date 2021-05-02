@@ -110,12 +110,12 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
         if (!exceptionTypes.isEmpty()) {
             for(Type exception : exceptionTypes) {
                 methodContext.addException(exception);
-                System.out.println("exception added to context, check methoddelcaration 166");
+                // System.out.println("exception added to context, check methoddelcaration 166");
             }
         }
                 
         // Convert the typenames for exceptions to jvmNames
-        exceptionJVMNames = this.exceptions.stream().map(x -> x.jvmName())
+        exceptionJVMNames = this.exceptions.stream().map(x -> "java.lang." + x)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         // Declare the parameters. We consider a formal parameter

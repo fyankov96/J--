@@ -1035,7 +1035,7 @@ private JStatement forStatement(): {
                 { varName = token.image; }
                 <COLON>
                 loopExpression = expression()
-                { identifier = new JSingleVariableDeclaration(line, varName, varType, mods); } |
+                { identifier = new JSingleVariableDeclaration(line, varName, varType, mods, true); } |
 
                 [
                     LOOKAHEAD((basicType() | qualifiedIdentifier()) <IDENTIFIER>)
@@ -1766,6 +1766,10 @@ private JExpression relationalExpression(): {
             <GT>
             rhs = additiveExpression()
             { lhs = new JGreaterThanOp(line, lhs, rhs); } |
+
+            <LT>
+            rhs = additiveExpression()
+            { lhs = new JLessThanOp(line, lhs, rhs); } |
 
             <LE>
             rhs = additiveExpression()

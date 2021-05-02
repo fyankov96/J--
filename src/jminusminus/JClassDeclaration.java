@@ -448,7 +448,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         mods.add("static");
         output.addMethod(mods, "<clinit>", "()V", null, false);
 
-        // If there are instance initializations, generate code
+        // If there are static initializations, generate code
         // for them
         for (JFieldDeclaration staticField : staticFieldInitializations) {
             staticField.codegenInitializations(output);

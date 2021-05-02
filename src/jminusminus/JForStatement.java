@@ -233,20 +233,10 @@ class JForEachStatement extends JForStatement {
     /* The new context (built in analyze()) for defining variables used in the loop. */
     private LocalContext context;
 
-
-    /* For-step statement resulting from analysis */
-    private JVariableDeclaration initDecl;
-    private JExpression condition;
-    private ArrayList<JStatement> loopSteps;
-
-    private JSingleVariableDeclaration iterableDecl;
-    private JForStepStatement forStepNode;
-    private ArrayList<JStatement> forStepStatements;
-    private JSingleVariableDeclaration identAssign;
-    private ArrayList<JStatement> blockStatements;
+    /* JBlock containing the rewritten loop done during analysis */
     private JBlock forStepBlock;
 
-
+    /* Static numbers used to generate guaranteed unique variables used in rewriting.*/
     private static int iterableNum = 0;
     private static int iteratorNum = 0;
 
@@ -268,15 +258,6 @@ class JForEachStatement extends JForStatement {
         super(line, body);
         this.identifier = identifier;
         this.iterable = iterable;
-        
-        this.initDecl = null;
-        this.condition = null;
-        this.loopSteps = new ArrayList<JStatement>();
-        this.iterableDecl = null;
-        this.forStepNode = null;
-        this.forStepStatements = null;
-        this.identAssign = null;
-        this.blockStatements  = new ArrayList<JStatement>();
         this.forStepBlock = null;
     }
 
@@ -291,17 +272,23 @@ class JForEachStatement extends JForStatement {
      */
 
     public /*JBlock*/ JForEachStatement analyze(Context context) {  //Thomas: Report
+        boolean isValid = true;
+
         this.context = new LocalContext(context);
 
         identifier.analyze(this.context);
         iterable.analyze(this.context);
 
         if (!(iterable.type().isArray() || iterable.type().isSubType(Type.typeFor(Iterable.class)))) {
+            isValid = false;
             JAST.compilationUnit.reportSemanticError(line(),
                 "Attempting to iterate over a non-iterable type");
         }
+        //Alternatively:
+        //Iterable.class.isAssignableFrom(iterable.type().classRep())
         
         if(!identifier.type().equals(iterable.type().componentType())){
+            isValid = false;
             JAST.compilationUnit.reportSemanticError(line(),
                 "Using " + identifier.type() + " type to iterate over " + iterable.type().componentType() + " array");
         }
@@ -309,64 +296,69 @@ class JForEachStatement extends JForStatement {
         body.analyze(this.context);
 
         // Rewrite to a for-step block and analyze //Thomas: Report
-        blockStatements = new ArrayList<JStatement>();
+        if(isValid){
+            ArrayList<JStatement> blockStatements = new ArrayList<JStatement>();
+            JSingleVariableDeclaration iterableDecl = null;
+            JVariableDeclaration initDecl = null;
+            JExpression condition = null;
+            ArrayList<JStatement> loopSteps = new ArrayList<JStatement>();
+            JSingleVariableDeclaration identAssign = null;
 
-        if (iterable.type().isArray()) {   
-            // Create the iterable $a' = iterable and add it to the block statements
-            String iterableName = generateIterableName();
-            String iteratorName = generateIteratorName();
-            iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), null, iterable); 
+            if (iterable.type().isArray()) {   
+                // Create the iterable $a' = iterable and add it to the block statements
+                String iterableName = generateIterableName();
+                String iteratorName = generateIteratorName();
+                iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), null, iterable); 
 
-            blockStatements.add(iterableDecl);
+                // Create the iterator (int $i' = 0 ; ...
+                JVariableDeclarator init = new JVariableDeclarator(line, iteratorName, Type.INT, new JLiteralInt(line(), "0"));
+                ArrayList<JVariableDeclarator> initList = new ArrayList<JVariableDeclarator>();
+                initList.add(init);
+                initDecl = new JVariableDeclaration(line, null, initList);
 
-            // Create the iterator (int $i' = 0 ; ...
-            JVariableDeclarator init = new JVariableDeclarator(line, iteratorName, Type.INT, new JLiteralInt(line(), "0"));
-            ArrayList<JVariableDeclarator> initList = new ArrayList<JVariableDeclarator>();
-            initList.add(init);
-            initDecl = new JVariableDeclaration(line, null, initList);
+                // Create the condition ... ; $i' < $a'.length ; ...
+                JExpression lhs = new JVariable(line(), iteratorName);
+                JExpression rhs = new JFieldSelection(line, new JVariable(line(), iterableName), "length");
+                condition = new JLessThanOp(line(), lhs, rhs);
 
-            // Create the condition ... ; $i' < $a'.length ; ...
-            JExpression lhs = new JVariable(line(), iteratorName);
-            JExpression rhs = new JFieldSelection(line, new JVariable(line(), iterableName), "length");
-            condition = new JLessOp(line(), lhs, rhs);
+                // Create the step ... ; $i'++
+                loopSteps.add(new JPostIncrementOp(line(), new JVariable(line(), iteratorName)));
 
-            // Create the step ... ; $i'++
-            loopSteps.add(new JPostIncrementOp(line(), new JVariable(line(), iteratorName)));
+                // Create the identifier assignment: Type identifier = $a'[$i']
+                identAssign = new JSingleVariableDeclaration(line(), identifier.name(), Type.INT, null,
+                                                                    new JArrayExpression(line(), 
+                                                                        new JVariable(line(), iterableName),
+                                                                            new JVariable(line(), iteratorName)));
 
-            // Create the identifier assignment: Type identifier = $a'[$i']
-            identAssign = new JSingleVariableDeclaration(line(), identifier.name(), Type.INT, null,
-                                                                new JArrayExpression(line(), 
-                                                                    new JVariable(line(), iterableName),
-                                                                        new JVariable(line(), iteratorName)));
+            } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) { //Dario: For-Each-Statement. Book page 194-195
+                // Create the iterator (I $i' = Expression.iterator() ; ...
+                //iterableDecl = new JSingleVariableDeclaration(line(), ..., ..., ..., ...);
+                //This is an AST node I made, it is the exact same as JVariableDeclaration, but only takes a single variable to declare.
 
-        } else if(iterable.type().isSubType(Type.typeFor(Iterable.class))) { //Dario: For-Each-Statement. Book page 194-195
-            // Create the iterator (I $i' = Expression.iterator() ; ...
-            //iterableDecl = new JSingleVariableDeclaration(line(), ..., ..., ..., ...);
-            //This is an AST node I made, it is the exact same as JVariableDeclaration, but only takes a single variable to declare.
+                // Create the condition ... ; $i'.hasNext() ;
+                //condition = new JNotEqualOp(line(), ..., ...);
 
-            // Create the condition ... ; $i'.hasNext() ;
-            //condition = new JNotEqualOp(line(), ..., ...);
+                // No step statements are required
 
-            // No step statements are required
+                // Create the identifier Type identifier = $i'.next()
+                //JSingleVariableDeclaration identifier = ...
+                
 
-            // Create the identifier Type identifier = $i'.next()
-            //JSingleVariableDeclaration identifier = ...
+                // Create the identifier assignment: Type identifier = $i'.next`()
+                //identAssign = ...
+
+            }
             
+            ArrayList<JStatement> forStepStatements = ((JBlock) body).statements();
+            forStepStatements.add(0, identAssign);
 
-            // Create the identifier assignment: Type identifier = $i'.next`()
-            //identAssign = ...
+            JForStepStatement forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, new JBlock(line(), forStepStatements));       
+            blockStatements.add(iterableDecl);
+            blockStatements.add(forStepNode);
 
+            this.forStepBlock = new JBlock(line(), blockStatements);
+            this.forStepBlock.analyze(context);
         }
-        
-        forStepStatements = ((JBlock) body).statements();
-        forStepStatements.add(0, identAssign);
-
-        forStepNode = new JForStepStatement(line, null, initDecl, condition, loopSteps, new JBlock(line(), forStepStatements));       
-        blockStatements.add(forStepNode);
-
-        this.forStepBlock = new JBlock(line(), blockStatements);
-        this.forStepBlock.analyze(context);
-        
         return this;
     }
 
@@ -403,12 +395,6 @@ class JForEachStatement extends JForStatement {
      */
 
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JForEachStatementBlock line=\"%d\">\n", line());
-        p.indentRight();
-        forStepBlock.writeToStdOut(p);
-        p.indentLeft();
-        p.printf("</JForEachStatementBlock>\n");
-        /*
         p.printf("<JForEachStatement line=\"%d\">\n", line());
         p.indentRight();
         identifier.writeToStdOut(p);
@@ -427,7 +413,14 @@ class JForEachStatement extends JForStatement {
         p.printf("</Body>\n");
         p.indentLeft();
         p.printf("</JForEachStatement>\n");
-        */
+        
+        p.printf("<JForEachStatementBlock line=\"%d\">\n", line());
+        p.indentRight();
+        if(forStepBlock != null) {
+            forStepBlock.writeToStdOut(p);
+        }
+        p.indentLeft();
+        p.printf("</JForEachStatementBlock>\n");
     }
 
 }

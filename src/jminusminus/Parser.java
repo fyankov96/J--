@@ -1616,7 +1616,7 @@ public class Parser {
      * 
      * <pre>
      *   relationalExpression ::= shiftExpression  // level 5
-     *                              [(GT | LE) shiftExpression 
+     *                              [(GT | LT | LE) shiftExpression 
      *                              | INSTANCEOF referenceType]
      * </pre>
      * 
@@ -1628,6 +1628,8 @@ public class Parser {
         JExpression lhs = shiftExpression();
         if (have(GT)) {
             return new JGreaterThanOp(line, lhs, shiftExpression());
+        } else if (have(LT)) {
+            return new JLessEqualOp(line, lhs, shiftExpression());
         } else if (have(LE)) {
             return new JLessEqualOp(line, lhs, shiftExpression());
         } else if (have(INSTANCEOF)) {

@@ -377,11 +377,7 @@ class JAndAssignOp extends JAssignment {
             rhs.type().mustMatchExpected(line(), Type.INT);
             type = Type.INT;
         } else {
-<<<<<<< Updated upstream
             JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for: " + lhs.type());
-=======
-            JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for &=: " + lhs.type());
->>>>>>> Stashed changes
         }
         return this;
     }

@@ -1,5 +1,6 @@
 package pass;
 
+
 public class ForEachStatement {
     public void forEachStatementAnalyze() {
         int[] a = {2, 3, 4, 5};
@@ -9,6 +10,8 @@ public class ForEachStatement {
         for(int x : a) {
             res += x;
         }
+        
+
 
         //for(java.lang.Integer x : b) {}
     }

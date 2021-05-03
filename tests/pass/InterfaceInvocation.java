@@ -7,7 +7,7 @@ public interface InterfaceB extends InterfaceA {
     int method3();
 }
 
-public class Impl1 extends InterfaceB {
+public class Impl1 implements InterfaceB {
     int method1() {
         return 1;
     }
@@ -22,7 +22,7 @@ public class Impl1 extends InterfaceB {
     }
 }
 
-public class Impl2 extends InterfaceB {
+public class Impl2 implements InterfaceB {
     int method1() {
         return -1;
     }

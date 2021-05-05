@@ -445,6 +445,36 @@ class Type {
         return true;
     }
 
+
+    /**
+     * Do argument types match? A helper used for finding candidate methods and
+     * constructors.
+     * 
+     * @param argTypes1
+     *            arguments (classReps) of one method.
+     * @param argTypes2
+     *            arguments (classReps) of another method.
+     * @return {@code true} iff all corresponding types of argTypes1 and 
+     *         argTypes2 match; {@code false} otherwise.
+     */
+
+    public static boolean argTypesMatch(Type[] argTypes1,
+            Class<?>[] argTypes2) {
+        if (argTypes1.length != argTypes2.length) {
+            return false;
+        }
+        for (int i = 0; i < argTypes1.length; i++) {
+            if(argTypes1[i] == Type.ANY) {
+                continue;
+            }
+            if (!Type.descriptorFor(argTypes1[i].classRep).equals(
+                    Type.descriptorFor(argTypes2[i]))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Returns the simple (unqualified) name for this Type. For example, String 
      * in place of java.lang.String.
@@ -464,7 +494,12 @@ class Type {
      */
 
     public String toString() {
-        return toJava(this.classRep);
+        if(this.classRep != null){
+            return toJava(this.classRep);
+        } else {
+            return "(ANY)";
+        }
+ 
     }
 
     /**
@@ -564,18 +599,18 @@ class Type {
      */
 
     public Method methodFor(String name, Type[] argTypes) {
+        /*
         Class[] classes = new Class[argTypes.length];
         for (int i = 0; i < argTypes.length; i++) {
             classes[i] = argTypes[i].classRep;
-        }
+        }*/
         Class cls = classRep;
-
         // Search this class and all superclasses
         while (cls != null) {
             java.lang.reflect.Method[] methods = cls.getDeclaredMethods();
             for (java.lang.reflect.Method method : methods) {
                 if (method.getName().equals(name)
-                        && Type.argTypesMatch(classes, method
+                        && Type.argTypesMatch(argTypes, method
                                 .getParameterTypes())) {
                     return new Method(method);
                 }

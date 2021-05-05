@@ -27,4 +27,54 @@ public class ExceptionHandling {
         }  
         return x;
     }
+
+    public String divideByZero() {
+        int a = 0;
+        int b = 1;
+        String c = "Init";
+        try {
+            b = b / a;
+            c = "Not Caught";
+        }
+        catch (ArithmeticException e){
+            c = "Caught";
+        }
+        return c;
+    }
+
+    public String illegalAccess() {
+        int[] a = new int[3];
+        String c;
+        try {
+            int b;
+            b = a[5];
+            c = "Not Caught";
+        } catch (ArrayIndexOutOfBoundsException e) {
+            c = "Caught";
+        }
+        return c;
+    }
+
+    public String IllegalArgument(int f) {
+        
+        Foo foo = new Foo();
+        String val = "Not Init";
+        try{
+            foo.bar(f);
+            val = "Not Caught";
+        } catch(IllegalArgumentException e) {
+            val = "Caught";
+        }
+        return val;
+    }
+
+
+}
+
+class Foo {
+    void bar(String a) {
+        if(a == "Illegal") {
+            throw new IllegalArgumentException();
+        }
+    }
 }

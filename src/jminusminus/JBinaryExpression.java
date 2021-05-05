@@ -306,13 +306,10 @@ class JDivideOp extends JBinaryExpression {
         rhs = (JExpression) rhs.analyze(context);
         
         if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
-            type = Type.INT;
-        } else if (lhs.type() == Type.DOUBLE && (rhs.type() == Type.INT || rhs.type() == Type.CHAR || rhs.type() == Type.DOUBLE)) {
+            type = Type.INT;   
+        } else if (rhs.type() == Type.DOUBLE && lhs.type() == Type.DOUBLE) {
             type = Type.DOUBLE;   
-        } else if (rhs.type() == Type.DOUBLE && (lhs.type() == Type.INT || lhs.type() == Type.CHAR || lhs.type() == Type.DOUBLE)) {
-            type = Type.DOUBLE;   
-        }
-        else {
+        } else {
             type = Type.ANY;
             JAST.compilationUnit.reportSemanticError(line(),
                     "Invalid operand types for /");
@@ -355,7 +352,7 @@ class JRemainderOp extends JBinaryExpression {
         else {
             type = Type.ANY;
             JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid operand types for %");
+                    "Invalid operand types for remainder");
         }
         return this;
     }

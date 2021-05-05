@@ -17,11 +17,11 @@ public class ExceptionHandling {
         int x = 0;
         try {
             x = 42;
-            throw new NullPointerException("null");
+            System.out.println(x);
         } catch (NullPointerException e) {
-            x = 2;
+            x = 2+3;
         } catch (IllegalArgumentException i) {
-            x = 3;
+            x = 3-1;
         } finally {
             System.out.println("done"); 
         }  

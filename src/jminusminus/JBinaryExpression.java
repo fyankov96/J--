@@ -352,7 +352,7 @@ class JRemainderOp extends JBinaryExpression {
         else {
             type = Type.ANY;
             JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid operand types for %");
+                    "Invalid operand types for remainder");
         }
         return this;
     }

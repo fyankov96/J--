@@ -375,6 +375,7 @@ class JForEachStatement extends JForStatement {
         } else {
             JAST.compilationUnit.reportSemanticError(line(),
             "Unsupported foreach");
+            return this;
         }
 
         forStepStatements = ((JBlock) body).statements();

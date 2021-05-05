@@ -1475,7 +1475,7 @@ public class Parser {
      * Parse a conditional-or expression.
      * 
      * <pre>
-     *   conditionalOrExpression ::= equalityExpression // level 10
+     *   conditionalOrExpression ::= equalityExpression // level 11
      *                                  {LAND bitwiseOrExpression}
      * </pre>
      * 

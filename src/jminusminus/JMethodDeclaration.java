@@ -182,7 +182,6 @@ class JMethodDeclaration extends JAST implements JMember {
         if (!exceptionTypes.isEmpty()) {
             for(Type exception : exceptionTypes) {
                 methodContext.addException(exception);
-                // System.out.println("exception added to context, check methoddelcaration 166");
             }
         }
         

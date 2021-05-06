@@ -126,50 +126,59 @@ class JTryCatchStatement extends JStatement {
         String startFinallyLabel = output.createLabel();
         String endFinallyLabel = output.createLabel();
 
-
-
-        // Add a start try label and generate code for try block
+        // Add a start try label, generate code for try block, add end try label
         output.addLabel(startTryLabel);
         tryBlock.codegen(output);
+        output.addLabel(endTryLabel);
         
         // generate code for finally block (when something goes wrong), if it has one
-        output.addLabel(endTryLabel);
         if(finallyBlock != null) {
             finallyBlock.codegen(output);
         }
+        // Go to end of try-catch-finally, and return
         output.addBranchInstruction(GOTO, endFinallyLabel);
 
         // generate code for each catchblock
         for(int i = 0; i < catchBlocks.size(); i++) {
             output.addLabel(startCatchLabel + i);
+
+             // Go to handler, if caught exception
             output.addNoArgInstruction(ASTORE_1);
+
             catchBlocks.get(i).codegen(output);
             output.addLabel(endCatchLabel + i);
+
+            // Add all exception handlers regarding catch; catchtype = exception from catchparam
             output.addExceptionHandler(startTryLabel, endTryLabel, startCatchLabel + i,
                 catchParams.get(i).type().jvmName());
-         
          
             // generate code for finally block (when something goes wrong), if it has one
             if(finallyBlock != null) {
                 finallyBlock.codegen(output);
             }
+            // Go to end of try-catch-finally, and return
             output.addBranchInstruction(GOTO, endFinallyLabel);  
         }
 
         // generate code for finally block, if it has one
         if (finallyBlock != null) {
             output.addLabel(startFinallyLabel);
+
+            // Beggining of finally block. 
             output.addOneArgInstruction(ASTORE, this.context.methodContext().offset());
             finallyBlock.codegen(output);
             output.addOneArgInstruction(ALOAD, this.context.methodContext().offset());
+
+            // Rethrow caught exception
             output.addNoArgInstruction(ATHROW);
         }
         output.addLabel(endFinallyLabel);
           
+        // Add all exception handlers regarding finally 
         if (finallyBlock != null) {
             output.addExceptionHandler(startTryLabel, endTryLabel, startFinallyLabel, null);
             
-
+            // Loops through all catch blocks and add exception handlers
             for(int i = 0; i < catchBlocks.size(); i++) {
                 output.addExceptionHandler(startCatchLabel + i, endCatchLabel + i, startFinallyLabel, null);  
             }

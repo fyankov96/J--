@@ -35,7 +35,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(UnaryPlusTest.class);
         suite.addTestSuite(MultiLineCommentTest.class);
         suite.addTestSuite(LogicalOrTest.class);
-        suite.addTestSuite(Conditional.class);
+        suite.addTestSuite(ConditionalTest.class);
         suite.addTestSuite(NotEqualsTest.class);
         suite.addTestSuite(DivisionAssignmentTest.class);
         suite.addTestSuite(MultiplicationAssignmentTest.class);

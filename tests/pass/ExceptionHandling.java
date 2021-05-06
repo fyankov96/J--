@@ -55,7 +55,7 @@ public class ExceptionHandling {
         return c;
     }
 
-    public String IllegalArgument(int f) {
+    public String IllegalArgument(String f) {
         
         Foo foo = new Foo();
         String val = "Not Init";

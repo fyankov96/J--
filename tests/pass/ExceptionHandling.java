@@ -55,7 +55,7 @@ public class ExceptionHandling {
         return c;
     }
 
-    public String IllegalArgument(int f) {
+    /* public String IllegalArgument(int f) {
         
         Foo foo = new Foo();
         String val = "Not Init";
@@ -66,15 +66,15 @@ public class ExceptionHandling {
             val = "Caught";
         }
         return val;
-    }
+    } */
 
 
 }
 
-class Foo {
-    void bar(String a) {
+/* class Foo {
+    void bar(int[] a) {
         if(a == "Illegal") {
             throw new IllegalArgumentException();
         }
     }
-}
+}*/

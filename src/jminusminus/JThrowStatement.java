@@ -94,10 +94,7 @@ class JThrowStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        output.addReferenceInstruction(NEW, expr.type().jvmName());
-        output.addNoArgInstruction(DUP);
-        output.addMemberAccessInstruction(INVOKESPECIAL, expr.type().jvmName(), 
-        "<init>", "(Ljava/lang/String;)V"); 
+        expr.codegen(output);
         output.addNoArgInstruction(ATHROW);
     }
 

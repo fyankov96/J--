@@ -3,6 +3,7 @@ package pass;
 public class ParseDoubles {
     
     public double doubles(double x, double y) {
+        
         double xx = 3.14;
         double yy = -4.13;
         

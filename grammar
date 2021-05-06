@@ -31,9 +31,11 @@ interfaceBody ::= LCURLY
                   { modifiers interfaceMemberDecl }
                   RCURLY       
 
-interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
-                        formalParameters SEMI
-                        | type variableDeclarators SEMI
+interfaceMemberDecl ::= interfaceDeclaration
+                            | (VOID | type) <identifier> // method
+                              formalParameters
+                                   [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
+                            | type variableDeclarators SEMI // field
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block

@@ -457,6 +457,8 @@ public class Parser {
             JAST typeDeclaration = typeDeclaration();
             if (typeDeclaration != null) {
                 typeDeclarations.add(typeDeclaration);
+            } else {
+                break;
             }
         }
         mustBe(EOF);
@@ -811,9 +813,11 @@ public class Parser {
      * Parse an interface member declaration.
      *
      * <pre>
-     *   interfaceMemberDecl ::= (VOID | type) IDENTIFIER  // method
-     *                    formalParameters SEMI
-     *                | type variableDeclarators SEMI
+     *interfaceMemberDecl ::= interfaceDeclaration
+     *                       | (VOID | type) <identifier> // method
+     *                           formalParameters
+     *                             [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
+     *                       | type variableDeclarators SEMI // field
      * </pre>
      *
      * @param mods the class member modifiers.
@@ -1474,7 +1478,7 @@ public class Parser {
      * Parse a conditional-or expression.
      * 
      * <pre>
-     *   conditionalOrExpression ::= equalityExpression // level 10
+     *   conditionalOrExpression ::= equalityExpression // level 11
      *                                  {LAND bitwiseOrExpression}
      * </pre>
      * 

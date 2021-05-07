@@ -17,14 +17,62 @@ public class ExceptionHandling {
         int x = 0;
         try {
             x = 42;
-            throw new NullPointerException("null");
+            System.out.println(x);
         } catch (NullPointerException e) {
-            x = 2;
+            x = 2+3;
         } catch (IllegalArgumentException i) {
-            x = 3;
+            x = 3-1;
         } finally {
             System.out.println("done"); 
         }  
         return x;
+    }
+
+    public String divideByZero() {
+        int a = 0;
+        int b = 1;
+        String c = "Init";
+        try {
+            b = b / a;
+            c = "Not Caught";
+        }
+        catch (ArithmeticException e){
+            c = "Caught";
+        }
+        return c;
+    }
+
+    public String illegalAccess() {
+        int[] a = new int[3];
+        String c;
+        try {
+            int b;
+            b = a[5];
+            c = "Not Caught";
+        } catch (ArrayIndexOutOfBoundsException e) {
+            c = "Caught";
+        }
+        return c;
+    }
+
+    public String illegalArgument(int f) {
+        
+        Foo foo = new Foo();
+        String val = "Not Init";
+        try{
+            foo.bar(f);
+            val = "Not Caught";
+        } catch(IllegalArgumentException e) {
+            val = "Caught";
+        }
+        return val;
+    } 
+}
+
+class Foo {
+    void bar(int a) {
+        if(a < 0 || a > 100) {
+            throw new IllegalArgumentException();
+        }
     }
 }

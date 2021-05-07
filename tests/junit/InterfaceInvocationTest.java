@@ -1,17 +1,19 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.InterfaceInvocationTest;
+import pass.InterfaceTestImpl1;
+import pass.InterfaceTestImpl2;
+
 
 
 public class InterfaceInvocationTest extends TestCase{
-    private Impl1 i1;
-    private Impl2 i2;
+    private InterfaceTestImpl1 i1;
+    private InterfaceTestImpl2 i2;
 
     protected void setUp() throws Exception {
         super.setUp();
-        i1 = new Impl1();
-        i2 = new Impl2();
+        i1 = new InterfaceTestImpl1();
+        i2 = new InterfaceTestImpl2();
     }
 
     protected void tearDown() throws Exception {

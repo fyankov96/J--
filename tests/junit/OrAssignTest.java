@@ -16,7 +16,9 @@ public class OrAssignTest extends TestCase {
     }
 
     public void testOrAssign() {
-        this.assertEquals(orass.orAssign(true), true);
-        this.assertEquals(orass.orAssign(false), false);
+        this.assertEquals(orass.orAssign(3, 10), 11);
+        this.assertEquals(orass.orAssign(3, 3), 3);
+        this.assertEquals(orass.orAssign(31, 32), 63);
+        this.assertEquals(orass.orAssign(29, 33), 61);
     }    
 }

@@ -373,6 +373,7 @@ class JForEachStatement extends JForStatement {
         } else {
             JAST.compilationUnit.reportSemanticError(line(),
             "Unsupported foreach");
+            return this;
         }
 
         JForStepStatement forStepNode = new JForStepStatement(line(), null, initDecl, condition, loopSteps, new JBlock(line(), forStepStatements));

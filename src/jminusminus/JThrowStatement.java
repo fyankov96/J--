@@ -4,6 +4,7 @@ package jminusminus;
 
 import static jminusminus.CLConstants.*;
 
+
 /**
  * The AST node for a throwexpression
  */
@@ -12,6 +13,12 @@ class JThrowStatement extends JStatement {
 
     /** Thrown expression. */
     private JExpression expr;
+
+    /** Method for thrown expression */
+    private Constructor constructor;
+
+    /** Types of the arguments. */
+    private Type[] argTypes;
 
     /**
      * Constructs an AST node for a throw-statement given its line number and the expression
@@ -36,27 +43,40 @@ class JThrowStatement extends JStatement {
      */
 
     public JThrowStatement analyze(Context context) {
+
         // Analyzing the expr makes the JThrowStatement use the imported libraries
         expr.analyze(context);
+
+        /* argTypes = new Type[1];
+        argTypes[0] = expr.type().resolve(context); 
+        System.out.println(argTypes.toString() + "Hello");
+        this.constructor = expr.type().constructorFor(argTypes);
+        System.out.println(constructor.toDescriptor() + "hi");
+        
+        System.out.println(expr.type().simpleName());*/ 
 
         // Check if the expr is the type throwable
         if (!(expr.type().isSubType(Type.typeFor(Throwable.class))))  {
             JAST.compilationUnit.reportSemanticError(line(),
                 "Attempting to throw a non-throwable type");
-                // System.out.println(context.getExceptions().toString());
-        } else if (context.getExceptions().contains(expr.type())) {
-            // Check if it exists or not in the local context, if it does, don't add it.
+            return null;
+        }
+        // Check if it exists in the local context, if it does, don't add it.
+        if (context.getExceptions().contains(expr.type())) {
             JAST.compilationUnit.reportSemanticError(line, "Exception already exists: "
             + expr.type().toString());
+        
+        // Check if it exists in the methodcontext, but doesn't exist in the local context
+        // then add to local context
         } else if (context.methodContext().getExceptions().contains(expr.type()) &&
                     !context.getExceptions().contains(expr.type())){
-            // Check if it exists in the methodcontext, but doesn't exist in the local context
-            // then add to local
+
             context.addException(expr.line(), expr.type());
             return this;
+
+        // If it doesn't exist in both, add both local & method context.
         } else if (!context.methodContext().getExceptions().contains(expr.type()) &&
         !context.getExceptions().contains(expr.type())){
-            // If it doesn't exist in both
             context.addException(expr.line(), expr.type());
             context.methodContext().addException(expr.line(), expr.type());
             return this;
@@ -74,10 +94,7 @@ class JThrowStatement extends JStatement {
      */
 
     public void codegen(CLEmitter output) {
-        output.addReferenceInstruction(NEW, expr.type().jvmName());
-        output.addNoArgInstruction(DUP);
-        output.addMemberAccessInstruction(INVOKESPECIAL, expr.type().jvmName(), 
-        "<init>", "()V");
+        expr.codegen(output);
         output.addNoArgInstruction(ATHROW);
     }
 

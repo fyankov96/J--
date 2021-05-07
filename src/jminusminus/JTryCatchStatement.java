@@ -64,49 +64,44 @@ class JTryCatchStatement extends JStatement {
 
     public JStatement analyze(Context context) {
         // Analyse try block
+        this.context = new LocalContext(context);
         tryBlock.analyze(context);
 
         for(JFormalParameter catchParam : catchParams) {
             catchParam.setType((new TypeName(catchParam.line(), "java.lang." + catchParam.type().toString())).resolve(context.methodContext()));
         }
 
-        // For every catch param, analyse the catch block
-        for(int i = 0; i < catchParams.size(); i++) {
-            this.context = new LocalContext(context);
-            catchParams.get(i).analyze(this.context);
-            catchBlocks.get(i).analyze(this.context);
+        // If theres no catchblocks due to only try-finally cases
+        if (!catchBlocks.isEmpty()) {
+            this.context.methodContext().nextOffset();
 
-            /*catchParams.get(i).setType(new TypeName(catchParams.get(i).line(), 
-            "java.lang." + catchParams.get(i).type().toString()));
-            catchParams.get(i).type().resolve(this.context);*/
-
-            // Check if current catchparam is valid
-            if (!(catchParams.get(i).type().isSubType(Type.typeFor(Throwable.class)))) {
-                                JAST.compilationUnit.reportSemanticError(catchParams.get(i).line(),
-                "Attempting to catch a non-throwable type");
-            } else {
-                // Add to both localcontext and methodcontext (so tryblock can search for them)
-                this.context.addException(catchParams.get(i).line(), catchParams.get(i).type());
-                this.context.methodContext().addException(catchParams.get(i).line(), catchParams.get(i).type());
-
-                // next off set for the context, if a new exception is added
-                if (i > 0) {
-                    this.context.methodContext().nextOffset();
-                }
-
-                System.out.println(this.context.methodContext().getExceptions().toString());
-                System.out.println(this.context.getExceptions().toString());
+            // For every catch param, analyse the catch block
+            for(int i = 0; i < catchParams.size(); i++) {
+                this.context = new LocalContext(context);
+                catchParams.get(i).analyze(this.context);
+                catchBlocks.get(i).analyze(this.context);
+    
+                /*catchParams.get(i).setType(new TypeName(catchParams.get(i).line(), 
+                "java.lang." + catchParams.get(i).type().toString()));
+                catchParams.get(i).type().resolve(this.context);*/
+    
+                // Check if current catchparam is valid
+                if (!(catchParams.get(i).type().isSubType(Type.typeFor(Throwable.class)))) {
+                                    JAST.compilationUnit.reportSemanticError(catchParams.get(i).line(),
+                    "Attempting to catch a non-throwable type");
+                } else {
+                    // Add to both localcontext and methodcontext (so tryblock can search for them)
+                    this.context.addException(catchParams.get(i).line(), catchParams.get(i).type());
+                    this.context.methodContext().addException(catchParams.get(i).line(), catchParams.get(i).type());
+                }          
             }
 
-            //System.out.println(context.methodContext().getExceptions().toString());
-            // System.out.println(this.context.getExceptions().toString());
-            //this.context.addEntry(catchParams.get(i).line(), catchParams.get(i).name(), 
-            //new LocalVariableDefn(catchParams.get(i).type(), this.context.nextOffset()));
-           
         }
+        
         
         // Analyse finally block
         if (finallyBlock != null) {
+            this.context.methodContext().nextOffset();
             this.context = new LocalContext(context);
             finallyBlock.analyze(this.context);
         }
@@ -131,48 +126,62 @@ class JTryCatchStatement extends JStatement {
         String startFinallyLabel = output.createLabel();
         String endFinallyLabel = output.createLabel();
 
-
-        // Add a start try label and generate code for try block
+        // Add a start try label, generate code for try block, add end try label
         output.addLabel(startTryLabel);
         tryBlock.codegen(output);
+        output.addLabel(endTryLabel);
         
-        // generate code for finally block, if it has one
+        // generate code for finally block (when something goes wrong), if it has one
         if(finallyBlock != null) {
             finallyBlock.codegen(output);
-            output.addBranchInstruction(GOTO, endFinallyLabel);
-            output.addLabel(endTryLabel);
         }
+        // Go to end of try-catch-finally, and return
+        output.addBranchInstruction(GOTO, endFinallyLabel);
 
+        // generate code for each catchblock
         for(int i = 0; i < catchBlocks.size(); i++) {
             output.addLabel(startCatchLabel + i);
+
+             // Go to handler, if caught exception
             output.addNoArgInstruction(ASTORE_1);
+
             catchBlocks.get(i).codegen(output);
             output.addLabel(endCatchLabel + i);
+
+            // Add all exception handlers regarding catch; catchtype = exception from catchparam
             output.addExceptionHandler(startTryLabel, endTryLabel, startCatchLabel + i,
-                this.context.methodContext().getExceptions().get(i).jvmName());
+                catchParams.get(i).type().jvmName());
          
+            // generate code for finally block (when something goes wrong), if it has one
             if(finallyBlock != null) {
                 finallyBlock.codegen(output);
-                output.addBranchInstruction(GOTO, endFinallyLabel);
             }
+            // Go to end of try-catch-finally, and return
+            output.addBranchInstruction(GOTO, endFinallyLabel);  
         }
 
-
+        // generate code for finally block, if it has one
         if (finallyBlock != null) {
             output.addLabel(startFinallyLabel);
+
+            // Beggining of finally block. 
             output.addOneArgInstruction(ASTORE, this.context.methodContext().offset());
-            // output.addLabel(startFinallyLabel + "+1");
             finallyBlock.codegen(output);
             output.addOneArgInstruction(ALOAD, this.context.methodContext().offset());
+
+            // Rethrow caught exception
             output.addNoArgInstruction(ATHROW);
-            output.addLabel(endFinallyLabel);
-
+        }
+        output.addLabel(endFinallyLabel);
+          
+        // Add all exception handlers regarding finally 
+        if (finallyBlock != null) {
             output.addExceptionHandler(startTryLabel, endTryLabel, startFinallyLabel, null);
-
+            
+            // Loops through all catch blocks and add exception handlers
             for(int i = 0; i < catchBlocks.size(); i++) {
-                output.addExceptionHandler(startCatchLabel + i, endCatchLabel + i, startFinallyLabel, null);
+                output.addExceptionHandler(startCatchLabel + i, endCatchLabel + i, startFinallyLabel, null);  
             }
-            // output.addExceptionHandler(startFinallyLabel, startFinallyLabel + "+1", startFinallyLabel, null);
         }
     }
 

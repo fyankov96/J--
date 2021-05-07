@@ -9,12 +9,5 @@ public class ForEachStatement {
         for(int x : a) {
             res += x;
         }
-        
-
-
-        //MyIterable b = new MyIterable();
-        //for(int x : b) {}
     }
 }
-
-//public class MyIterable implements java.lang.Iterable {}

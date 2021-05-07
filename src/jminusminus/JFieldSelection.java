@@ -58,7 +58,7 @@ class JFieldSelection extends JExpression implements JLhs {
         this.target = target;
         this.fieldName = fieldName;
     }
-
+    
     /**
      * Analyzing a field selection expression involves, (1) reclassifying any
      * ambiguous part, (2) analyzing the target, (3) treating "length" field of
@@ -109,7 +109,7 @@ class JFieldSelection extends JExpression implements JLhs {
                 context.definingType().checkAccess(line, (Member) field);
                 type = field.type();
 
-                // Non-static field cannot be referenced from a static context. //Thomas: Report
+                // Non-static field cannot be referenced from a static context.
                 if (!field.isStatic()) {
                     if ((target instanceof JVariable && ((JVariable) target).iDefn() instanceof TypeNameDefn) || (context.blockContext() != null && context.blockContext().isStatic())) {
                         JAST.compilationUnit.reportSemanticError(line(),

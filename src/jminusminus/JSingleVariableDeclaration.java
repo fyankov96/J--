@@ -17,9 +17,6 @@ class JSingleVariableDeclaration extends JStatement {
     /** Variable name. */
     private String name;
 
-    /** Flag denoting whether this variable is initialized stealthily */
-    private Boolean hiddenInit;
-
     /** Original Variable initializer. */
     private JExpression initializer;
 
@@ -47,7 +44,6 @@ class JSingleVariableDeclaration extends JStatement {
         this.mods = mods;
         this.initializer = null;
         this.initialization = null;
-        this.hiddenInit = true;
     }
 
     /**
@@ -73,7 +69,6 @@ class JSingleVariableDeclaration extends JStatement {
         this.mods = mods;
         this.initializer = initializer;
         this.initialization = null;
-        this.hiddenInit = false;
     }
 
     
@@ -148,7 +143,7 @@ class JSingleVariableDeclaration extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-    public JAST analyze(Context context) {        //Thomas: Report
+    public JAST analyze(Context context) {
         // Get the local variable declaration
         int offset = ((LocalContext) context).nextOffset();
         LocalVariableDefn defn = new LocalVariableDefn(type.resolve(context), offset);
@@ -161,21 +156,21 @@ class JSingleVariableDeclaration extends JStatement {
                     "The name " + name + " overshadows another local variable.");
         }
 
-        // Then declare it in the local context and initialize it
+        // Then declare it in the local context
         context.addEntry(line(), name, defn);
 
-        // Set the variable to having been initialized if it is done in a hidden fashion
-        if (hiddenInit) {
-            defn.initialize();
-        }
+        // If it is final, add that information to the definition
+        if(mods.contains("final"))
+            defn.setFinal();
 
         // Initialization must be turned into assignment statement and analyzed
         if (initializer != null) {
-            defn.initialize();
             JAssignOp assignOp = new JAssignOp(line(),
                                   new JVariable(line(), name), initializer);
             assignOp.isStatementExpression = true;
             initialization = new JStatementExpression(line(), assignOp).analyze(context);
+
+            defn.initialize();
         }
 
         return this;

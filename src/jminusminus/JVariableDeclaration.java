@@ -82,15 +82,20 @@ class JVariableDeclaration extends JStatement {
             // Then declare it in the local context
             context.addEntry(decl.line(), decl.name(), defn);
 
+            // If it is final, add that information to the definition
+            if(mods.contains("final"))
+                    defn.setFinal();
+
             // All initializations must be turned into assignment
             // statements and analyzed
             if (decl.initializer() != null) {
-                defn.initialize();
                 JAssignOp assignOp = new JAssignOp(decl.line(), new JVariable(
                         decl.line(), decl.name()), decl.initializer());
                 assignOp.isStatementExpression = true;
                 initializations.add(new JStatementExpression(decl.line(),
                         assignOp).analyze(context));
+                
+                defn.initialize();
             }
         }
         return this;

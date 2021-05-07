@@ -57,7 +57,7 @@ class JAssignOp extends JAssignment {
 
     public JExpression analyze(Context context) {
         if (!(lhs instanceof JLhs)) {
-            JAST.compilationUnit.reportSemanticError(line(), "Illegal lhs for assignment");
+            JAST.compilationUnit.reportSemanticError(line(), "Illegal lhs for assignment.");
         } else {
             lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
         }

@@ -226,6 +226,7 @@ TOKEN: {
 | <USHR: ">>>">
 | <BOR: "|">
 | <LOR: "||">
+| <BXOR: "^">
 | <PLUS_ASSIGN: "+=">
 | <MINUS_ASSIGN: "-=">
 | <MULT_ASSIGN: "*=">
@@ -1701,8 +1702,8 @@ private JExpression conditionalOrExpression(): {
  * Parse a conditional-and expression.
  * 
  * <pre>
- *   conditionalAndExpression ::= equalityExpression        // level 10
- *                                  {LAND equalityExpression}
+ *   conditionalAndExpression ::= bitWiseOrExpression        // level 10
+ *                                  {LAND bitWiseOrExpression}
  * </pre>
  * 
  * @return an AST for a conditionalExpression.
@@ -1714,10 +1715,10 @@ private JExpression conditionalAndExpression(): {
 }
 {
     try {
-        lhs = equalityExpression() { line = lhs.line(); }
+        lhs = bitWiseOrExpression() { line = lhs.line(); }
         (
             <LAND>
-            rhs = equalityExpression()
+            rhs = bitWiseOrExpression()
             { lhs = new JLogicalAndOp(line, lhs, rhs); }
         )*
     }
@@ -1726,6 +1727,99 @@ private JExpression conditionalAndExpression(): {
     }
     { return lhs; }
 }
+
+/**
+ * Parse a bitwise OR expression.
+ * 
+ * <pre>
+ * bitWiseOrExpression ::= bitWiseXOrExpression // level 9
+ *                          {BOR bitWiseXOrExpression}
+ * </pre>
+ * 
+ * @return an AST for a bitWiseOrExpression.
+ */
+
+
+private JExpression bitWiseOrExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = bitWiseXOrExpression() { line = lhs.line(); }
+        (
+            <BOR>
+            rhs = bitWiseXOrExpression()
+            { lhs = new JBitwiseOrOp(line, lhs, rhs); }
+        )*
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return lhs; }
+}
+
+
+/**
+ * Parse a bitwise XOR expression.
+ * 
+ * <pre>
+ * bitWiseXOrExpression ::= bitWiseAndExpression // level 8
+                          {BXOR bitWiseAndExpression}
+ * </pre>
+ * 
+ * @return an AST for a bitWiseXOrExpression.
+ */
+
+private JExpression bitWiseXOrExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = bitWiseAndExpression() { line = lhs.line(); }
+        (
+            <BXOR>
+            rhs = bitWiseAndExpression()
+            { lhs = new JBitwiseXorOp(line, lhs, rhs); }
+        )*
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return lhs; }
+}
+
+
+/**
+ * Parse a bitwise AND expression.
+ * 
+ * <pre>
+ * bitWiseAndExpression ::= equalityExpression // level 7
+ *                           {BAND equalityExpression}
+ * </pre>
+ * 
+ * @return an AST for a bitWiseAndExpression.
+ */
+private JExpression bitWiseAndExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = equalityExpression() { line = lhs.line(); }
+        (
+            <BAND>
+            rhs = equalityExpression()
+            { lhs = new JBitwiseAndOp(line, lhs, rhs); }
+        )*
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return lhs; }
+}
+
 
 /**
  * Parse an equality expression.
@@ -1738,7 +1832,7 @@ private JExpression conditionalAndExpression(): {
  * @return an AST for an equalityExpression.
  */
 
-private JExpression equalityExpression(): {
+ private JExpression equalityExpression(): {
     int line = 0;
     JExpression lhs = null, rhs = null;
 }
@@ -1760,6 +1854,8 @@ private JExpression equalityExpression(): {
     }
     { return lhs; }
 }
+
+
 
 /**
  * Parse a relational expression.
@@ -1909,6 +2005,10 @@ private JExpression unaryExpression(): {
         unaryExpr = unaryExpression()
         { expr = new JNegateOp(line, unaryExpr); } |
 
+        <PLUS>
+        unaryExpr = unaryExpression()
+        { expr = new JUnaryPlusOp(line, unaryExpr); } |
+        
         expr = simpleUnaryExpression()
     }
     catch (ParseException e) {

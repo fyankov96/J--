@@ -80,22 +80,17 @@ class JTryCatchStatement extends JStatement {
                 this.context = new LocalContext(context);
                 catchParams.get(i).analyze(this.context);
                 catchBlocks.get(i).analyze(this.context);
-    
-                /*catchParams.get(i).setType(new TypeName(catchParams.get(i).line(), 
-                "java.lang." + catchParams.get(i).type().toString()));
-                catchParams.get(i).type().resolve(this.context);*/
-    
+ 
                 // Check if current catchparam is valid
-                if (!(catchParams.get(i).type().isSubType(Type.typeFor(Throwable.class)))) {
-                                    JAST.compilationUnit.reportSemanticError(catchParams.get(i).line(),
-                    "Attempting to catch a non-throwable type");
-                } else {
-                    // Add to both localcontext and methodcontext (so tryblock can search for them)
+                if (catchParams.get(i).type().isSubType(Type.typeFor(Throwable.class))) {
+                    // Add to both localcontext and methodcontext (so tryblock can search for them
                     this.context.addException(catchParams.get(i).line(), catchParams.get(i).type());
-                    this.context.methodContext().addException(catchParams.get(i).line(), catchParams.get(i).type());
+                    this.context.methodContext().addException(catchParams.get(i).line(), catchParams.get(i).type());          
+                } else {
+                    JAST.compilationUnit.reportSemanticError(catchParams.get(i).line(),
+                    "Attempting to catch a non-throwable type");
                 }          
             }
-
         }
         
         

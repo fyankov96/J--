@@ -71,7 +71,7 @@ public class ExceptionHandling {
 
 class Foo {
     void bar(int a) {
-        if(a < 0 || a > 100) {
+        if(a == 0) {
             throw new IllegalArgumentException();
         }
     }

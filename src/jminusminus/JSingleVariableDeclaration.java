@@ -143,7 +143,6 @@ class JSingleVariableDeclaration extends JStatement {
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
-<<<<<<< HEAD
     public JAST analyze(Context context) {        //Thomas: Report
             // Local variables are declared here (fields are
             // declared
@@ -153,12 +152,6 @@ class JSingleVariableDeclaration extends JStatement {
         int offset = offset = ((LocalContext) context).nextOffset(typeDecl);
 
         LocalVariableDefn defn = new LocalVariableDefn(typeDecl, offset);
-=======
-    public JAST analyze(Context context) {
-        // Get the local variable declaration
-        int offset = ((LocalContext) context).nextOffset();
-        LocalVariableDefn defn = new LocalVariableDefn(type.resolve(context), offset);
->>>>>>> 798fe25ec483f0598e54f14dd592c277fe741149
         
         // Check for shadowing
         IDefn previousDefn = context.lookup(name);

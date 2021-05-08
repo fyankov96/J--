@@ -315,10 +315,6 @@ class Scanner {
                 }
                 return new TokenInfo(SHL, line);
             } else {
-<<<<<<< HEAD
-                //reportScannerError("Operator < is not supported in j--.");
-=======
->>>>>>> 798fe25ec483f0598e54f14dd592c277fe741149
                 return new TokenInfo(LT, line);
             }
         case '\'':

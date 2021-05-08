@@ -73,13 +73,8 @@ public class ExceptionHandling {
 }
 
 class Foo {
-<<<<<<< HEAD
     void bar(String a) {
         if(a == "Illegal") {
-=======
-    void bar(int a) {
-        if(a == 0) {
->>>>>>> 798fe25ec483f0598e54f14dd592c277fe741149
             throw new IllegalArgumentException();
         }
     }

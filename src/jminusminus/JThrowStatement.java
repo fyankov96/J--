@@ -46,15 +46,7 @@ class JThrowStatement extends JStatement {
 
         // Analyzing the expr makes the JThrowStatement use the imported libraries
         expr.analyze(context);
-
-        /* argTypes = new Type[1];
-        argTypes[0] = expr.type().resolve(context); 
-        System.out.println(argTypes.toString() + "Hello");
-        this.constructor = expr.type().constructorFor(argTypes);
-        System.out.println(constructor.toDescriptor() + "hi");
         
-        System.out.println(expr.type().simpleName());*/ 
-
         // Check if the expr is the type throwable
         if (!(expr.type().isSubType(Type.typeFor(Throwable.class))))  {
             JAST.compilationUnit.reportSemanticError(line(),

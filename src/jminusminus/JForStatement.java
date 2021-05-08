@@ -331,7 +331,7 @@ class JForEachStatement extends JForStatement {
             // Create the condition ... ; $i' < $a'.length ; ...
             JExpression lhs = new JVariable(line(), iteratorName);
             JExpression rhs = new JFieldSelection(line, new JVariable(line(), iterableName), "length");
-            condition = new JLessOp(line(), lhs, rhs);
+            condition = new JLessThanOp(line(), lhs, rhs);
 
             // Create the step ... ; $i'++
             loopSteps.add(new JPostIncrementOp(line(), new JVariable(line(), iteratorName)));

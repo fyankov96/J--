@@ -7,20 +7,19 @@ import java.lang.IndexOutOfBoundsException;
 import java.lang.System;
 
 public class ExceptionHandling {
-    public ExceptionHandling() throws IllegalArgumentException {
+    public ExceptionHandling() {
         int x = tryCatch();
         System.out.println(x);
-        throw new IndexOutOfBoundsException("out of bounds");
     }
 
-    public int tryCatch() throws IndexOutOfBoundsException {
+    public int tryCatch() {
         int x = 0;
         try {
             x = 42;
             System.out.println(x);
         } catch (NullPointerException e) {
             x = 2+3;
-        } catch (IllegalArgumentException i) {
+        } catch (IllegalCallerException i) {
             x = 3-1;
         } finally {
             System.out.println("done"); 
@@ -49,13 +48,13 @@ public class ExceptionHandling {
             int b;
             b = a[5];
             c = "Not Caught";
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             c = "Caught";
         }
         return c;
     }
 
-    public String illegalArgument(int f) {
+    public String illegalArgument(String f) {
         
         Foo foo = new Foo();
         String val = "Not Init";
@@ -70,8 +69,8 @@ public class ExceptionHandling {
 }
 
 class Foo {
-    void bar(int a) {
-        if(a < 0 || a > 100) {
+    void bar(String a) {
+        if(a == "Illegal") {
             throw new IllegalArgumentException();
         }
     }

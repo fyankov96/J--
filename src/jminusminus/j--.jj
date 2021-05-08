@@ -384,7 +384,14 @@ private JAST typeDeclaration(): {
 {
     try {
         mods = modifiers()
-        classDeclaration = classDeclaration(mods)
+
+        (   
+            LOOKAHEAD(<CLASS>)
+            classDeclaration = classDeclaration(mods) |
+            LOOKAHEAD(<INTERFACE>) 
+            classDeclaration = interfaceDeclaration(mods)
+            )
+        
     }
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
@@ -600,7 +607,7 @@ private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods): {
 }
 {
     try {
-        <CLASS> { line = token.beginLine; }
+        <INTERFACE> { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         [
             <EXTENDS> superClass = qualifiedIdentifier()
@@ -1652,7 +1659,7 @@ private JExpression ternaryExpression(): {
 }
 {
     try {
-        cond = conditionalAndExpression() { line = cond.line(); }
+        cond = conditionalOrExpression() { line = cond.line(); }
         [
         <COND>
         trueExp = ternaryExpression()
@@ -1684,10 +1691,10 @@ private JExpression conditionalOrExpression(): {
 }
 {
     try {
-        lhs = equalityExpression() { line = lhs.line(); }
+        lhs = conditionalAndExpression() { line = lhs.line(); }
         (
             <LOR>
-            rhs = equalityExpression()
+            rhs = conditionalAndExpression()
             { lhs = new JLogicalOrOp(line, lhs, rhs); }
         )*
     }
@@ -1876,28 +1883,66 @@ private JExpression relationalExpression(): {
 }
 {
     try {
-        lhs = additiveExpression() { line = lhs.line(); }
+        lhs = shiftExpression() { line = lhs.line(); }
         [
             <GE>
-            rhs = additiveExpression()
+            rhs = shiftExpression()
             { lhs = new JGreaterEqualOp(line, lhs, rhs); } | 
 
             <GT>
-            rhs = additiveExpression()
+            rhs = shiftExpression()
             { lhs = new JGreaterThanOp(line, lhs, rhs); } |
 
             <LT>
-            rhs = additiveExpression()
+            rhs = shiftExpression()
             { lhs = new JLessThanOp(line, lhs, rhs); } |
 
             <LE>
-            rhs = additiveExpression()
+            rhs = shiftExpression()
             { lhs = new JLessEqualOp(line, lhs, rhs); } |
 
             <INSTANCEOF>
             type = referenceType()
             { lhs = new JInstanceOfOp(line, lhs, type); }
         ]
+    }
+    catch (ParseException e) {
+        recoverFromError(new int[] { SEMI, EOF }, e);
+    }
+    { return lhs; }
+}
+
+/**
+ * Parse an shift expression.
+ * 
+ * <pre>
+ * shiftExpression ::= additiveExpression             // level 4
+ *                          {(USHR | SHR | SHL) additiveExpression}
+ * </pre>
+ * 
+ * @return an AST for a shiftExpression.
+ */
+
+private JExpression shiftExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = additiveExpression() { line = lhs.line(); } 
+        (
+            <USHR>
+            rhs = additiveExpression()
+            { lhs = new JUnsignedShiftRight(line, lhs, rhs); } |
+
+            <SHR>
+            rhs = additiveExpression()
+            { lhs = new JShiftRightAssignOp(line, lhs, rhs); } |
+
+            <SHL>
+            rhs = additiveExpression()
+            { lhs = new JShiftLeftAssignOp(line, lhs, rhs); }
+        )*
     }
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
@@ -1980,7 +2025,8 @@ private JExpression multiplicativeExpression(): {
  * 
  * <pre>
  *   unaryExpression ::= INC unaryExpression // level 1
- *                     | MINUS unaryExpression
+                       | DEC unaryExpression
+                       | MINUS unaryExpression
  *                     | simpleUnaryExpression
  * </pre>
  * 
@@ -2043,6 +2089,10 @@ private JExpression simpleUnaryExpression(): {
         <LNOT> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JLogicalNotOp(line, unaryExpr); } |
+
+        <BNOT> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JBitwiseNotOp(line, unaryExpr); } |
 
         LOOKAHEAD(<LPAREN> basicType() <RPAREN>)
         <LPAREN> { line = token.beginLine; }

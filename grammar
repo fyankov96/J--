@@ -132,7 +132,7 @@ equalityExpression ::= relationalExpression  // level 6
                          {EQUAL | NOT_EQUALS relationalExpression}
 
 relationalExpression ::= shiftExpression       // level 5
-                           [(GT | LE) shiftExpression
+                           [(GT | LE | LT | GE) shiftExpression
                            | INSTANCEOF referenceType]
 
 shiftExpression ::= additiveExpression             // level 4

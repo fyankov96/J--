@@ -387,6 +387,9 @@ class JAndAssignOp extends JAssignment {
         if (lhs.type().equals(Type.INT)) {
             rhs.type().mustMatchExpected(line(), Type.INT);
             type = Type.INT;
+        } else if (lhs.type().equals(Type.BOOLEAN)) {
+            rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+            type = Type.BOOLEAN;
         } else {
             JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for: " + lhs.type());
             type = Type.ANY;
@@ -426,6 +429,9 @@ class JOrAssignOp extends JAssignment {
         if (lhs.type().equals(Type.INT)) {
             rhs.type().mustMatchExpected(line(), Type.INT);
             type = Type.INT;
+        } else if (lhs.type().equals(Type.BOOLEAN)) {
+            rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+            type = Type.BOOLEAN;
         } else {
             JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for: " + lhs.type());
             type = Type.ANY;
@@ -465,8 +471,11 @@ class JXOrAssignOp extends JAssignment {
         if (lhs.type().equals(Type.INT)) {
             rhs.type().mustMatchExpected(line(), Type.INT);
             type = Type.INT;
+        } else if (lhs.type().equals(Type.BOOLEAN)) {
+            rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+            type = Type.BOOLEAN;
         } else {
-            JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for " + lhs.type());
+            JAST.compilationUnit.reportSemanticError(line(), "Invalid lhs type for: " + lhs.type());
             type = Type.ANY;
         }
         return this;

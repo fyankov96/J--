@@ -159,6 +159,7 @@ public class Parser {
     private boolean seeBlock() {
         scanner.recordPosition();
         if (!have(LCURLY)) {
+            scanner.returnToPosition();
             return false;
         }
         scanner.returnToPosition();
@@ -693,8 +694,13 @@ public class Parser {
 
             if (have(SEMI)) {
                 // Do nothing
-            } else if (have(STATIC)) {
-                if (see(LCURLY)) {
+            } else if (see(STATIC)) {
+                scanner.recordPosition();
+                boolean isStaticBlock = have(STATIC);
+                isStaticBlock &= see(LCURLY);
+                scanner.returnToPosition();
+                if (isStaticBlock) {
+                    mustBe(STATIC);
                     ArrayList<String> mods = new ArrayList<String>();
                     mods.add("static");
                     SIB.add(block(mods));

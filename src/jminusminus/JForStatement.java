@@ -323,7 +323,7 @@ class JForEachStatement extends JForStatement {
             // Create the iterable $a' = iterable and add it to the block statements
             String iterableName = generateIterableName();
             String iteratorName = generateIteratorName();
-            iterableDecl = new JSingleVariableDeclaration(line(), iterableName, Type.typeFor(int[].class), new ArrayList<String>(), iterable); 
+            iterableDecl = new JSingleVariableDeclaration(line(), iterableName, iterable.type(), new ArrayList<String>(), iterable); 
             blockStatements.add(iterableDecl);
 
             // Create the iterator (int $i' = 0 ; ...
@@ -341,7 +341,7 @@ class JForEachStatement extends JForStatement {
             loopSteps.add(new JPostIncrementOp(line(), new JVariable(line(), iteratorName)));
 
             // Create the identifier assignment: Type identifier = $a'[$i']
-            identAssign = new JSingleVariableDeclaration(line(), identifier.name(), Type.INT, identifier.mods(),
+            identAssign = new JSingleVariableDeclaration(line(), identifier.name(), identifier.type(), identifier.mods(),
                                                                 new JArrayExpression(line(), 
                                                                     new JVariable(line(), iterableName),
                                                                         new JVariable(line(), iteratorName)));

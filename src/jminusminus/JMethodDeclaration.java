@@ -2,6 +2,7 @@
 
 package jminusminus;
 
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import static jminusminus.CLConstants.*;
@@ -192,8 +193,10 @@ class JMethodDeclaration extends JAST implements JMember {
         // Declare the parameters. We consider a formal parameter 
         // to be always initialized, via a function call.
         for (JFormalParameter param : params) {
-            LocalVariableDefn defn = new LocalVariableDefn(param.type(), 
-                this.context.nextOffset());
+
+            Type typeParam = param.type();
+            LocalVariableDefn defn = new LocalVariableDefn(typeParam, 
+                this.context.nextOffset(typeParam));
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }

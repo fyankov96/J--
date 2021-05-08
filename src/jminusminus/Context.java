@@ -392,6 +392,34 @@ class LocalContext extends Context {
         return offset++;
     }
 
+
+    /**
+     * Allocates a new offset (for example, for a parameter or local variable).
+     * 
+     * @param thickness The length of the data (i.e. double is 2 words long)
+     * @return the next allocated offset.
+     */
+
+    public int nextOffset(int thickness) {
+        int baseOffset = offset;
+        offset += thickness;
+        return baseOffset;
+    }
+
+    /**
+     * Allocates a new offset (for example, for a parameter or local variable).
+     * 
+     * @param type The type used for calculating the width of the data
+     * @return the next allocated offset.
+     */
+
+    public int nextOffset(Type type) {
+        int thickness = type == Type.DOUBLE ? 2 : 1;
+        int baseOffset = offset;
+        offset += thickness;
+        return baseOffset;
+    }
+
     /**
      * {@inheritDoc}
      */

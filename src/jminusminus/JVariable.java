@@ -166,6 +166,25 @@ class JVariable extends JExpression implements JLhs {
                         break;
                     }
                 }
+                if (type == Type.DOUBLE) {
+                    switch (offset) {
+                    case 0:
+                        output.addNoArgInstruction(DLOAD_0);
+                        break;
+                   case 1:
+                        output.addNoArgInstruction(DLOAD_1);
+                        break;
+                    case 2:
+                        output.addNoArgInstruction(DLOAD_2);
+                        break;
+                    case 3:
+                        output.addNoArgInstruction(DLOAD_3);
+                        break;
+                    default:
+                        output.addOneArgInstruction(DLOAD, offset);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -238,7 +257,12 @@ class JVariable extends JExpression implements JLhs {
     public void codegenDuplicateRvalue(CLEmitter output) {
         if (iDefn instanceof LocalVariableDefn) {
             // It's copied atop the stack.
-            output.addNoArgInstruction(DUP);
+            if(type == Type.DOUBLE) {
+                output.addNoArgInstruction(DUP2);
+            } else {
+                output.addNoArgInstruction(DUP);
+            }
+
         }
     }
 
@@ -293,6 +317,24 @@ class JVariable extends JExpression implements JLhs {
                         output.addOneArgInstruction(ISTORE, offset);
                         break;
                     }
+                } else if(type == Type.DOUBLE) {
+                    switch (offset) {
+                        case 0:
+                            output.addNoArgInstruction(DSTORE_0);
+                            break;
+                        case 1:
+                            output.addNoArgInstruction(DSTORE_1);
+                            break;
+                        case 2:
+                            output.addNoArgInstruction(DSTORE_2);
+                            break;
+                        case 3:
+                            output.addNoArgInstruction(DSTORE_3);
+                            break;
+                        default:
+                            output.addOneArgInstruction(DSTORE, offset);
+                            break;
+                        }
                 }
             }
         }

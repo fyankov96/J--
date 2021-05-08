@@ -149,9 +149,14 @@ class JSingleVariableDeclaration extends JStatement {
      */
 
     public JAST analyze(Context context) {        //Thomas: Report
-        // Get the local variable declaration
-        int offset = ((LocalContext) context).nextOffset();
-        LocalVariableDefn defn = new LocalVariableDefn(type.resolve(context), offset);
+            // Local variables are declared here (fields are
+            // declared
+            // in preAnalyze())
+
+        Type typeDecl = type.resolve(context);
+        int offset = offset = ((LocalContext) context).nextOffset(typeDecl);
+
+        LocalVariableDefn defn = new LocalVariableDefn(typeDecl, offset);
         
         // Check for shadowing
         IDefn previousDefn = context.lookup(name);

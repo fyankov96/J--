@@ -128,6 +128,8 @@ class Conversions {
 
         put(Type.CHAR, Type.INT, Converter.Identity);
         put(Type.INT, Type.CHAR, new I2C());
+        put(Type.INT, Type.DOUBLE, new I2D());
+        put(Type.DOUBLE, Type.INT, new D2I());
 
         // Boxing
         put(Type.CHAR, Type.BOXED_CHAR, new Boxing(Type.CHAR, Type.BOXED_CHAR));
@@ -347,3 +349,36 @@ class I2C implements Converter {
     }
 
 }
+
+/**
+ * Converting from an int to a char requires an I2C instruction.
+ */
+
+class I2D implements Converter {
+
+    /**
+     * {@inheritDoc}
+     */
+
+    public void codegen(CLEmitter output) {
+        output.addNoArgInstruction(I2D);
+    }
+
+}
+
+/**
+ * Converting from an int to a char requires an I2C instruction.
+ */
+
+class D2I implements Converter {
+
+    /**
+     * {@inheritDoc}
+     */
+
+    public void codegen(CLEmitter output) {
+        output.addNoArgInstruction(D2I);
+    }
+
+}
+

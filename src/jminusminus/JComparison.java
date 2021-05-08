@@ -40,7 +40,7 @@ abstract class JComparison extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
+        lhs.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
         rhs.type().mustMatchExpected(line(), lhs.type());
         type = Type.BOOLEAN;
         return this;
@@ -87,7 +87,10 @@ class JGreaterThanOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        
+        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        }
         output.addBranchInstruction(onTrue ? IF_ICMPGT : IF_ICMPLE,
                         targetLabel);
     }
@@ -133,7 +136,11 @@ class JLessEqualOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        
+        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addNoArgInstruction(INEG);  //Negates the result because if <= the comparison should succeed
+            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        }
         output.addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,
                         targetLabel);
     }
@@ -145,7 +152,7 @@ class JLessEqualOp extends JComparison {
  * short-circuiting branching.
  */
 
-class JLessOp extends JComparison {
+class JLessThanOp extends JComparison {
 
     /**
      * Constructs an AST node for a less-than-or-equal-to expression given its
@@ -160,7 +167,7 @@ class JLessOp extends JComparison {
      *            rhs operand.
      */
 
-    public JLessOp(int line, JExpression lhs, JExpression rhs) {
+    public JLessThanOp(int line, JExpression lhs, JExpression rhs) {
         super(line, "<", lhs, rhs);
     }
 
@@ -179,7 +186,11 @@ class JLessOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-
+        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addNoArgInstruction(INEG);  //Negates the result because if < the comparison should succeed
+            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        }
         output.addBranchInstruction(onTrue ? IF_ICMPLT : IF_ICMPGE,
                         targetLabel);
     }
@@ -225,7 +236,10 @@ class JGreaterEqualOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-
+        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        }
         output.addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT,
                         targetLabel);
     }

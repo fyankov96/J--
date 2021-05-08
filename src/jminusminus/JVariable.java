@@ -114,7 +114,7 @@ class JVariable extends JExpression implements JLhs {
             }
 
             // We are trying to initialize a local final variable
-            if (((LocalVariableDefn) iDefn).isFinal()) {
+            if (iDefn != null && ((LocalVariableDefn) iDefn).isFinal()) {
                 if (((LocalVariableDefn) iDefn).isInitialized()) { //The variable has already been initialized
                     JAST.compilationUnit.reportSemanticError(line, "Cannot assign a value to final variable "
                     + name);

@@ -800,6 +800,7 @@ public class Parser {
                     memberDecl = new JMethodDeclaration(line, mods, name, type, params, exceptions, body);
                 } else {
                     // Field
+                    System.out.println((mods.contains("static")) ? "Static" : "Not Static");
                     memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
                     mustBe(SEMI);
                 }

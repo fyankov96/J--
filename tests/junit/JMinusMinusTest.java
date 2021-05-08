@@ -72,8 +72,11 @@ public class JMinusMinusTest extends TestCase {
                 args = new String[] { "-d", genClassDir.getAbsolutePath(),
                         files[i].toString() };
                 Main.main(args);
+                if(!Main.errorHasOccurred()) {
+                    System.out.printf("TEST FAILED %s ...\n\n", files[i].toString());
+                }
+                System.out.printf("x");
                 System.out.printf("\n\n");
-
                 // true only if all tests fail
                 errorHasOccurred &= Main.errorHasOccurred();
             }

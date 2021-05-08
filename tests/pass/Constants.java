@@ -2,15 +2,20 @@ package pass;
 
 
 public class Constants {
-    final int x = 1;
-    final int y;
+    public final int x = 1;
+    public final int y;
     int z = 2;
+
+    public final String str;
+    public final double d;
     
     {
         y = 3;
+        str = "string";
+        d = 3.14;
     }
 
-    public void method() {
+    public int method() {
         final int a;
         final int b = 1;
 
@@ -25,5 +30,7 @@ public class Constants {
         for(final int i : arr) {
             res += i;
         }
+
+        return a + b + z;
     }
 }

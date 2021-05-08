@@ -396,7 +396,7 @@ private JAST typeDeclaration(): {
  * (public, protected, and private). Otherwise, no checks.
  *
  * <pre>
- *   modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
+ *   modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT | FINAL}
  * </pre>
  * 
  * 
@@ -410,6 +410,7 @@ private ArrayList<String> modifiers(): {
     boolean scannedPRIVATE   = false;
     boolean scannedSTATIC    = false;
     boolean scannedABSTRACT  = false;
+    boolean scannedFINAL     = false;
 }
 {
     try {
@@ -462,6 +463,14 @@ private ArrayList<String> modifiers(): {
                     reportParserError("Repeated modifier: abstract");
                 }
                 scannedABSTRACT = true;
+            } |
+            <FINAL>
+            {
+                mods.add("final");
+                if (scannedFINAL) {
+                    reportParserError("Repeated modifier: final");
+                }
+                scannedFINAL = true;
             } 
         )*
     }
@@ -527,9 +536,13 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
  * Parse a class body.
  * 
  * <pre>
- *   classBody ::= LCURLY
- *                   {modifiers memberDecl}
- *                 RCURLY
+ *   classBody ::=  LCURLY {
+ *                          (SEMI
+ *                           | modifiers memberDecl
+ *                           | STATIC block 
+ *                           | block)
+ *                         }
+ *                  RCURLY
  * </pre>
  * 
  * @return list of members in the class body.
@@ -548,6 +561,7 @@ private ArrayList<JMember> classBody(ArrayList<JBlock> SIB, ArrayList<JBlock> II
             LOOKAHEAD(<STATIC> block()) 
             <STATIC>
             aBlock = block() {SIB.add(aBlock);} | 
+            LOOKAHEAD(block())
             aBlock = block() {IIB.add(aBlock);} |
             mods = modifiers()
             aMember = memberDecl(mods) { members.add(aMember);}
@@ -1195,7 +1209,7 @@ private JExpression parExpression(): {
  * Parse a local variable declaration statement.
  * 
  * <pre>
- *   localVariableDeclarationStatement ::= type
+ *   localVariableDeclarationStatement ::= [FINAL] type
  *                                           variableDeclarators
  *                                             SEMI
  * </pre>
@@ -1211,6 +1225,11 @@ private JVariableDeclaration localVariableDeclarationStatement(): {
 }
 {
     try {
+        [
+            LOOKAHEAD(<FINAL>)
+            <FINAL>
+            { mods.add("final"); }
+        ]
         type = type() { line = token.beginLine; }
         vdecls = variableDeclarators(type)
         <SEMI>

@@ -674,13 +674,12 @@ public class Parser {
      * 
      * <pre>
     
-        classBody ::=  [SEMI] |
-                        {
-                        SEMI
-                        | modifiers memberDecl
-                        | STATIC block 
-                        | block
-                        }
+        classBody ::=  {(SEMI
+                         | modifiers memberDecl
+                         | STATIC block 
+                         | block)
+                       }
+                       RCURLY
      * 
      * </pre>
      * 

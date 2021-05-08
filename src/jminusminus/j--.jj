@@ -884,7 +884,7 @@ private JStatement blockStatement(): {
 }
 {
     try {
-        LOOKAHEAD(type() <IDENTIFIER>)
+        LOOKAHEAD((<FINAL> type() | type()) <IDENTIFIER>)
         statement = localVariableDeclarationStatement() |
         statement = statement()
     }

@@ -3,10 +3,15 @@ package pass;
 public interface InterfaceA {
     int method1();
     String method2(int l);
+    //int method3();
+
+}
+
+public interface InterfaceB extends InterfaceA {
     int method3();
 }
 
-public class InterfaceTestImpl1 implements InterfaceA {
+public class InterfaceTestImpl1 implements InterfaceB {
     public int method1() {
         return 1;
     }
@@ -21,7 +26,7 @@ public class InterfaceTestImpl1 implements InterfaceA {
     }
 }
 
-public class InterfaceTestImpl2 implements InterfaceA {
+public class InterfaceTestImpl2 implements InterfaceB {
     public int method1() {
         return -1;
     }

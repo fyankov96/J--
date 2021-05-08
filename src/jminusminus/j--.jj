@@ -213,7 +213,7 @@ TOKEN: {
 | <LAND: "&&">
 | <BAND: "&">
 | <LE: "<=">
-| <SE: ">=">
+| <GE: ">=">
 | <LNOT: "!">
 | <MINUS: "-">
 | <STAR: "*">
@@ -1049,7 +1049,7 @@ private JStatement forStatement(): {
                 { varName = token.image; }
                 <COLON>
                 loopExpression = expression()
-                { identifier = new JSingleVariableDeclaration(line, varName, varType, mods, true); } |
+                { identifier = new JSingleVariableDeclaration(line, varName, varType, mods); } |
 
                 [
                     LOOKAHEAD((basicType() | qualifiedIdentifier()) <IDENTIFIER>)
@@ -1782,6 +1782,10 @@ private JExpression relationalExpression(): {
     try {
         lhs = additiveExpression() { line = lhs.line(); }
         [
+            <GE>
+            rhs = additiveExpression()
+            { lhs = new JGreaterEqualOp(line, lhs, rhs); } | 
+
             <GT>
             rhs = additiveExpression()
             { lhs = new JGreaterThanOp(line, lhs, rhs); } |
@@ -1863,7 +1867,10 @@ private JExpression multiplicativeExpression(): {
             { lhs = new JMultiplyOp(line, lhs, rhs); } |
             <DIV>
             rhs = unaryExpression()
-            { lhs = new JDivideOp(line, lhs, rhs); }
+            { lhs = new JDivideOp(line, lhs, rhs); } |
+            <REM>
+            rhs = unaryExpression()
+            { lhs = new JRemainderOp(line, lhs, rhs); }
         )*
     }
     catch (ParseException e) {

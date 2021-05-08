@@ -6,6 +6,7 @@ public class ParseDoubles {
         
         double xx = 3.14;
         double yy = -4.13;
+        int n = 4;
         
         double a = 3.14 + 4.13;
         a += 4.13;
@@ -24,6 +25,10 @@ public class ParseDoubles {
 
         double f = ++x;
         f = y--;
+
+        double xd = (double) n;
+        xd++;
+        n = (int) xd;
         
         return 3.14;
     }

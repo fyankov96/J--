@@ -105,18 +105,11 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         String packageName = JAST.compilationUnit.packageName();
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? 
             name : JAST.compilationUnit.packageName() + "/" + name;
-
-
-
-        ArrayList<String> interfaceJVMNames = interfaceSuperTypes.stream()
-                .map(t -> t.jvmName())
-                .collect(Collectors.toCollection(ArrayList::new));
+        
 
         CLEmitter partial = new CLEmitter(false);
 
-
-
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), interfaceJVMNames, false);
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null, false);
 
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
@@ -134,6 +127,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         // Resolve superinterfaces
         interfaceSuperTypes = interfaceSuperTypes.stream().map(x -> x.resolve(this.context))
                 .collect(Collectors.toCollection(ArrayList::new));
+
 
         //ArrayList<String> interfaceJVMNames = this.interfaceSuperTypes.stream().map(x -> x.jvmName())
         //        .collect(Collectors.toCollection(ArrayList::new));

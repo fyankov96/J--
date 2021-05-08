@@ -113,6 +113,10 @@ class JEqualOp extends JBooleanBinaryExpression {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
+        if(type == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG);
+            output.addNoArgInstruction(ICONST_0);
+        }
         if (lhs.type().isReference()) {
             output.addBranchInstruction(onTrue ? IF_ACMPEQ : IF_ACMPNE,
                     targetLabel);
@@ -291,6 +295,10 @@ class JNotEqualOp extends JBooleanBinaryExpression {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
+        if(type == Type.DOUBLE) {
+            output.addNoArgInstruction(DCMPG);
+            output.addNoArgInstruction(ICONST_0);
+        }
         if (lhs.type().isReference()) {
             output.addBranchInstruction(onTrue ? IF_ACMPNE : IF_ACMPEQ,
                     targetLabel);

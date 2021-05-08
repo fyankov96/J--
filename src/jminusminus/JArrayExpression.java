@@ -92,6 +92,8 @@ class JArrayExpression extends JExpression implements JLhs {
             output.addNoArgInstruction(BALOAD);
         } else if (type == Type.CHAR) {
             output.addNoArgInstruction(CALOAD);
+        } else if (type == Type.DOUBLE) {
+            output.addNoArgInstruction(DALOAD);
         } else if (!type.isPrimitive()) {
             output.addNoArgInstruction(AALOAD);
         }

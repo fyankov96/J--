@@ -1478,7 +1478,7 @@ public class Parser {
      * 
      * <pre>
      *   conditionalOrExpression ::= equalityExpression // level 11
-     *                                  {LAND bitwiseOrExpression}
+     *                                  {LOR bitwiseOrExpression}
      * </pre>
      * 
      * @return an AST for a conditionalExpression.

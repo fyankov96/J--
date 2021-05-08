@@ -1763,6 +1763,14 @@ private JExpression relationalExpression(): {
     try {
         lhs = additiveExpression() { line = lhs.line(); }
         [
+            <LT>
+            rhs = additiveExpression()
+            { lhs = new JLessThanOp(line, lhs, rhs); } | 
+
+            <GE>
+            rhs = additiveExpression()
+            { lhs = new JGreaterEqualOp(line, lhs, rhs); } | 
+
             <GT>
             rhs = additiveExpression()
             { lhs = new JGreaterThanOp(line, lhs, rhs); } |

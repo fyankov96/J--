@@ -2,6 +2,8 @@ package pass;
 
 public class Remainder {
     public int remainder(int x, int y) {
-        return x % y ;
+        double a = 3.14;
+        double b = a % 2;
+        return x % y;
     }
 }

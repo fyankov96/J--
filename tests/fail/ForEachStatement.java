@@ -21,6 +21,8 @@ public class ForEachStatement {
         for(int x : c_arr) {
             res += x;
         }
+
+        x = 2;
         
         int x = 2;
         for(int x : i_arr) {

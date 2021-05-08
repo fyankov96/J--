@@ -10,12 +10,10 @@ public class ClassDeclaration {
         this.a = a;
     }
     
-    /*
     double x = 3.14;
     {
         x = 0.0;
     }
-    */
 
     {
         int x = 0;
@@ -37,7 +35,6 @@ public class ClassDeclaration {
         b = 2;
     }
     
-    /*
     public static int getB() {
         return b;
     }
@@ -45,6 +42,5 @@ public class ClassDeclaration {
     void setA(int a) {
         this.a = a;
     }
-    */
     
 }

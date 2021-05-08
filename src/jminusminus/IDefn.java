@@ -73,6 +73,9 @@ class LocalVariableDefn implements IDefn {
     /** Has this local variable been initialized? */
     private boolean isInitialized;
 
+    /** Is this local variable a constant? */
+    private boolean isFinal;
+
     /**
      * Constructs a local variable definition for a local variable.
      * 
@@ -86,6 +89,22 @@ class LocalVariableDefn implements IDefn {
     public LocalVariableDefn(Type type, int offset) {
         this.type = type;
         this.offset = offset;
+    }
+
+    /**
+     * Constructs a local variable definition for a local variable.
+     * 
+     * @param type
+     *            the variable's type.
+     * @param offset
+     *            the variable's offset from the base of the current stack frame
+     *            (allocated for each method invocation.)
+     */
+
+    public LocalVariableDefn(Type type, int offset, boolean isFinal) {
+        this.type = type;
+        this.offset = offset;
+        this.isFinal = isFinal;
     }
 
     /**
@@ -125,5 +144,26 @@ class LocalVariableDefn implements IDefn {
     public boolean isInitialized() {
         return isInitialized;
     }
+
+    /**
+     * Set that the variable is final
+     * 
+     * @return true or false.
+     */
+
+    public void setFinal() {
+        this.isFinal = true;
+    }
+
+    /**
+     * Is this local variable final?
+     * 
+     * @return true or false.
+     */
+
+    public boolean isFinal() {
+        return isFinal;
+    }
+
 
 }

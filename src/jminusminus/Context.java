@@ -5,6 +5,7 @@ package jminusminus;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -116,7 +117,7 @@ class Context {
         }     
     
 
-    // Get execeptions
+    // Get exceptions
     public ArrayList<Type> getExceptions() {
         return exceptions;
     }
@@ -314,6 +315,8 @@ class ClassContext extends Context {
     /** AST node of the type that this class represents. */
     private JAST definition;
 
+    private Set<String> initializedConstantFields;
+
     /**
      * Constructs a class context.
      * 
@@ -327,6 +330,7 @@ class ClassContext extends Context {
         super(surrounding, null, surrounding.compilationUnitContext());
         classContext = this;
         this.definition = definition;
+        this.initializedConstantFields = new HashSet<String>();
     }
 
     /**
@@ -337,6 +341,28 @@ class ClassContext extends Context {
 
     public JAST definition() {
         return definition;
+    }
+
+    /**
+     * Adds a field to the set of initialized constant fields
+     * 
+     * @param name
+     *            the name of the field.
+     */
+
+    public void initializeConstantField(String name) {
+        initializedConstantFields.add(name);
+    }
+
+    /**
+     * Returns whether a final field with the given name has been initialized
+     * 
+     *  @param name
+     *            the name of the field.
+     * @return a boolean
+     */
+    public boolean isConstantInitialized(String name) {
+        return initializedConstantFields.contains(name);
     }
 
 }

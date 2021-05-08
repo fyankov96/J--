@@ -104,14 +104,43 @@ class JVariable extends JExpression implements JLhs {
     public JExpression analyzeLhs(Context context) {
         analyzeLhs = true;
         JExpression newTree = analyze(context);
+
         if (newTree instanceof JVariable) {
             // Could (now) be a JFieldSelection, but if it's
             // (still) a JVariable
             if (iDefn != null && !(iDefn instanceof LocalVariableDefn)) {
                 JAST.compilationUnit.reportSemanticError(line(), name
-                        + " is a bad lhs to a  =");
+                        + " is a bad lhs to a =");
+            }
+
+            // We are trying to initialize a local final variable
+            if (((LocalVariableDefn) iDefn).isFinal()) {
+                if (((LocalVariableDefn) iDefn).isInitialized()) { //The variable has already been initialized
+                    JAST.compilationUnit.reportSemanticError(line, "Cannot assign a value to final variable "
+                    + name);
+                } else { //It has now been initialized
+                    ((LocalVariableDefn) iDefn).initialize();
+                }
             }
         }
+
+        if(newTree instanceof JFieldSelection) {
+            Type definingType = context.definingType();
+            Field field = definingType.fieldFor(name);
+            if(field.isFinal()) {
+                //Attempting to assign a value to a final field in a method context.
+                if(context.methodContext() != null){
+                    JAST.compilationUnit.reportSemanticError(line, "Cannot assign a value to final variable " + name);
+                } else {
+                    //Attempting to assign a value to a final field that already has a value.
+                    if (context.classContext().isConstantInitialized(name)) {
+                        JAST.compilationUnit.reportSemanticError(line, "Cannot assign a value to final variable " + name + " that may already have been assigned");
+                    }
+                    context.classContext().initializeConstantField(name);
+                }
+            }
+        }
+
         return newTree;
     }
 

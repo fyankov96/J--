@@ -20,6 +20,7 @@ public class ForStatementTest extends TestCase {
         ForStatement f = new ForStatement();
         ForEachStatement ff = new ForEachStatement();
 
+        this.assertEquals(ff.sum(), 9);
         this.assertEquals(f.compute(), 22);
         this.assertEquals(ff.compute(), 5);
     }

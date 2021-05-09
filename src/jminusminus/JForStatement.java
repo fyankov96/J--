@@ -338,7 +338,9 @@ class JForEachStatement extends JForStatement {
             condition = new JLessThanOp(line(), lhs, rhs);
 
             // Create the step ... ; $i'++
-            loopSteps.add(new JPostIncrementOp(line(), new JVariable(line(), iteratorName)));
+            JPostIncrementOp jio = new JPostIncrementOp(line(), new JVariable(line(), iteratorName));
+            jio.isStatementExpression = true;
+            loopSteps.add(jio);
 
             // Create the identifier assignment: Type identifier = $a'[$i']
             identAssign = new JSingleVariableDeclaration(line(), identifier.name(), identifier.type(), identifier.mods(),

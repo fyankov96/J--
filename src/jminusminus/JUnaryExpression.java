@@ -493,7 +493,7 @@ class JPostIncrementOp extends JUnaryExpression {
                 arg.codegen(output);
             }
             if(type == Type.INT) {
-                output.addIINCInstruction(offset, -1);
+                output.addIINCInstruction(offset, 1);
             } else if(type == Type.DOUBLE) {
                 output.addOneArgInstruction(DLOAD, offset);
                 output.addNoArgInstruction(DCONST_1);

@@ -1637,8 +1637,6 @@ public class Parser {
         JExpression lhs = shiftExpression();
         if (have(GT)) {
             return new JGreaterThanOp(line, lhs, shiftExpression());
-        } else if (have(LT)) {
-            return new JLessEqualOp(line, lhs, shiftExpression());
         } else if (have(LE)) {
             return new JLessEqualOp(line, lhs, shiftExpression());
         } else if (have(LT)) {

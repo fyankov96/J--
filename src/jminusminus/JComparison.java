@@ -87,12 +87,14 @@ class JGreaterThanOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
-            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
-            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        if(lhs.type() == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(onTrue ? DCMPG : DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addBranchInstruction(onTrue ? IFGT : IFLE,
+            targetLabel);
+        } else if(lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPGT : IF_ICMPLE,
+            targetLabel);
         }
-        output.addBranchInstruction(onTrue ? IF_ICMPGT : IF_ICMPLE,
-                        targetLabel);
     }
 
 }
@@ -136,13 +138,14 @@ class JLessEqualOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
-            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
-            output.addNoArgInstruction(INEG);  //Negates the result because if <= the comparison should succeed
-            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        if(lhs.type() == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(onTrue ? DCMPL : DCMPG); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addBranchInstruction(onTrue ? IFLE : IFGT,
+            targetLabel);
+        } else if(lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,
+            targetLabel);
         }
-        output.addBranchInstruction(onTrue ? IF_ICMPLE : IF_ICMPGT,
-                        targetLabel);
     }
 
 }
@@ -186,13 +189,14 @@ class JLessThanOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
-            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
-            output.addNoArgInstruction(INEG);  //Negates the result because if < the comparison should succeed
-            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        if(lhs.type() == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(onTrue ? DCMPL : DCMPG); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addBranchInstruction(onTrue ? IFLT : IFGE,
+            targetLabel);
+        } else if(lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPLT : IF_ICMPGE,
+            targetLabel);
         }
-        output.addBranchInstruction(onTrue ? IF_ICMPLT : IF_ICMPGE,
-                        targetLabel);
     }
 
 }
@@ -236,12 +240,15 @@ class JGreaterEqualOp extends JComparison {
     public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
         lhs.codegen(output);
         rhs.codegen(output);
-        if(type == Type.DOUBLE) { //Transform a double comparison in an integer comparison
-            output.addNoArgInstruction(DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
-            output.addNoArgInstruction(ICONST_0); //Load a 0 for the integer comparison
+        if(lhs.type() == Type.DOUBLE) { //Transform a double comparison in an integer comparison
+            output.addNoArgInstruction(onTrue ? DCMPG : DCMPL); //Compares doubles (1 if lhs > rhs, 0 if equal, -1 otherwise)
+            output.addBranchInstruction(onTrue ? IFGE : IFLT,
+            targetLabel);
+        } else if(lhs.type() == Type.INT) {
+            output.addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT,
+            targetLabel);
         }
-        output.addBranchInstruction(onTrue ? IF_ICMPGE : IF_ICMPLT,
-                        targetLabel);
+
     }
 
 }

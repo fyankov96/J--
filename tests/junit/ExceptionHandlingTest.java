@@ -15,8 +15,8 @@ public class ExceptionHandlingTest extends TestCase {
         super.tearDown();
     }
 
-    public void testDivide() {
-        this.assertEquals(eh.tryCatch(), 0);
+    public void testTryCatch() {
+        this.assertEquals(eh.tryCatch(), 42);
 
     }
     
@@ -26,6 +26,6 @@ public class ExceptionHandlingTest extends TestCase {
         this.assertEquals(this.eh.divideByZero(), "Caught");
         this.assertEquals(this.eh.illegalAccess(), "Caught");
         this.assertEquals(this.eh.illegalArgument("Illegal"), "Caught");
-        this.assertEquals(this.eh.illegalArgument("Legal"), "Caught");
+        this.assertEquals(this.eh.illegalArgument("Legal"), "Not Caught");
     }
 }

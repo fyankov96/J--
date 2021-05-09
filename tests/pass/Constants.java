@@ -15,6 +15,11 @@ public class Constants {
         d = 3.14;
     }
 
+    public int arrayLiteral() {
+        int[] arr = {2, 3}; 
+        return arr[0];
+    }
+
     public int method() {
         final int a;
         final int b = 1;
@@ -27,9 +32,10 @@ public class Constants {
         
         int[] arr = {2, 3};
         int res = 0;
+        /*
         for(final int i : arr) {
             res += i;
-        }
+        }*/
 
         return a + b + z;
     }

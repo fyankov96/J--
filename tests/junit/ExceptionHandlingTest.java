@@ -15,16 +15,17 @@ public class ExceptionHandlingTest extends TestCase {
         super.tearDown();
     }
 
-    public void testDivide() {
-        this.assertEquals(eh.tryCatch(), 0);
+    public void testTryCatch() {
+        this.assertEquals(eh.tryCatch(), 42);
 
     }
     
     public void testExceptions() {
         System.out.println("Running Exception Tests...");
-        this.assertEquals("Division by Zero should be triggered and caught", eh.divideByZero(), "Caught");
-        this.assertEquals("Illegal Array access should be caught", eh.illegalAccess(), "Caught");
-        this.assertEquals("Illegal Argument should not be thrown", eh.IllegalArgument("Illegal"), "Caught");
-        this.assertEquals("Illegal Argument should be thrown", eh.IllegalArgument("Legal"), "Caught");
+        
+        this.assertEquals(this.eh.divideByZero(), "Caught");
+        this.assertEquals(this.eh.illegalAccess(), "Caught");
+        this.assertEquals(this.eh.illegalArgument("Illegal"), "Caught");
+        this.assertEquals(this.eh.illegalArgument("Legal"), "Not Caught");
     }
 }

@@ -297,6 +297,9 @@ class Scanner {
                     return new TokenInfo(SHR_ASSIGN, line);
                 }
                 return new TokenInfo(SHR, line);
+            } else if (ch == '=') {
+                nextCh();
+                return new TokenInfo(GE, line);
             }
             return new TokenInfo(GT, line);
         case '<':
@@ -312,8 +315,7 @@ class Scanner {
                 }
                 return new TokenInfo(SHL, line);
             } else {
-                reportScannerError("Operator < is not supported in j--.");
-                return getNextToken();
+                return new TokenInfo(LT, line);
             }
         case '\'':
             buffer = new StringBuffer();

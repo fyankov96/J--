@@ -66,9 +66,11 @@ class JVariableDeclaration extends JStatement {
             // Local variables are declared here (fields are
             // declared
             // in preAnalyze())
-            int offset = ((LocalContext) context).nextOffset();
-            LocalVariableDefn defn = new LocalVariableDefn(decl.type().resolve(
-                    context), offset);
+
+            Type typeDecl = decl.type().resolve(context);
+            int offset = ((LocalContext) context).nextOffset(typeDecl);
+
+            LocalVariableDefn defn = new LocalVariableDefn(typeDecl, offset);
 
             // First, check for shadowing
             IDefn previousDefn = context.lookup(decl.name());
@@ -82,15 +84,20 @@ class JVariableDeclaration extends JStatement {
             // Then declare it in the local context
             context.addEntry(decl.line(), decl.name(), defn);
 
+            // If it is final, add that information to the definition
+            if(mods.contains("final"))
+                    defn.setFinal();
+
             // All initializations must be turned into assignment
             // statements and analyzed
             if (decl.initializer() != null) {
-                defn.initialize();
                 JAssignOp assignOp = new JAssignOp(decl.line(), new JVariable(
                         decl.line(), decl.name()), decl.initializer());
                 assignOp.isStatementExpression = true;
                 initializations.add(new JStatementExpression(decl.line(),
                         assignOp).analyze(context));
+                
+                defn.initialize();
             }
         }
         return this;

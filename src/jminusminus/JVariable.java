@@ -104,14 +104,43 @@ class JVariable extends JExpression implements JLhs {
     public JExpression analyzeLhs(Context context) {
         analyzeLhs = true;
         JExpression newTree = analyze(context);
+
         if (newTree instanceof JVariable) {
             // Could (now) be a JFieldSelection, but if it's
             // (still) a JVariable
             if (iDefn != null && !(iDefn instanceof LocalVariableDefn)) {
                 JAST.compilationUnit.reportSemanticError(line(), name
-                        + " is a bad lhs to a  =");
+                        + " is a bad lhs to a =");
+            }
+
+            // We are trying to initialize a local final variable
+            if (iDefn != null && ((LocalVariableDefn) iDefn).isFinal()) {
+                if (((LocalVariableDefn) iDefn).isInitialized()) { //The variable has already been initialized
+                    JAST.compilationUnit.reportSemanticError(line, "Cannot assign a value to final variable "
+                    + name);
+                } else { //It has now been initialized
+                    ((LocalVariableDefn) iDefn).initialize();
+                }
             }
         }
+
+        if(newTree instanceof JFieldSelection) {
+            Type definingType = context.definingType();
+            Field field = definingType.fieldFor(name);
+            if(field.isFinal()) {
+                //Attempting to assign a value to a final field in a method context.
+                if(context.methodContext() != null){
+                    JAST.compilationUnit.reportSemanticError(line, "Cannot assign a value to final variable " + name);
+                } else {
+                    //Attempting to assign a value to a final field that already has a value.
+                    if (context.classContext().isConstantInitialized(name)) {
+                        JAST.compilationUnit.reportSemanticError(line, "Cannot assign a value to final variable " + name + " that may already have been assigned");
+                    }
+                    context.classContext().initializeConstantField(name);
+                }
+            }
+        }
+
         return newTree;
     }
 
@@ -163,6 +192,25 @@ class JVariable extends JExpression implements JLhs {
                         break;
                     default:
                         output.addOneArgInstruction(ILOAD, offset);
+                        break;
+                    }
+                }
+                if (type == Type.DOUBLE) {
+                    switch (offset) {
+                    case 0:
+                        output.addNoArgInstruction(DLOAD_0);
+                        break;
+                   case 1:
+                        output.addNoArgInstruction(DLOAD_1);
+                        break;
+                    case 2:
+                        output.addNoArgInstruction(DLOAD_2);
+                        break;
+                    case 3:
+                        output.addNoArgInstruction(DLOAD_3);
+                        break;
+                    default:
+                        output.addOneArgInstruction(DLOAD, offset);
                         break;
                     }
                 }
@@ -238,7 +286,12 @@ class JVariable extends JExpression implements JLhs {
     public void codegenDuplicateRvalue(CLEmitter output) {
         if (iDefn instanceof LocalVariableDefn) {
             // It's copied atop the stack.
-            output.addNoArgInstruction(DUP);
+            if(type == Type.DOUBLE) {
+                output.addNoArgInstruction(DUP2);
+            } else {
+                output.addNoArgInstruction(DUP);
+            }
+
         }
     }
 
@@ -293,6 +346,24 @@ class JVariable extends JExpression implements JLhs {
                         output.addOneArgInstruction(ISTORE, offset);
                         break;
                     }
+                } else if(type == Type.DOUBLE) {
+                    switch (offset) {
+                        case 0:
+                            output.addNoArgInstruction(DSTORE_0);
+                            break;
+                        case 1:
+                            output.addNoArgInstruction(DSTORE_1);
+                            break;
+                        case 2:
+                            output.addNoArgInstruction(DSTORE_2);
+                            break;
+                        case 3:
+                            output.addNoArgInstruction(DSTORE_3);
+                            break;
+                        default:
+                            output.addOneArgInstruction(DSTORE, offset);
+                            break;
+                        }
                 }
             }
         }

@@ -1,19 +1,15 @@
 package pass;
 
 public class StaticAndMemberInitialization {
+    public int a = 1;
+    public static int b = 2;    
+
+    {
+        a = 3;
+    }
 
     static 
     {
-        int a = 1;
-        int b = 2;
-        int c = a + b;
+        b = 3;
     }
- 
-    {
-        int a = 1;
-        int b = 2;
-        int c = a + b;
-    }
-
-    
 }

@@ -8,6 +8,7 @@ public class Kast {
         Object[] oa;
         oa = (Object[]) args;
         args = (String[]) oa;
+        
     }
 
 }

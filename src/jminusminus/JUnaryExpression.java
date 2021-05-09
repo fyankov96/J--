@@ -215,24 +215,17 @@ class JNegateOp extends JUnaryExpression {
 
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
-
-        arg.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
-        return this;
-
-        /*
         if (arg.type() == Type.INT) {
             type = Type.INT;
-        } else if (arg.type()) == Type.DOUBLE {
+        } else if (arg.type() == Type.DOUBLE) {
             type = Type.DOUBLE;   
-        }
-        else {
+        } else {
             type = Type.ANY;
             JAST.compilationUnit.reportSemanticError(line(),
                     "Invalid operand types for -");
         }
         return this;
-        */
+    
     }
 
     /**
@@ -357,10 +350,18 @@ class JPostDecrementOp extends JUnaryExpression {
             JAST.compilationUnit.reportSemanticError(line,
                     "Operand to expr-- must have an LValue.");
             type = Type.ANY;
-        } else {
-            arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+            return this;
+        }
+            
+        arg = (JExpression) arg.analyze(context);
+        if (arg.type() == Type.INT) {
             type = Type.INT;
+        } else if (arg.type() == Type.DOUBLE) {
+            type = Type.DOUBLE;   
+        } else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for post--");
         }
         return this;
     }
@@ -384,13 +385,19 @@ class JPostDecrementOp extends JUnaryExpression {
         if (arg instanceof JVariable) {
             // A local variable; otherwise analyze() would
             // have replaced it with an explicit field selection.
-            int offset = ((LocalVariableDefn) ((JVariable) arg).iDefn())
-                    .offset();
+            int offset = ((LocalVariableDefn) ((JVariable) arg).iDefn()).offset();
             if (!isStatementExpression) {
                 // Loading its original rvalue
                 arg.codegen(output);
             }
-            output.addIINCInstruction(offset, -1);
+            if(type == Type.INT) {
+                output.addIINCInstruction(offset, -1);
+            } else if(type == Type.DOUBLE) {
+                output.addOneArgInstruction(DLOAD, offset);
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DSUB);
+                output.addOneArgInstruction(DSTORE, offset);
+            }
         } else {
             ((JLhs) arg).codegenLoadLhsLvalue(output);
             ((JLhs) arg).codegenLoadLhsRvalue(output);
@@ -398,8 +405,13 @@ class JPostDecrementOp extends JUnaryExpression {
                 // Loading its original rvalue
                 ((JLhs) arg).codegenDuplicateRvalue(output);
             }
-            output.addNoArgInstruction(ICONST_1);
-            output.addNoArgInstruction(ISUB);
+            if(type == Type.INT){
+                output.addNoArgInstruction(ICONST_1);
+                output.addNoArgInstruction(ISUB);
+            } else if (type == Type.DOUBLE) {
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DSUB);
+            }
             ((JLhs) arg).codegenStore(output);
         }
     }
@@ -439,10 +451,18 @@ class JPostIncrementOp extends JUnaryExpression {
             JAST.compilationUnit.reportSemanticError(line,
                     "Operand to expr++ must have an LValue.");
             type = Type.ANY;
-        } else {
-            arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+            return this;
+        }
+            
+        arg = (JExpression) arg.analyze(context);
+        if (arg.type() == Type.INT) {
             type = Type.INT;
+        } else if (arg.type() == Type.DOUBLE) {
+            type = Type.DOUBLE;   
+        } else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for post++");
         }
         return this;
     }
@@ -472,7 +492,14 @@ class JPostIncrementOp extends JUnaryExpression {
                 // Loading its original rvalue
                 arg.codegen(output);
             }
-            output.addIINCInstruction(offset, 1);
+            if(type == Type.INT) {
+                output.addIINCInstruction(offset, 1);
+            } else if(type == Type.DOUBLE) {
+                output.addOneArgInstruction(DLOAD, offset);
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DADD);
+                output.addOneArgInstruction(DSTORE, offset);
+            }
         } else {
             ((JLhs) arg).codegenLoadLhsLvalue(output);
             ((JLhs) arg).codegenLoadLhsRvalue(output);
@@ -480,8 +507,13 @@ class JPostIncrementOp extends JUnaryExpression {
                 // Loading its original rvalue
                 ((JLhs) arg).codegenDuplicateRvalue(output);
             }
-            output.addNoArgInstruction(ICONST_1);
-            output.addNoArgInstruction(IADD);
+            if(type == Type.INT) {
+                output.addNoArgInstruction(ICONST_1);
+                output.addNoArgInstruction(ISUB);
+            } else if (type == Type.DOUBLE) {
+                output.addNoArgInstruction(DCONST_1);
+                output.addNoArgInstruction(DSUB);
+            }
             ((JLhs) arg).codegenStore(output);
         }
     }
@@ -504,6 +536,7 @@ class JPreIncrementOp extends JUnaryExpression {
      *            the operand.
      */
 
+
     public JPreIncrementOp(int line, JExpression arg) {
         super(line, "++pre", arg);
     }
@@ -522,10 +555,16 @@ class JPreIncrementOp extends JUnaryExpression {
             JAST.compilationUnit.reportSemanticError(line,
                     "Operand to ++expr must have an LValue.");
             type = Type.ANY;
-        } else {
-            arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+        }
+        arg = (JExpression) arg.analyze(context);
+        if (arg.type() == Type.INT) {
             type = Type.INT;
+        } else if (arg.type() == Type.DOUBLE) {
+            type = Type.DOUBLE;   
+        } else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for post++");
         }
         return this;
     }
@@ -601,12 +640,18 @@ class JPreDecrementOp extends JUnaryExpression {
     public JExpression analyze(Context context) {
         if (!(arg instanceof JLhs)) {
             JAST.compilationUnit.reportSemanticError(line,
-                    "Operand to --expr must have an LValue.");
+                    "Operand to ++expr must have an LValue.");
             type = Type.ANY;
-        } else {
-            arg = (JExpression) arg.analyze(context);
-            arg.type().mustMatchExpected(line(), Type.INT);
+        }
+        arg = (JExpression) arg.analyze(context);
+        if (arg.type() == Type.INT) {
             type = Type.INT;
+        } else if (arg.type() == Type.DOUBLE) {
+            type = Type.DOUBLE;   
+        } else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid operand types for post++");
         }
         return this;
     }

@@ -16,6 +16,11 @@ public class MultiLineComment {
         }
         */
 
+        /*
+        //
+        This is a comment.
+        */
+
         return x;
     }
 }

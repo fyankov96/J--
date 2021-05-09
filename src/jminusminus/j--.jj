@@ -610,8 +610,15 @@ private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods): {
         <INTERFACE> { line = token.beginLine; }
         <IDENTIFIER> { name = token.image; }
         [
-            <EXTENDS> superClass = qualifiedIdentifier()
-        ] {superClasses.add(superClass);}
+            <EXTENDS>
+            superClass = qualifiedIdentifier()
+            {superClasses.add(superClass);}
+            (
+                <COMMA> superClass = qualifiedIdentifier()
+                {superClasses.add(superClass);}
+            )* 
+        ]
+
         interfaceBody = interfaceBody()
     }
     catch (ParseException e) {
@@ -644,7 +651,7 @@ private ArrayList<JMember> interfaceBody(): {
         <LCURLY>
         (
             mods = modifiers()
-            aMember = memberDecl(mods) { members.add(aMember); }
+            aMember = interfaceMemberDecl(mods) { members.add(aMember); }
         )*
         <RCURLY>
     }
@@ -710,14 +717,16 @@ private JMember interfaceMemberDecl(ArrayList<String> mods): {
                     { exceptions.add(exception); }
                 )*
             ]
-
-            (
-                body = block() |
-                <SEMI>
-            )
+            <SEMI> 
             {
+                if(!mods.contains("abstract")) {
+                    mods.add("abstract"); //Abstract method
+                }                
+                if(!mods.contains("public")) {
+                    mods.add("public"); //Abstract method
+                }
                 interfaceMemberDecl = new JMethodDeclaration(line, mods, name,
-                                                    type, params, exceptions, body);
+                                                    type, params, exceptions, null);
             }
         ) |
         (
@@ -725,6 +734,16 @@ private JMember interfaceMemberDecl(ArrayList<String> mods): {
             variableDeclarators = variableDeclarators(type)
             <SEMI>
             {
+               if(!mods.contains("public")) {
+                    mods.add("public"); //Abstract method
+                }
+                if (!mods.contains("static")) { 
+                    mods.add("static");
+                }
+               if (!mods.contains("final")) {
+                    mods.add("final");
+                }                    
+            
                 interfaceMemberDecl = new JFieldDeclaration(line, mods,
                                                    variableDeclarators);
             }
@@ -1937,11 +1956,11 @@ private JExpression shiftExpression(): {
 
             <SHR>
             rhs = additiveExpression()
-            { lhs = new JShiftRightAssignOp(line, lhs, rhs); } |
+            { lhs = new JShiftRight(line, lhs, rhs); } |
 
             <SHL>
             rhs = additiveExpression()
-            { lhs = new JShiftLeftAssignOp(line, lhs, rhs); }
+            { lhs = new JShiftLeft(line, lhs, rhs); }
         )*
     }
     catch (ParseException e) {

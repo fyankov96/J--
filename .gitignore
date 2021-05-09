@@ -42,3 +42,4 @@ src/jminusminus/JavaCCParserTokenManager.java
 
 bin/*
 target/*
+!lib/*.jar

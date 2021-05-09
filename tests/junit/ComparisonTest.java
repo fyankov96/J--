@@ -32,8 +32,8 @@ public class ComparisonTest extends TestCase {
         this.assertFalse(c.le(99.9, 99.1));
         this.assertFalse(c.gt(99.9, 99.9));
         this.assertFalse(c.lt(99.9, 99.9));
-        this.assertFalse(c.neq(99.9, 99.1));
-        this.assertFalse(c.eq(99.9, 99.9));
+        this.assertFalse(c.neq(99.9, 99.9));
+        this.assertFalse(c.eq(99.9, 99.1));
     }    
 
 
@@ -46,7 +46,7 @@ public class ComparisonTest extends TestCase {
         this.assertTrue(c.le((int) 9, (int) 9));
         this.assertTrue(c.ge((int) 9, (int) 9));
         this.assertTrue(c.eq((int) 9, (int) 9));
-        this.assertTrue(c.neq((int) 9, (int) 9));
+        this.assertTrue(c.neq((int) 9, (int) 7));
     }    
 
     public void testComparisonIntFalse() {

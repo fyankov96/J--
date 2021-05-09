@@ -13,6 +13,12 @@ public class Comparisons {
     public boolean gt(int a, int b) {
         return a > b;
     }
+    public boolean eq(int a, int b) {
+        return a == b;
+    }
+    public boolean neq(int a, int b) {
+        return a != b;
+    }
     public boolean le(double a, double b) {
         return a <= b;
     }

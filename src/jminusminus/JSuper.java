@@ -32,6 +32,11 @@ class JSuper extends JExpression {
      */
 
     public JExpression analyze(Context context) {
+        if (context.blockContext() != null && context.blockContext().isStatic()) {
+            JAST.compilationUnit.reportSemanticError(line(),
+            "Cannot use super in a static context");
+        }
+
         type = ((JClassDeclaration) context.classContext.definition())
                 .thisType();
         if (type.isReference() && type.superClass() != null) {

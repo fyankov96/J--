@@ -31,11 +31,11 @@ public class ExceptionHandling {
         }
         return x;
     }
-/*
+
     public void throwUnexpected() throws IndexOutOfBoundsException {
         throw new IllegalArgumentException();
     }
-*/
+
     public String divideByZero() {
         int a = 0;
         int b = 1;

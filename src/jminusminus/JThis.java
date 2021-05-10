@@ -32,6 +32,10 @@ class JThis extends JExpression {
      */
 
     public JExpression analyze(Context context) {
+        if (context.blockContext() != null && context.blockContext().isStatic()) {
+            JAST.compilationUnit.reportSemanticError(line(),
+            "Cannot use this in a static context");
+        }
         type = ((JClassDeclaration) context.classContext.definition())
                 .thisType();
         return this;

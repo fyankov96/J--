@@ -1,6 +1,11 @@
 package pass;
 
-public class ClassDeclaration {
+class MyClass {
+    static int x = 0;
+    int y = 0;
+}
+
+public class ClassDeclaration extends MyClass {
     int a = 1;
     private static int b = 2;
 
@@ -29,6 +34,10 @@ public class ClassDeclaration {
 
     {
         this.a = b;
+    }
+
+    {
+        a = super.y;
     }
 
     static {

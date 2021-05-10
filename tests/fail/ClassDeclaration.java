@@ -1,6 +1,11 @@
 package fail;
 
-public class ClassDeclaration {
+class MyClass {
+    static int x = 0;
+    int y = 0;
+}
+
+public class ClassDeclaration extends MyClass{
     int a = 5;
     static int b = 1;
     
@@ -15,13 +20,17 @@ public class ClassDeclaration {
     static {
         this.a = 2;
     }
-    
+
     static {
-        throw new NullPointerException();
+        b = super.x;
+    }
+
+    static {
+        //throw new NullPointerException();
     }
     
     {
-        throw new NullPointerException();
+        //throw new NullPointerException();
     }
 
     static {

@@ -16,8 +16,14 @@ public class ExceptionHandlingTest extends TestCase {
     }
 
     public void testTryCatch() {
-        this.assertEquals(eh.tryCatch(), 42);
-
+        boolean x = false;
+        try{
+            eh.tryCatch();
+        }
+        catch(IndexOutOfBoundsException e) {
+            x = true;
+        }
+        this.assertTrue(x);
     }
     
     public void testExceptions() {

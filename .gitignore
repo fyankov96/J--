@@ -42,5 +42,3 @@ src/jminusminus/JavaCCParserTokenManager.java
 
 target/*
 !lib/*.jar
-lib/j--.jar
-lib/spim.jar

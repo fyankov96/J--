@@ -3,14 +3,9 @@
 package pass;
 import java.lang.IllegalArgumentException;
 import java.lang.NullPointerException;
-import java.lang.IndexOutOfBoundsException;
 import java.lang.System;
-
+import java.lang.IndexOutOfBoundsException;
 public class ExceptionHandling {
-    public ExceptionHandling() {
-        int x = tryCatch();
-        System.out.println(x);
-    }
 
     public int tryCatch() {
         int x = 0;

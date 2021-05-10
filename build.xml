@@ -34,9 +34,8 @@
     <target name="jarNormal" depends="compile">
 
         <echo message="Creating jar on handwritten parser"/>
-        <jar destfile="jars/j--.jar" filesetmanifest="skip">
+        <jar destfile="jars/j--.jar" basedir="${CLASS_DIR}" includes="jminusminus/**" filesetmanifest="skip">
             <zipgroupfileset dir="lib" includes="*.jar"/>
-
             <manifest>
                 <attribute name="Main-Class" value="jminusminus.Main"/>
                <!-- <attribute name="Class-Path" value="${mf.classpath}"/> -->
@@ -47,11 +46,11 @@
     <target name="jarJavaCC" depends="javacc,compileJavaCC">
 
         <echo message="Creating jar on handwritten parser"/>
-        <jar destfile="jars/j--javacc.jar" filesetmanifest="skip">
+        <jar destfile="jars/j--javacc.jar" basedir="${CLASS_DIR}" includes="jminusminus/**" filesetmanifest="skip">
             <zipgroupfileset dir="lib" includes="*.jar"/>
 
             <manifest>
-                <attribute name="Main-Class" value="jminusminus.MainJavaCC"/>
+                <attribute name="Main-Class" value="jminusminus.JavaCCMain"/>
                <!-- <attribute name="Class-Path" value="${mf.classpath}"/> -->
             </manifest>
         </jar>

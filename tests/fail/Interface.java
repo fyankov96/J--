@@ -12,9 +12,5 @@ interface SubInterf extends pass.Interf {
 
 class InterfaceTest implements SubInterf  {
     int test = 1;
-    void b(int a) {
-
-    }
+    void b(int a) {}
 }
-
-

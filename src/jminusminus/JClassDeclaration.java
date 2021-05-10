@@ -265,6 +265,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // Finally, ensure that a non-abstract class has
         // no abstract methods.
+        System.out.println((thisType.isAbstract()) ? "Is Abstract" : "Is not abstract");
+        System.out.println("Num abstract: " + thisType.abstractMethods().size());
         if (!thisType.isAbstract() && thisType.abstractMethods().size() > 0) {
             String methods = "";
             for (Method method : thisType.abstractMethods()) {
@@ -424,7 +426,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
     protected void codegenInstanceInitialization(CLEmitter output){
         for (JBlock block : instanceInitializationBlocks) {
-            block.codegen(output);a
+            block.codegen(output);
         }
     }
 

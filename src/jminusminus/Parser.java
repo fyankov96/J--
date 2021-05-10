@@ -826,9 +826,8 @@ public class Parser {
         int line = scanner.token().line();
         JMember interfaceMemberDecl = null;
         Type type = null;
-        if (seeBlock()) { // static initialization block
-            interfaceMemberDecl = block(mods);
-        } else if (have(VOID)) {
+
+        if (have(VOID)) {
             // Methods are also abstract by default
             if (!mods.contains("abstract")) {
                 mods.add("abstract");

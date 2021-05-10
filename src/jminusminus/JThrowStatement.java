@@ -75,7 +75,6 @@ class JThrowStatement extends JStatement {
                    !context.getExceptions().contains(expr.type())){
             context.addException(expr.line(), expr.type());
             context.methodContext().addException(expr.line(), expr.type());
-            
         }
 
         return this;

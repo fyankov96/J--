@@ -306,8 +306,8 @@ class Type {
      * 
      * It has abstract methods if:
      * <ol>
-     *   <li>Any method declared in the class is abstract or 
-     *   <li>its superclass has an abstract method which is not overridden here.
+     *   <li> Any method declared in the class is abstract or 
+     *   <li> its superclass has an abstract method which is not overridden here.
      * </ol>
      * 
      * @return a list of abstract methods.
@@ -323,6 +323,7 @@ class Type {
         ArrayList<Method> declaredConcreteMethods = declaredConcreteMethods();
         ArrayList<Method> declaredAbstractMethods = declaredAbstractMethods();
         abstractMethods.addAll(declaredAbstractMethods);
+
         for (Method method : inheritedAbstractMethods) {
             boolean isImplementation = declaredConcreteMethods.stream().filter(x -> method.equals(x)).count() > 0;
             boolean isAbstractDeclaration = declaredConcreteMethods.stream().filter(x -> method.equals(x)).count() > 0;
@@ -331,6 +332,7 @@ class Type {
                 abstractMethods.add(method);
             }
         }
+
         return abstractMethods;
     }
 

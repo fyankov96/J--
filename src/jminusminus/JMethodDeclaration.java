@@ -200,6 +200,7 @@ class JMethodDeclaration extends JAST implements JMember {
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }
+        
         if (body != null) {
             body = body.analyze(this.context);
             if (returnType!=Type.VOID && ! methodContext.methodHasReturn()){

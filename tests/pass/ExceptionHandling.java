@@ -16,7 +16,7 @@ public class ExceptionHandling {
         int x = 0;
         try {
             x = 42;
-            System.out.println(x);
+            throw new IndexOutOfBoundsException();
         } catch (NullPointerException e) {
             x = 2+3;
         } catch (IllegalCallerException i) {
@@ -24,13 +24,18 @@ public class ExceptionHandling {
         } finally {
             System.out.println("done"); 
         }  
+        try {
+            throw new IndexOutOfBoundsException();
+        } catch (IndexOutOfBoundsException e) {
+            x = 2+6;
+        }
         return x;
     }
-
+/*
     public void throwUnexpected() throws IndexOutOfBoundsException {
         throw new IllegalArgumentException();
     }
-
+*/
     public String divideByZero() {
         int a = 0;
         int b = 1;

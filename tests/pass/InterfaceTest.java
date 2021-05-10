@@ -1,5 +1,7 @@
-package pass;
 
+
+package pass;
+import java.lang.Integer;
 public interface InterfaceA {
     int method1();
     String method2(int l);
@@ -18,7 +20,7 @@ public class InterfaceTestImpl1 implements InterfaceB {
 
     public String method2(int l) {
         String a = ">";
-        return a.concat(toString());
+        return a.concat(Integer.toString(l));
     }
 
     public int method3() {
@@ -33,7 +35,7 @@ public class InterfaceTestImpl2 implements InterfaceB {
 
     public String method2(int l) {
         String a = "<";
-        return a.concat(toString());
+        return a.concat(Integer.toString(l));
     }
 
     public int method3() {

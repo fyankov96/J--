@@ -22,12 +22,13 @@ public class InterfaceInvocationTest extends TestCase{
 
     public void testInvocation() {
         this.assertEquals(i1.method1(), 1);
+        System.out.println(i1.method2(1));
         this.assertEquals(i1.method2(1), ">1");
         this.assertEquals(i1.method3(), 3);
         this.assertEquals(i2.method1(), -1);
         this.assertEquals(i2.method2(1), "<1");
         this.assertEquals(i2.method3(), -3);
-        this.assertEquals(i2.method1(), -11);
+        this.assertEquals(i2.method1(), -1);
         this.assertEquals(i2.method2(1), "<1");
         this.assertEquals(i2.method3(), -3);
     }      

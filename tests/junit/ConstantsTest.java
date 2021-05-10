@@ -18,6 +18,7 @@ public class ConstantsTest extends TestCase {
     public void testConstants() {
         Constants c = new Constants();
 
+        this.assertEquals(c.arrayLiteral(), 2);
         this.assertEquals(c.y, 3);
         this.assertEquals(c.str, "string");
         this.assertEquals(c.method(), 6);

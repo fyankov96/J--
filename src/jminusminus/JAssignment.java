@@ -183,7 +183,7 @@ class JPlusAssignOp extends JAssignment {
 }
 
 /**
- * The AST node for a /= expression. A += expression has two operands: a lhs and
+ * The AST node for a /= expression. A /= expression has two operands: a lhs and
  * a rhs.
  */
 
@@ -215,6 +215,7 @@ class JDivideAssignOp extends JAssignment {
     }
 
     public void codegen(CLEmitter output) {
+        //Codegen and replicate Lhs on
         ((JLhs) lhs).codegenLoadLhsLvalue(output);
         ((JLhs) lhs).codegenLoadLhsRvalue(output);
         rhs.codegen(output);
@@ -232,6 +233,10 @@ class JDivideAssignOp extends JAssignment {
 
 }
 
+/**
+ * The AST node for a *= expression. A *= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JMultiplyAssignOp extends JAssignment {
 
     public JMultiplyAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -278,6 +283,10 @@ class JMultiplyAssignOp extends JAssignment {
 
 }
 
+/**
+ * The AST node for a -= expression. A -= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JSubtractAssignOp extends JAssignment {
     public JSubtractAssignOp(int line, JExpression lhs, JExpression rhs) {
         super(line, "-=", lhs, rhs);
@@ -323,6 +332,10 @@ class JSubtractAssignOp extends JAssignment {
 
 }
 
+/**
+ * The AST node for a %= expression. A %= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JRemainderAssignOp extends JAssignment {
 
     public JRemainderAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -369,6 +382,10 @@ class JRemainderAssignOp extends JAssignment {
 
 }
 
+/**
+ * The AST node for a &= expression. A &= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JAndAssignOp extends JAssignment {
 
     public JAndAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -411,6 +428,10 @@ class JAndAssignOp extends JAssignment {
     }
 }
 
+/**
+ * The AST node for a |= expression. A |= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JOrAssignOp extends JAssignment {
 
     public JOrAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -452,7 +473,10 @@ class JOrAssignOp extends JAssignment {
         ((JLhs) lhs).codegenStore(output);
     }
 }
-
+/**
+ * The AST node for a ^= expression. A ^= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JXOrAssignOp extends JAssignment {
 
     public JXOrAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -494,7 +518,10 @@ class JXOrAssignOp extends JAssignment {
         ((JLhs) lhs).codegenStore(output);
     }
 }
-
+/**
+ * The AST node for a <<= expression. A <<= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JShiftLeftAssignOp extends JAssignment {
 
     public JShiftLeftAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -533,7 +560,10 @@ class JShiftLeftAssignOp extends JAssignment {
     }
 
 }
-
+/**
+ * The AST node for a >>= expression. A >>= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JShiftRightAssignOp extends JAssignment {
 
     public JShiftRightAssignOp(int line, JExpression lhs, JExpression rhs) {
@@ -573,6 +603,10 @@ class JShiftRightAssignOp extends JAssignment {
 
 }
 
+/**
+ * The AST node for a >>>= expression. A >>>= expression has two operands: a lhs and
+ * a rhs.
+ */
 class JUnsignedShiftRightAssignOp extends JAssignment {
 
     public JUnsignedShiftRightAssignOp(int line, JExpression lhs, JExpression rhs) {

@@ -553,7 +553,6 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
 private ArrayList<JMember> classBody(): {
     ArrayList<String> mods = null;
     JMember aMember        = null;
-    JBlock aBlock          = null;
     ArrayList<JMember> members = new ArrayList<JMember>();
 }
 {
@@ -561,7 +560,7 @@ private ArrayList<JMember> classBody(): {
         <LCURLY>
         (
             mods = modifiers()
-            aMember = memberDecl(mods) { members.add(aMember);}
+            aMember = memberDecl(mods) { members.add(aMember); }
         )*
         <RCURLY>
     }
@@ -803,7 +802,7 @@ private JMember memberDecl(ArrayList<String> mods): {
                 )*
             ]
 
-            body = block()
+            body = block(null)
             {
                 memberDecl = new JConstructorDeclaration(line, mods,
                                                          name, params, exceptions, body);
@@ -832,7 +831,7 @@ private JMember memberDecl(ArrayList<String> mods): {
             ]
 
             (
-                body = block() |
+                body = block(null) |
                 <SEMI>
             )
             {
@@ -842,20 +841,14 @@ private JMember memberDecl(ArrayList<String> mods): {
         )  | 
         LOOKAHEAD(<LCURLY>)
         (
-           {
-                if (mods.contains("static")) { //static initialization block
-                    memberDecl = block(mods);
-                } else {
-                    memberDecl = block();
-                }
-           }
+           body = block(mods)
+           { memberDecl = body; }
         ) | (
             type = type() { line = token.beginLine; }
             variableDeclarators = variableDeclarators(type)
             <SEMI>
             {
-                memberDecl = new JFieldDeclaration(line, mods,
-                                                   variableDeclarators);
+                memberDecl = new JFieldDeclaration(line, mods, variableDeclarators);
             }
         )
 
@@ -876,7 +869,7 @@ private JMember memberDecl(ArrayList<String> mods): {
  * @return an AST for a block.
  */
 
-private JBlock block(): {
+private JBlock block(ArrayList<String> mods): {
     int line = 0;
     JStatement aStatement = null;
     ArrayList<JStatement> statements = new ArrayList<JStatement>();
@@ -893,7 +886,12 @@ private JBlock block(): {
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
-    { return new JBlock(line, statements); }
+    { if (mods == null) {
+        return new JBlock(line, statements);
+      } else {
+          return new JBlock(line, statements, mods);
+      }
+    }
 }
 
 /**
@@ -960,7 +958,7 @@ private JStatement statement(): {
 }
 {
     try {
-        statement = block() |
+        statement = block(null) |
         
         <IF> { line = token.beginLine; }
         test = parExpression()
@@ -982,21 +980,21 @@ private JStatement statement(): {
         { statement = new JWhileStatement(line, test, body); } |
 
         <TRY> { line = token.beginLine; }
-        tryBlock = block()
+        tryBlock = block(null)
         (
             <CATCH>
             <LPAREN>
             catchParam = formalParameter()
             { catchParams.add(catchParam); }
             <RPAREN>
-            catchBlock = block()
+            catchBlock = block(null)
             { catchBlocks.add(catchBlock); }
         )*
 
         [
             LOOKAHEAD(<FINALLY>)
             <FINALLY>
-            finallyBlock = block()
+            finallyBlock = block(null)
         ]
         { statement = new JTryCatchStatement(line, tryBlock, catchParams, catchBlocks, finallyBlock); } |
 

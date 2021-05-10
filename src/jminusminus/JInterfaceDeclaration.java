@@ -172,6 +172,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
             id.setClassRep(partial.toClass());
         }
     }
+    
 
     @Override
     public JAST analyze(Context context) {
@@ -209,7 +210,7 @@ class JInterfaceDeclaration extends JAST implements JTypeDecl {
         for (JMember member : interfaceBlock) {
             ((JAST) member).codegen(output);
         }
-
+        
         // Generate code for the static fields
         for (JFieldDeclaration staticField : staticFieldInitializations) {
             staticField.codegenInitializations(output);

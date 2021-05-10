@@ -13,7 +13,7 @@ modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
 
 classDeclaration ::= CLASS IDENTIFIER 
                        [EXTENDS qualifiedIdentifier] 
-                       [IMPLEMENTS qualifiedIdentifier {, qualifiedIdentifier}]
+                       [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}]
                        classBody
 
 interfaceDeclaration ::= INTERFACE IDENTIFIER
@@ -34,17 +34,17 @@ interfaceBody ::= LCURLY
 interfaceMemberDecl ::= interfaceDeclaration
                             | (VOID | type) <identifier> // method
                               formalParameters
-                                   [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
+                                   [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}] block
                             | type variableDeclarators SEMI // field
 
 memberDecl ::= IDENTIFIER            // constructor
-                 formalParameters block
-                 [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
-             | (VOID | type) IDENTIFIER  // method
                  formalParameters
-                 [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
+                 [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}] block
+               | (VOID | type) IDENTIFIER  // method
+                 formalParameters
+                 [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]
                  (block | SEMI)
-             | type variableDeclarators SEMI // field
+               | type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
 
@@ -63,13 +63,12 @@ statement ::= block
             | SEMI 
             | statementExpression SEMI
 
-forExpression ::= LPAREN [forInit] SEMI [expression] SEMI [forUpdate] RPAREN statement
-                | LPAREN type variableDeclarator COL expression RPAREN statement
+forStatement ::= LPAREN [forInit] SEMI [expression] SEMI [forUpdate] RPAREN statement |
+                  LPAREN [<FINAL>] type qualifiedIdentifier COL expression RPAREN statement
 
-forInit ::= forUpdate
-| type variableDeclarators
+forInit = (variableDeclarators | statementExpression {COMMA statementExpression})
 
-forUpdate ::= statementExpression {, statementExpression}
+forUpdate = statementExpression {COMMA statementExpression}
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]
@@ -181,5 +180,5 @@ creator ::= (basicType | qualifiedIdentifier)
 newArrayDeclarator ::= LBRACK expression RBRACK 
                          {LBRACK expression RBRACK} {LBRACK RBRACK}
 
-literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL
+literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL | DOUBLE_LITERAL
           | TRUE        | FALSE        | NULL

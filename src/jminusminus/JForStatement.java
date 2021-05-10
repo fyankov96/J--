@@ -96,7 +96,7 @@ class JForStepStatement extends JForStatement {
         if(initDeclarations != null) {
             initDeclarations.analyze(this.context);
         }
-
+        
         if(condition != null) {
             condition.analyze(this.context);
             condition.type().mustMatchExpected(line(), Type.BOOLEAN);
@@ -135,10 +135,10 @@ class JForStepStatement extends JForStatement {
 
         //Create the while-statement and add it to the block
         if(condition == null){
-            whileStatement = new JWhileStatement(line(), new JLiteralTrue(line()), new JBlock(line(), whileBodyStatements));
-        } else {
-            whileStatement = new JWhileStatement(line(), condition, new JBlock(line(), whileBodyStatements));
+            condition = new JLiteralTrue(line());
         }
+        whileStatement = new JWhileStatement(line(), condition, new JBlock(line(), whileBodyStatements));
+
         whileBlockStatements.add(whileStatement);
         
         //Finish and analyze the whileBlock
@@ -174,9 +174,10 @@ class JForStepStatement extends JForStatement {
         output.addLabel(test);
 
         //Jump to end label if condition is false
-        if(condition != null) {
-            condition.codegen(output, out, false);
+        if(condition == null) {
+            (new JLiteralTrue(line())).codegen(output, out, false);
         }
+        condition.codegen(output, out, false);
 
         body.codegen(output);
 

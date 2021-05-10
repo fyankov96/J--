@@ -1,7 +1,7 @@
 package jminusminus;
 import static jminusminus.CLConstants.*;
 
-public class JTernaryExpression extends JExpression{
+public class JTernaryExpression extends JExpression {
         /** The condition to Evaluate */
         protected JExpression condition;
     
@@ -17,8 +17,7 @@ public class JTernaryExpression extends JExpression{
             this.trueExpr = trueExpr;
             this.falseExpr = falseExpr;
         }
-
-
+        
     /**
      * {@inheritDoc}
      */

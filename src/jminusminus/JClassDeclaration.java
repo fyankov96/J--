@@ -436,7 +436,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     /**
      * Generates code for class initialization, in j-- this means static field
-     * initializations.
+     * initializations and, with extensions, static initialization blocks.
      * 
      * @param output the code emitter (basically an abstraction for producing the
      *               .class file).

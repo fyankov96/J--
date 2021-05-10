@@ -159,7 +159,10 @@ class Type {
     }
 
     /**
-     * Is this an Iterable type?
+     * Is this a subtype of another given type?
+     * 
+     * @param superClass
+     *        The class we are checking if we can find in the class hierarchy.
      * 
      * @return true or false.
      */

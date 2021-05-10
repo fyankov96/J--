@@ -741,12 +741,12 @@ public class Parser {
      * 
      * <pre>
      *   memberDecl ::= IDENTIFIER            // constructor
-     *                    formalParameters
-     *                    block
+     *                  formalParameters
+     *                  [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
      *                | (VOID | type) IDENTIFIER  // method
-     *                    formalParameters
-     *                    (block | SEMI)
-     *                | type variableDeclarators SEMI
+     *                  formalParameters
+     *                  [THROWS qualifiedIdentifier {, qualifiedIdentifier}] (block | SEMI)
+     *                | type variableDeclarators SEMI // field
      * </pre>
      * 
      * @param mods the class member modifiers.
@@ -800,7 +800,6 @@ public class Parser {
                     memberDecl = new JMethodDeclaration(line, mods, name, type, params, exceptions, body);
                 } else {
                     // Field
-                    System.out.println((mods.contains("static")) ? "Static" : "Not Static");
                     memberDecl = new JFieldDeclaration(line, mods, variableDeclarators(type));
                     mustBe(SEMI);
                 }
@@ -949,15 +948,16 @@ public class Parser {
      * 
      * <pre>
      *   statement ::= block
-     *               | IF parExpression statement [ELSE statement]
-     *               | WHILE parExpression statement 
-     *               | TRY block 
-                       CATCH ( formalParameter ) block
-                       [FINALLY block]
-                     | THROW [expression] SEMI
-     *               | RETURN [expression] SEMI
-     *               | SEMI 
-     *               | statementExpression SEMI
+     *                 | IF parExpression statement [ELSE statement]
+     *                 | WHILE parExpression statement 
+     *                 | TRY block 
+     *                   CATCH ( formalParameter ) block
+     *                   [FINALLY block]
+     *                 | THROW expression SEMI
+     *                 | FOR forExpression
+     *                 | RETURN [expression] SEMI
+     *                 | SEMI 
+     *                 | statementExpression SEMI
      * </pre>
      * 
      * @return an AST for a statement.
@@ -1022,8 +1022,8 @@ public class Parser {
     /**
      * Parse a for statement.
      * 
-     * forExpression ::= [JVariableDeclaration] SEMI [expression] SEMI [JStatement {COMMA JStatement}] RPAREN JStatement |
-     * LPAREN [<FINAL>] type <IDENTIFIER> COL expression RPAREN JStatement
+     * forStatement ::= LPAREN [forInit] SEMI [expression] SEMI [forUpdate] RPAREN statement |
+     *                   LPAREN [<FINAL>] type qualifiedIdentifier COL expression RPAREN statement
      * 
      * @return A JForStatement
      */
@@ -1076,7 +1076,7 @@ public class Parser {
             }
             mustBe(SEMI);
             if (!see(RPAREN)) {
-                stepStatements = forSteps();
+                stepStatements = forUpdate();
             }
         }
         mustBe(RPAREN);
@@ -1092,11 +1092,11 @@ public class Parser {
     /**
      * Parse a set of for statement step statements
      * 
-     * forSteps ::= statementExpression {, statementExpression}
+     * forUpdate ::= statementExpression {, statementExpression}
      * 
      * @return An ArrayList of JStatementExpressions
      */
-    private ArrayList<JStatement> forSteps() {
+    private ArrayList<JStatement> forUpdate() {
         ArrayList<JStatement> steps = new ArrayList<JStatement>();
         do {
             steps.add(statementExpression());
@@ -1412,12 +1412,10 @@ public class Parser {
      * Parse an assignment expression.
      * 
      * <pre>
-     *   assignmentExpression ::= 
-     *       conditionalAndExpression // level 13
-     *           [( ASSIGN  // conditionalExpression
-     *            | PLUS_ASSIGN // must be valid lhs
-     *            )
-     *            assignmentExpression]
+     *   assignmentExpression ::= ternaryExpression  // must be a valid lhs
+     *                              [(ASSIGN | PLUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN 
+     *                               | MINUS_ASSIGN | REM_ASSIGN | USHR_ASSIGN 
+     *                               | SHR_ASSIGN | SHL_ASSIGN | OR_ASSIGN | XOR_ASSIGN) assignmentExpression]
      * </pre>
      * 
      * @return an AST for an assignmentExpression.
@@ -1456,8 +1454,8 @@ public class Parser {
     }
 
     /**
-     * ternaryExpression ::= conditionalOrExpression //level 12 [COND
-     * ternaryExpression COLON ternaryExpression]
+     * ternaryExpression := conditionalOrExpression  //level 12
+     *                      [COND ternaryExpression COL ternaryExpression]
      */
     private JExpression ternaryExpression() {
         int line = scanner.token().line();

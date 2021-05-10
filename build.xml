@@ -28,6 +28,36 @@
         <echo message="help: Lists main targets"/>
     </target>
     
+
+
+    <!-- compile: Compiles the jminusminus and SPIM source files. -->
+    <target name="jarNormal" depends="compile">
+
+        <echo message="Creating jar on handwritten parser"/>
+        <jar destfile="jars/j--.jar" filesetmanifest="skip">
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+
+            <manifest>
+                <attribute name="Main-Class" value="jminusminus.Main"/>
+               <!-- <attribute name="Class-Path" value="${mf.classpath}"/> -->
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="jarJavaCC" depends="javacc,compileJavaCC">
+
+        <echo message="Creating jar on handwritten parser"/>
+        <jar destfile="jars/j--javacc.jar" filesetmanifest="skip">
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+
+            <manifest>
+                <attribute name="Main-Class" value="jminusminus.MainJavaCC"/>
+               <!-- <attribute name="Class-Path" value="${mf.classpath}"/> -->
+            </manifest>
+        </jar>
+    </target>
+
+
     <!-- javacc: Generates JavaCC scanner and parser. -->
     <target name="javacc">
         <echo message="Generating JavaCC files..."/>
@@ -134,10 +164,10 @@
     <target name="package"
             depends="clean,javacc,compileJavaCC,compileSPIM,jar,javadoc,j2h">
         <echo message="Making a distributable j--.zip..."/>
-        <zip destfile="j--.zip"
+        <zip destfile="J--.zip"
              basedir="../"
-             includes="j--/**"
-             excludes="j--/${CLASS_DIR}/**,j--/*.zip" />
+             includes="J--/**"
+             excludes="J--/${CLASS_DIR}/**,J--/*.zip" />
     </target>
 
     <!--
@@ -580,6 +610,7 @@
         <delete dir="${CLASS_DIR}" />
         <delete dir="${JAVADOC_DIR}" />
         <delete dir="${J2H_DIR}" />
+         <delete dir="jars" />
     </target>
 
 </project>

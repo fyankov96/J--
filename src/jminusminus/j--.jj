@@ -550,7 +550,7 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
  * @return list of members in the class body.
  */
 
-private ArrayList<JMember> classBody(ArrayList<JBlock> SIB, ArrayList<JBlock> IIB): {
+private ArrayList<JMember> classBody(): {
     ArrayList<String> mods = null;
     JMember aMember        = null;
     JBlock aBlock          = null;
@@ -809,15 +809,6 @@ private JMember memberDecl(ArrayList<String> mods): {
                                                          name, params, exceptions, body);
             }
         ) |
-        LOOKAHEAD(LCURLY)
-        (
-           {if (mods.contains("static")) { //static initialization block
-                memberDecl = block(mods);
-            } else {
-                memberDecl = block();
-            }
-           }
-        ) |
         LOOKAHEAD((<VOID> | type()) <IDENTIFIER> <LPAREN>)
         (
             (
@@ -848,8 +839,17 @@ private JMember memberDecl(ArrayList<String> mods): {
                 memberDecl = new JMethodDeclaration(line, mods, name,
                                                     type, params, exceptions, body);
             }
-        ) |
+        )  | 
+        LOOKAHEAD(<LCURLY>)
         (
+           {
+                if (mods.contains("static")) { //static initialization block
+                    memberDecl = block(mods);
+                } else {
+                    memberDecl = block();
+                }
+           }
+        ) | (
             type = type() { line = token.beginLine; }
             variableDeclarators = variableDeclarators(type)
             <SEMI>
@@ -858,6 +858,7 @@ private JMember memberDecl(ArrayList<String> mods): {
                                                    variableDeclarators);
             }
         )
+
     }
     catch (ParseException e) { 
         recoverFromError(new int[] { SEMI, EOF }, e);

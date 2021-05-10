@@ -53,6 +53,13 @@ class JThrowStatement extends JStatement {
                 "Attempting to throw a non-throwable type");
             return null;
         }
+
+        if (context.blockContext() != null) {
+            JAST.compilationUnit.reportSemanticError(line(),
+            "Attempting to throw in an initialization block");
+            return null;
+        }
+
         // Check if it exists in the local context, if it does, don't add it.
         if (context.getExceptions().contains(expr.type())) {
             JAST.compilationUnit.reportSemanticError(line, "Exception already exists: "
@@ -73,6 +80,7 @@ class JThrowStatement extends JStatement {
             context.methodContext().addException(expr.line(), expr.type());
             return this;
         }
+
         // Return null, if it break rules
         return null;
     }

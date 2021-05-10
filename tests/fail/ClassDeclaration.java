@@ -15,9 +15,21 @@ public class ClassDeclaration {
     static {
         this.a = 2;
     }
-
+    
     static {
-        x = 0.0;
+        throw new NullPointerException();
     }
     
+    {
+        throw new NullPointerException();
+    }
+
+    static {
+        return 0;
+    }
+    
+    {
+        return 0;
+    }
+
 }

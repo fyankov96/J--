@@ -52,7 +52,10 @@ class JReturnStatement extends JStatement {
         // j-- does not allow a block to occur outside of a
         // method, we don't check for methodContext being null
 
-        if (methodContext.methodReturnType() == Type.CONSTRUCTOR) {
+        if (context.blockContext() != null) {
+            JAST.compilationUnit.reportSemanticError(line(),
+            "Attempting to return in an initialization block");
+        } else if (methodContext.methodReturnType() == Type.CONSTRUCTOR) {
             if (expr != null) {
                 // Can't return a value from a constructor
                 JAST.compilationUnit.reportSemanticError(line(),

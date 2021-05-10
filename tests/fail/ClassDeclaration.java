@@ -1,44 +1,20 @@
 package fail;
 
-class MyClass {
-    static int x = 0;
-    int y = 0;
-}
+public class ClassDeclaration {
+    int a = 1;
+    private static int b = 2;
 
-public class ClassDeclaration extends MyClass{
-    int a = 5;
-    static int b = 1;
-    
-    static {
-        a = 2;
-    }
+    public ClassDeclaration() {}
 
-    static {
-        int c = a;
-    }
-
-    static {
-        this.a = 2;
-    }
-
-    static {
-        b = super.x;
-    }
-
-    static {
-        //throw new NullPointerException();
+    public ClassDeclaration(int a) {
+        this.a = a;
     }
     
-    {
-        //throw new NullPointerException();
-    }
-
-    static {
-        return 0;
+    public static int getA() {
+        return a;
     }
     
-    {
-        return 0;
+    void setB(int b) {
+        this.b = b;
     }
-
 }

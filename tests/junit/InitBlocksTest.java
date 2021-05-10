@@ -3,7 +3,7 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.StaticAndMemberInitialization;
+import pass.InitBlocks;
 
 public class InitBlocksTest extends TestCase {
 
@@ -16,10 +16,10 @@ public class InitBlocksTest extends TestCase {
     }
 
     public void testInitBlocks() {
-        StaticAndMemberInitialization c = new StaticAndMemberInitialization();
+        InitBlocks ib = new InitBlocks();
 
-        this.assertEquals(c.a, 3);
-        this.assertEquals(c.b, 3);
+        this.assertEquals(ib.a, 3);
+        this.assertEquals(ib.b, 3);
     }
 
 }

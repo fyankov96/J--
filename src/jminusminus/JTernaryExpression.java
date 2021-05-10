@@ -68,15 +68,13 @@ public class JTernaryExpression extends JExpression {
     public void codegen(CLEmitter output) {
         String elseLabel = output.createLabel();
         String endLabel = output.createLabel();
+
         condition.codegen(output, elseLabel, false);
         trueExpr.codegen(output);
-        if (falseExpr != null) {
-            output.addBranchInstruction(GOTO, endLabel);
-        }
+        output.addBranchInstruction(GOTO, endLabel);
+        
         output.addLabel(elseLabel);
-        if (falseExpr != null) {
-            falseExpr.codegen(output);
-            output.addLabel(endLabel);
-        }
+        falseExpr.codegen(output);
+        output.addLabel(endLabel);
     }
 }

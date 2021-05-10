@@ -51,38 +51,34 @@ class JThrowStatement extends JStatement {
         if (!(expr.type().isSubType(Type.typeFor(Throwable.class))))  {
             JAST.compilationUnit.reportSemanticError(line(),
                 "Attempting to throw a non-throwable type");
-            return null;
         }
 
+        // Check if we are in an initialization blocks
+        // If so, report a semantic error
         if (context.blockContext() != null) {
             JAST.compilationUnit.reportSemanticError(line(),
             "Attempting to throw in an initialization block");
-            return null;
-        }
 
         // Check if it exists in the local context, if it does, don't add it.
-        if (context.getExceptions().contains(expr.type())) {
+        } else if (context.getExceptions().contains(expr.type())) {
             JAST.compilationUnit.reportSemanticError(line, "Exception already exists: "
             + expr.type().toString());
         
         // Check if it exists in the methodcontext, but doesn't exist in the local context
         // then add to local context
         } else if (context.methodContext().getExceptions().contains(expr.type()) &&
-                    !context.getExceptions().contains(expr.type())){
-
+                   !context.getExceptions().contains(expr.type())){
             context.addException(expr.line(), expr.type());
-            return this;
 
         // If it doesn't exist in both, add both local & method context.
-        } else if (!context.methodContext().getExceptions().contains(expr.type()) &&
-        !context.getExceptions().contains(expr.type())){
+        } else if (!context.methodContext().getExceptions().contains(expr.type()) && 
+                   !context.getExceptions().contains(expr.type())){
             context.addException(expr.line(), expr.type());
             context.methodContext().addException(expr.line(), expr.type());
-            return this;
+            
         }
 
-        // Return null, if it break rules
-        return null;
+        return this;
     }
 
     /**

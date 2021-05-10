@@ -1,9 +1,9 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
 package pass;
+import java.lang.System;
 import java.lang.IllegalArgumentException;
 import java.lang.NullPointerException;
-import java.lang.System;
 import java.lang.IndexOutOfBoundsException;
 
 public class ExceptionHandling {
@@ -15,11 +15,12 @@ public class ExceptionHandling {
             throw new IndexOutOfBoundsException();
         } catch (NullPointerException e) {
             x = 2+3;
-        } catch (IllegalCallerException i) {
+        } catch (IllegalArgumentException i) {
             x = 3-1;
         } finally {
             System.out.println("done"); 
-        }  
+        }
+
         try {
             throw new IndexOutOfBoundsException();
         } catch (IndexOutOfBoundsException e) {

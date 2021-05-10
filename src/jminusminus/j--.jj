@@ -512,8 +512,6 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
     Type superInt = null;
     ArrayList<JMember> classBody = null;
     ArrayList<Type> superInterfaces = new ArrayList<Type>();
-    ArrayList<JBlock> SIB = new ArrayList<JBlock>();
-    ArrayList<JBlock> IIB = new ArrayList<JBlock>();
 }
 {
     try {
@@ -530,13 +528,13 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
                 superInt = qualifiedIdentifier() {superInterfaces.add(superInt); }
             )*
         ]
-        classBody = classBody(SIB,IIB)
+        classBody = classBody()
     }
     catch (ParseException e) {
         recoverFromError(new int[] { SEMI, EOF }, e);
     }
     {
-        return new JClassDeclaration(line, mods, name, superClass, superInterfaces, classBody, SIB, IIB);
+        return new JClassDeclaration(line, mods, name, superClass, superInterfaces, classBody);
     }
 }
 
@@ -544,13 +542,9 @@ private JClassDeclaration classDeclaration(ArrayList<String> mods): {
  * Parse a class body.
  * 
  * <pre>
- *   classBody ::=  LCURLY {
- *                          (SEMI
- *                           | modifiers memberDecl
- *                           | STATIC block 
- *                           | block)
- *                         }
- *                  RCURLY
+ *   classBody ::=  LCURLY 
+                        {SEMI | modifiers memberDecl}
+                    RCURLY
  * </pre>
  * 
  * @return list of members in the class body.
@@ -566,11 +560,6 @@ private ArrayList<JMember> classBody(ArrayList<JBlock> SIB, ArrayList<JBlock> II
     try {
         <LCURLY>
         (
-            LOOKAHEAD(<STATIC> block()) 
-            <STATIC>
-            aBlock = block() {SIB.add(aBlock);} | 
-            LOOKAHEAD(block())
-            aBlock = block() {IIB.add(aBlock);} |
             mods = modifiers()
             aMember = memberDecl(mods) { members.add(aMember);}
         )*
@@ -764,11 +753,13 @@ private JMember interfaceMemberDecl(ArrayList<String> mods): {
  *                    formalParameters
  *                    [THROWS qualifiedIdentifier {, qualifiedIdentifier}]
  *                    block
- *                | (VOID | type) IDENTIFIER  // method
+ *                  | STATIC block 
+ *                  | block
+ *                  | (VOID | type) IDENTIFIER  // method
  *                    formalParameters
  *                    [THROWS qualifiedIdentifier {, qualifiedIdentifier}]
  *                    (block | SEMI)
- *                | type variableDeclarators SEMI 
+ *                  | type variableDeclarators SEMI 
  * </pre>
  * 
  * @param mods the class member modifiers.
@@ -817,6 +808,15 @@ private JMember memberDecl(ArrayList<String> mods): {
                 memberDecl = new JConstructorDeclaration(line, mods,
                                                          name, params, exceptions, body);
             }
+        ) |
+        LOOKAHEAD(LCURLY)
+        (
+           {if (mods.contains("static")) { //static initialization block
+                memberDecl = block(mods);
+            } else {
+                memberDecl = block();
+            }
+           }
         ) |
         LOOKAHEAD((<VOID> | type()) <IDENTIFIER> <LPAREN>)
         (

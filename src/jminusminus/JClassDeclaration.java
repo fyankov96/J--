@@ -70,7 +70,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * @param classBlock class block.
      */
 
-    public JClassDeclaration(int line, ArrayList<String> mods, String name, Type superType,
+    public JClassDeclaration(int line, ArrayList<String> mods, String name, Type superType, ArrayList<Type> implement,
             ArrayList<JMember> classBlock) {
         super(line);
         this.mods = mods;
@@ -83,21 +83,6 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticInitializationBlocks = new ArrayList<JBlock>();
         instanceInitializationBlocks = new ArrayList<JBlock>();
-    }
-
-    public JClassDeclaration(int line, ArrayList<String> mods, String name, Type superType, ArrayList<Type> implement,
-            ArrayList<JMember> classBlock, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
-        super(line);
-        this.mods = mods;
-        this.name = name;
-        this.superType = superType;
-        this.interfaceSuperTypes = implement;
-        this.classBlock = classBlock;
-        hasExplicitConstructor = false;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticInitializationBlocks = SIB;
-        instanceInitializationBlocks = IIB;
     }
 
     /**
@@ -256,9 +241,17 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 } else {
                     instanceFieldInitializations.add(fieldDecl);
                 }
+            } else if (member instanceof JBlock) {
+                JBlock initBlock = (JBlock) member;
+                if (initBlock.mods().contains("static")) {
+                    staticInitializationBlocks.add(initBlock);
+                } else {
+                    instanceInitializationBlocks.add(initBlock);
+                }
             }
         }
-
+        
+        /*
         // Analyze the static initialization blocks
         for (JBlock block : staticInitializationBlocks) {
             block.analyze(this.context);
@@ -268,6 +261,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         for (JBlock block : instanceInitializationBlocks) {
             block.analyze(this.context);
         }
+        */
 
         // Finally, ensure that a non-abstract class has
         // no abstract methods.

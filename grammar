@@ -23,8 +23,6 @@ interfaceDeclaration ::= INTERFACE IDENTIFIER
 classBody ::= LCURLY {
             SEMI
             | modifiers memberDecl
-            | STATIC block 
-            | block
             } RCURLY
 
 interfaceBody ::= LCURLY
@@ -40,6 +38,8 @@ interfaceMemberDecl ::= interfaceDeclaration
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters
                  [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}] block
+               | STATIC block 
+               | block
                | (VOID | type) IDENTIFIER  // method
                  formalParameters
                  [THROWS qualifiedIdentifier {COMMA qualifiedIdentifier}]

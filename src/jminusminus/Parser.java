@@ -628,11 +628,9 @@ public class Parser {
         }
         mustBe(LCURLY);
         ArrayList<JMember> members = new ArrayList<>();
-        ArrayList<JBlock> IIB = new ArrayList<>();
-        ArrayList<JBlock> SIB = new ArrayList<>();
-        consumeClassBody(members, SIB, IIB);
+        consumeClassBody(members);
         mustBe(RCURLY);
-        return new JClassDeclaration(line, mods, name, superClass, implement, members, SIB, IIB);
+        return new JClassDeclaration(line, mods, name, superClass, implement, members);
     }
 
     /**
@@ -675,11 +673,7 @@ public class Parser {
      * 
      * <pre>
     
-        classBody ::=  {(SEMI
-                         | modifiers memberDecl
-                         | STATIC block 
-                         | block)
-                       }
+        classBody ::=  {SEMI | modifiers memberDecl}
                        RCURLY
      * 
      * </pre>
@@ -687,30 +681,15 @@ public class Parser {
      * @return list of members in the class body.
      */
 
-    private void consumeClassBody(ArrayList<JMember> members, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB) {
+    private void consumeClassBody(ArrayList<JMember> members/*, ArrayList<JBlock> SIB, ArrayList<JBlock> IIB*/) {
         boolean error = false;
         while (!see(RCURLY) && !see(EOF)) {
             scanner.errorHasOccured();
 
             if (have(SEMI)) {
                 // Do nothing
-            } else if (see(STATIC)) {
-                scanner.recordPosition();
-                boolean isStaticBlock = have(STATIC);
-                isStaticBlock &= see(LCURLY);
-                scanner.returnToPosition();
-                if (isStaticBlock) {
-                    mustBe(STATIC);
-                    ArrayList<String> mods = new ArrayList<String>();
-                    mods.add("static");
-                    SIB.add(block(mods));
-                } else {
-                    members.add(memberDecl(modifiers()));
-                }
-            } else if (seeModifier() || seeBasicType() || seeReferenceType() || see(VOID)) {
+            } else if (seeModifier() || seeBasicType() || seeReferenceType() || see(VOID) || see(LCURLY)) {
                 members.add(memberDecl(modifiers()));
-            } else if (seeBlock()) {
-                IIB.add(block());
             } else {
                 error = true;
                 break;
@@ -747,12 +726,14 @@ public class Parser {
      * 
      * <pre>
      *   memberDecl ::= IDENTIFIER            // constructor
-     *                  formalParameters
-     *                  [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
-     *                | (VOID | type) IDENTIFIER  // method
-     *                  formalParameters
-     *                  [THROWS qualifiedIdentifier {, qualifiedIdentifier}] (block | SEMI)
-     *                | type variableDeclarators SEMI // field
+     *                    formalParameters
+     *                    [THROWS qualifiedIdentifier {, qualifiedIdentifier}] block
+     *                  | STATIC block 
+     *                  | block
+     *                  | (VOID | type) IDENTIFIER  // method
+     *                    formalParameters
+     *                    [THROWS qualifiedIdentifier {, qualifiedIdentifier}] (block | SEMI)
+     *                  | type variableDeclarators SEMI // field
      * </pre>
      * 
      * @param mods the class member modifiers.
@@ -777,7 +758,13 @@ public class Parser {
             memberDecl = new JConstructorDeclaration(line, mods, name, params, exceptions, body);
         } else {
             Type type = null;
-            if (have(VOID)) {// void method
+            if (seeBlock()) { //initialization block
+                if (mods.contains("static")) { //static
+                    memberDecl = block(mods);
+                } else {
+                    memberDecl = block();
+                }
+            } else if (have(VOID)) {// void method
                 type = Type.VOID;
                 mustBe(IDENTIFIER);
                 String name = scanner.previousToken().image();
@@ -839,7 +826,9 @@ public class Parser {
         int line = scanner.token().line();
         JMember interfaceMemberDecl = null;
         Type type = null;
-        if (have(VOID)) {
+        if (seeBlock()) { // static initialization block
+            interfaceMemberDecl = block(mods);
+        } else if (have(VOID)) {
             // Methods are also abstract by default
             if (!mods.contains("abstract")) {
                 mods.add("abstract");

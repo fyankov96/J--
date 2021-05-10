@@ -50,12 +50,20 @@ class JFieldDeclaration extends JAST implements JMember {
         return mods;
     }
 
+    /**
+     * Add the static modifier
+     * 
+     */
     public void setStatic() {
         if(!mods.contains("static")) {
             mods.add("static");
         }
     }
 
+    /**
+     * Add the final modifier
+     * 
+     */
     public void setFinal() {
         if(!mods.contains("final")) {
             mods.add("final");

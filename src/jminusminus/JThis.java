@@ -36,6 +36,7 @@ class JThis extends JExpression {
             JAST.compilationUnit.reportSemanticError(line(),
             "Cannot use this in a static context");
         }
+
         type = ((JClassDeclaration) context.classContext.definition())
                 .thisType();
         return this;

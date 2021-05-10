@@ -18,8 +18,8 @@ public class InitBlocksTest extends TestCase {
     public void testInitBlocks() {
         InitBlocks ib = new InitBlocks();
 
-        this.assertEquals(ib.a, 3);
-        this.assertEquals(ib.b, 3);
+        this.assertEquals(ib.a, 2);
+        this.assertEquals(ib.b, 2);
     }
 
 }

@@ -71,7 +71,7 @@ class JThisConstruction extends JExpression {
             arguments.set(i, (JExpression) arguments.get(i).analyze(context));
             argTypes[i] = arguments.get(i).type();
         }
-
+        
         if (!properUseOfConstructor) {
             JAST.compilationUnit.reportSemanticError(line(), "this"
                     + Type.argTypesAsString(argTypes)

@@ -1,5 +1,7 @@
 package fail;
 
+import java.lang.NullPointerException;
+
 class MyClass {
     static int x = 0;
     int y = 0;
@@ -26,7 +28,7 @@ public class InitBlocks extends MyClass{
     }
 
     static {
-        throw new NullPointerException();
+        throw new NullPointerException();        
     }
     
     {

@@ -49,7 +49,7 @@ class JSuper extends JExpression {
     }
 
     /**
-     * Load "this" onto the stack (even if we treat it as its super class.
+     * Load "this" onto the stack (even if we treat it as its super class).
      * 
      * @param output
      *            the code emitter (basically an abstraction for producing the

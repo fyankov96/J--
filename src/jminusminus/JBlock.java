@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * @see LocalContext
  */
 
-class JBlock extends JStatement {
+class JBlock extends JStatement implements JMember {
 
     /** List of statements forming the block body. */
     private ArrayList<JStatement> statements;
@@ -47,6 +47,16 @@ class JBlock extends JStatement {
     }
 
     /**
+     * Returns the list of modifiers.
+     * 
+     * @return list of modifiers.
+     */
+
+    public ArrayList<String> mods() {
+        return mods;
+    }
+
+    /**
      * Returns the list of statements comprising the block.
      * 
      * @return list of statements.
@@ -54,6 +64,20 @@ class JBlock extends JStatement {
 
     public ArrayList<JStatement> statements() {
         return statements;
+    }
+
+    /**
+     * JBlocks have nothing to declare.
+     * 
+     * @param context
+     *            the parent (class) context.
+     * @param partial
+     *            the code emitter (basically an abstraction for producing the
+     *            partial class).
+     */
+
+    public void preAnalyze(Context context, CLEmitter partial) {
+        //Nothing to do here
     }
 
     /**

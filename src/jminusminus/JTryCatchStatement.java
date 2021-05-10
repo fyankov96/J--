@@ -67,6 +67,7 @@ class JTryCatchStatement extends JStatement {
         this.context = new LocalContext(context);
         tryBlock.analyze(context);
 
+        //
         for(JFormalParameter catchParam : catchParams) {
             catchParam.setType((new TypeName(catchParam.line(), "java.lang." + catchParam.type().toString())).resolve(context.methodContext()));
         }

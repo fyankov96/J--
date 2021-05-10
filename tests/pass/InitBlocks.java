@@ -7,15 +7,14 @@ class MyClass {
 
 public class InitBlocks extends MyClass {
     public int a = 1;
-    public static int b = 2;
+    public static int b = 1;
     public int c = 3;
+    double x = 3.14;
 
-
-    public InitBlocks() {
-        this();
-    }
+    public InitBlocks() {}
 
     public InitBlocks(int a) {
+        this();
         this.a = a;
     }
 
@@ -32,7 +31,6 @@ public class InitBlocks extends MyClass {
         b = 2;
     }
 
-    double x = 3.14;
     {
         x = 0.0;
     }

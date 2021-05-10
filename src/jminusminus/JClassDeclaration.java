@@ -424,7 +424,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
     protected void codegenInstanceInitialization(CLEmitter output){
         for (JBlock block : instanceInitializationBlocks) {
-            block.codegen(output);
+            block.codegen(output);a
         }
     }
 

@@ -6,7 +6,7 @@ This extension was realized for the Compiler Construction course at DTU (Danmark
 ## Contributors
 * Dario Passarello
 * David Tran 
-* Flip Yankov
+* Filip Yankov
 * Thomas Byskov Tønder
 * Tobias Frederik Flensberg Thomsen
 
